@@ -8,7 +8,7 @@ app.use(cors());
 app.use(body_paarser());
 app.use("/api",posRouters)
 app.use("/",(req,res)=>{
-    res.status(200).send("Success")
+    res.status(200).send("SUCCESS")
 })
 
 app.listen( process.env.PORT || port,()=>{
