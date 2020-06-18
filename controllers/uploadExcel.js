@@ -14,7 +14,8 @@ let uploadExcel=(req,res)=>{
             || !req.body.programName || !req.body.propertyName || !req.body.outletName
             || !req.body.brandUniqueIdentifier || !req.body.programUniqueIdentifier
             || !req.body.propertyUniqueIdentifier
-            || !req.body.outletUniqueIdentifier){
+            || !req.body.outletUniqueIdentifier
+            || !req.body.userId){
             res.status(401).send({code: 401, message: 'Invalid Inputs'})
             return
         }
@@ -25,7 +26,7 @@ let uploadExcel=(req,res)=>{
             res.status(401).send({code: 401, message: `Please provide excel among ${extensions.join(",")} format!`})
             return
         }
-        excelModel.uploadExcel(file,createFileName(req.body)).then(data=>{
+        excelModel.uploadExcel(file,createFileName(req.body),req.body).then(data=>{
             res.status(200).send({code: 200, message: 'success' , data : data})
         }).catch(e=>{
             res.status(500).send({code: 500, message: e})

@@ -2,15 +2,15 @@ var FTP = require('ftp');
 var ftp = new FTP();
 var config = {
     host: "52.20.202.8",
-    // port: 21,
-    user: "cm4",
-    // secure : false,
-    password: "7!,sj@5?Mgk9W9Nr",
-    // type : 'ftp',
+    port: 21,
+    user: "clubmarriot",
+    secure : false,
+    password: "DF3tfr#RRdftt4",
+    type : 'ftp',
     // pasvTimeout : 1000,
-    // PasvMode : 'ACTIVE'
+    // PasvMode : 'PASSIVE'
     // logonType:1,
-    // PasvMode: "MODE_DEFAULT",
+    PasvMode: "MODE_DEFAULT",
     // EncodingType:"Auto",
     // secureOptions: null,
     // BypassProxy: 0,
@@ -19,8 +19,8 @@ var config = {
     // DirectoryComparison:0,
     // secure : false,
         // secureOptions : null,
-    // connTimeout : 10000000,
-    // pasvTimeout: 1000000,
+    connTimeout : 10000000,
+    pasvTimeout: 10000000,
     // keepalive : 10000,
     // promptForPass : false,
     // remote : "/",
