@@ -10,6 +10,7 @@
     "dateformat": "^3.0.3",
     "easy-ftp": "^0.4.1",
     "express": "^4.17.1",
+    "fs": "0.0.1-security",
     "ftp": "^0.3.10",
     "ftp-client": "^0.2.2",
     "ftps": "^1.1.1",
