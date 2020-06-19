@@ -3,7 +3,7 @@ var ftp = new FTP();
 var config = {
     host: "52.20.202.8",
     port: 21,
-    user: "clubmarriot",
+    user: "cm4",
     secure : false,
     password: "DF3tfr#RRdftt4",
     type : 'ftp',
@@ -27,15 +27,15 @@ var config = {
 };
  
 ftp.on('ready',async function(err,data) {
-    ftp.list(function(err, list) {
-      if (err) throw err;
-      console.dir(list);
-      ftp.end();
-    });
-    // ftp.put('atul.txt', 'atul1.txt', function(err) {
+    // ftp.list(function(err, list) {
     //   if (err) throw err;
+    //   console.dir(list);
     //   ftp.end();
     // });
+    ftp.put('atul.txt', 'atul1.txt', function(err) {
+      if (err) throw err;
+      ftp.end();
+    });
 });
 ftp.connect(config);	
 

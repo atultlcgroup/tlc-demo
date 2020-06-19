@@ -10,11 +10,12 @@ async function example() {
             host: "52.20.202.8",
             user: "clubmarriot",
             password: "DF3tfr#RRdftt4",
-            secure: false
+            secure: false,
+            active : true
         })
         console.log(await client.list())
         // await client.uploadFrom("README.md", "README_FTP.md")
-        // await client.downloadTo("README_COPY.md", "README_FTP.md")
+        // await client.downloadTo("benefit.png", "benefit.png")
     }
     catch(err) {
         console.log(err)
