@@ -1,5 +1,5 @@
 
-const excelModel= require("../models/uploadExcel")
+const excelModel= require("../models/pos")
 const extensions = ['xls','xlsx','xlsm','xlt','xltx','xltm','xla','xlam','csv'];
 
 let createFileName= (body)=>{
