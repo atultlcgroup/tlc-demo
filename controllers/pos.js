@@ -15,7 +15,7 @@ let uploadExcel=(req,res)=>{
             || !req.body.brandUniqueIdentifier || !req.body.programUniqueIdentifier
             || !req.body.propertyUniqueIdentifier
             || !req.body.outletUniqueIdentifier
-            || !req.body.userId){
+            || !req.body.userId || !req.body.posSource){
             res.status(401).send({code: 401, message: 'Invalid Inputs'})
             return
         }

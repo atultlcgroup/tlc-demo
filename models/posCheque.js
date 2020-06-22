@@ -1,4 +1,4 @@
-let pool = require("../db").pool
+let pool = require("../databases/db").pool
 
 let getPosCheque=async()=>{
    try{
