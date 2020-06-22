@@ -32,8 +32,23 @@
 
 
 
-const fs = require('fs');
+// const fs = require('fs');
 
-fs.unlink('hi.js', (err) => {
-  if (err) throw err;
-});
+// fs.unlink('hi.js', (err) => {
+//   if (err) throw err;
+// });
+
+const excelToJson = require('convert-excel-to-json');
+const fs=require('fs');
+let routesPath='./uploads';
+
+
+fs.readdirSync(routesPath).forEach(function (file){  
+const result = excelToJson({  
+    source: fs.readFileSync(`${routesPath}/${file}`)});
+console.log(result);
+
+})
+
+
+
