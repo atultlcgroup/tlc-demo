@@ -37,6 +37,34 @@ let uploadExcel=(req,res)=>{
    
 }
 
+
+
+let getPosData=async(req,res)=>{
+
+   
+    console.log("Get POS api called");
+    let result= await excelModel.getPosData();
+    console.log('=====================Response============================')
+    console.log(result);
+    res.status(200).send({code: 200, message: 'success' , data : result});
+    
+
+    readExcelInDirectory(result)
+
+    
+
+}
+
+
+let readExcelInDirectory=async(result)=>{
+    console.log('get POS excel in uploaded directory');
+    
+
+}
+
+
+
 module.exports={
-    uploadExcel
+    uploadExcel,
+    getPosData
 }

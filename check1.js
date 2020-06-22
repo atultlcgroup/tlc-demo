@@ -1,22 +1,15 @@
-const ftp = require("basic-ftp")
- 
-example()
- 
-async function example() {
-    const client = new ftp.Client()
-    client.ftp.verbose = true
-    try {
-        await client.access({
-            host: "52.20.202.8",
-            user: "clubmarriot",
-            password: "DF3tfr#RRdftt4",
-        })
-        console.log(await client.list())
-        // await client.uploadFrom("README.md", "README_FTP.md")
-        // await client.downloadTo("benefit.png", "benefit.png")
-    }
-    catch(err) {
-        console.log(err)
-    }
-    client.close()
-}
+
+const excelToJson = require('convert-excel-to-json');
+const fs=require('fs');
+let routesPath='./uploads';
+
+
+fs.readdirSync(routesPath).forEach(function (file){  
+const result = excelToJson({  
+    source: fs.readFileSync(`${routesPath}/${file}`)});
+console.log(result);
+
+})
+
+
+
