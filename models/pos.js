@@ -23,7 +23,9 @@ let uploadExcelToFTP=async(fileName,file)=>{
 
 let uploadExcel=async(file ,fileName , body)=>{
    try{      
+    console.log(`from here 1`)
    const data=await writeFileSync(`./uploads/${fileName}`, `${file}`,{encoding:"base64"})
+   console.log(`from here 1`)
    await uploadExcelToFTP(fileName,file); 
    updatePOSTracking(body,fileName)
     return data;
