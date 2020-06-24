@@ -1,54 +1,12 @@
-// const ftp = require("basic-ftp")
- 
-// let ftpCheck = async()=>{
-//     let data = await example();
-//     // console.log(await data.list())
-//     data.close()
-// }
-// ftpCheck()
- 
-// async function example() {
-//     const client = new ftp.Client()
-//     client.ftp.verbose = true
-//     try {
-//         await client.access({
-//             host: "52.20.202.8",
-//             user: "clubmarriot",
-//             password: "DF3tfr#RRdftt4",
-//         })
-//         // console.log(await client.list())
-//         await client.uploadFrom("hi.txt", "POS/hi.txt")
-        
-//         // await client.downloadTo("benefit.png", "benefit.png")
-//         return client;
-//     }
-//     catch(err) {
-//         console.log(err)
-//     }
-//     client.close()
-// }
 
+function convert(str) {
+    var date = new Date(str),
+      mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+      day = ("0" + date.getDate()).slice(-2);
+    return [date.getFullYear(), mnth, day].join("-");
+  }
+  
+//   console.log(convert("Thu Jun 09 2011 00:00:00 GMT+0530 (India Standard Time)"));
 
-
-
-
-// const fs = require('fs');
-
-// fs.unlink('hi.js', (err) => {
-//   if (err) throw err;
-// });
-
-const excelToJson = require('convert-excel-to-json');
-const fs=require('fs');
-let routesPath='./uploads';
-
-
-fs.readdirSync(routesPath).forEach(function (file){  
-const result = excelToJson({  
-    source: fs.readFileSync(`${routesPath}/${file}`)});
-console.log(result);
-
-})
-
-
+console.log(new Date('26.02.2016 11:48:36'))
 
