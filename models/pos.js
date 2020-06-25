@@ -131,7 +131,7 @@ let getPosLogData=async()=>{
         postLogDataToPosChequeDetails(result.rows);
         return result.rows;
     }catch( e ){
-        return e;
+        return SYNC_ERROR;
     }
 
 }
@@ -156,12 +156,13 @@ let postLogDataToPosChequeDetails=async(data)=>{
           console.log('id',insertedValue.rows[0].id);
           console.log('n',n)
           
-          insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id,n);
+         let syncUpadte= insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id,n);
+         
 
         }  
            
     }catch( e ){
-        return e
+        return SYNC_ERROR
     }
 
 }
@@ -169,6 +170,7 @@ let postLogDataToPosChequeDetails=async(data)=>{
 
 
   let insertInPosChequeDetailsItemCategory=async(foreignKey,data)=>{
+      try{
       console.log("insert in insertInPosChequeDetailsItemCategory");
     //   console.log(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
     //     cheque__c,gross_amount__c,tax_amount__c)
@@ -176,10 +178,12 @@ let postLogDataToPosChequeDetails=async(data)=>{
      let insertedValueID=await  pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
        cheque__c,gross_amount__c,tax_amount__c)
       VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`); 
+      let syncUpadte=updatePosLogTableNewToSYnc();
+     
 
-      console.log('insertedValueID',insertedValueID);
-
-
+     }catch( e){
+         return SYNC_ERROR
+     }
 
 
       
@@ -192,6 +196,23 @@ let convert=(str)=> {
       day = ("0" + date.getDate()).slice(-2);
     return [date.getFullYear(), mnth, day].join("-");
   }
+
+
+  let updatePosLogTableNewToSYnc=()=>{
+    try{
+      console.log("changing the sync status");
+      let  getStatus=pool.query(`update tlcsalesforce.pos_log set status='SYNC_COMPLETED' where status='NEW' RETURNING status`);
+
+    }catch( e ){
+        return SYNC_ERROR ;
+
+    }
+    
+
+
+  }
+
+
 module.exports = {
     uploadExcel,
     getPosData,
