@@ -54,8 +54,23 @@ let readExcelInDirectory=async(result)=>{
 }
 
 
+let getPosLogData=async(req,res)=>{
+    console.log("get pos log data");
+    excelModel.getPosLogData().then(data=>{
+        res.status(200).json({code: 200, message: 'success' , data : data});
+    }).catch(err=>{
+        res.status(200).json({code:500,message:err});
+    })
+    
+}
+
+
+
+
+
 
 module.exports={
     uploadExcel,
-    getPosData
+    getPosData,
+    getPosLogData
 }

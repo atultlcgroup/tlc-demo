@@ -6,5 +6,7 @@ Routers.post("/POS1",excelControllers.uploadExcel);
 
 Routers.post("/POS2",excelControllers.getPosData);
 
+Routers.post("/POS3",excelControllers.getPosLogData)
+
 
 module.exports= Routers;

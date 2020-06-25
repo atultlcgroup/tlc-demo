@@ -58,7 +58,6 @@ let getPosData=async()=>{
 
 
 
-
 let readExcel=async(fileName,posSource)=>{
     try{
         const result = await excelToJson({  
@@ -124,7 +123,78 @@ let getFileFromFTP=async(fileArr)=>{
         console.log(err)
     }
  }
+
+let getPosLogData=async()=>{
+    try{
+        console.log("get POS data API called");
+        const result=await pool.query(`select * from tlcsalesforce.pos_log where status='NEW'`);    
+        postLogDataToPosChequeDetails(result.rows);
+        return result.rows;
+    }catch( e ){
+        return e;
+    }
+
+}
+
+let postLogDataToPosChequeDetails=async(data)=>{
+    try{
+        for (n of data){
+            ConvertedBillDate=convert(n.BillDate);
+            console.log('+++++++++++++++++++++++++++++++');
+            console.log(ConvertedBillDate);
+            console.log('+++++++++++++++++++++++++++++++');
+             
+         console.log("uploading POS log data to POS cheque details");
+        //  console.log(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
+        //     membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c)
+        //   VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}')`)
+          
+          let  insertedValue= await  pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
+            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c)
+          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}') RETURNING id`);           
+       
+          console.log('id',insertedValue.rows[0].id);
+          console.log('n',n)
+          
+          insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id,n);
+
+        }  
+           
+    }catch( e ){
+        return e
+    }
+
+}
+
+
+
+  let insertInPosChequeDetailsItemCategory=async(foreignKey,data)=>{
+      console.log("insert in insertInPosChequeDetailsItemCategory");
+    //   console.log(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
+    //     cheque__c,gross_amount__c,tax_amount__c)
+    //    VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`)
+     let insertedValueID=await  pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
+       cheque__c,gross_amount__c,tax_amount__c)
+      VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`); 
+
+      console.log('insertedValueID',insertedValueID);
+
+
+
+
+      
+  }
+
+
+let convert=(str)=> {
+    var date = new Date(str),
+      mnth = ("0" + (date.getMonth() + 1)).slice(-2),
+      day = ("0" + date.getDate()).slice(-2);
+    return [date.getFullYear(), mnth, day].join("-");
+  }
 module.exports = {
     uploadExcel,
-    getPosData
+    getPosData,
+    getPosLogData
+    
 }
