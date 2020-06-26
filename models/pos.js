@@ -49,7 +49,7 @@ let updatePOSTracking = (body, fileName) => {
 let getPosData = async () => {
     try {
         console.log('get Pos data api called');
-        const result = await pool.query(`select file_name,pos_source from tlcsalesforce.pos_tracking where status='UPLOADED'`);
+        const result = await pool.query(`select file_name,pos_source,sync_id from tlcsalesforce.pos_tracking where status='UPLOADED'`);
         getFileFromFTP((result) ? result.rows : null);
     } catch (e) {
         return e;
@@ -58,7 +58,7 @@ let getPosData = async () => {
 
 
 
-let readExcel = async (fileName, posSource) => {
+let readExcel = async (fileName, posSource,posTrackingId) => {
     try {
         const result = await excelToJson({
             source: fs.readFileSync(`uploads/${fileName}`)
@@ -66,7 +66,7 @@ let readExcel = async (fileName, posSource) => {
         let cnt = 1;
         let resultArr = []
         let arr = []
-        let query = `INSERT INTO tlcsalesforce.pos_log(pos_source,status,`;
+        let query = `INSERT INTO tlcsalesforce.pos_log(pos_source,status,pos_tracking_id,`;
         for (d of result['Sheet1']) {
             let query2 = ``;
             let len = Object.entries(d).length
@@ -78,7 +78,7 @@ let readExcel = async (fileName, posSource) => {
                     e[1] = (resultObj) ? resultObj.rows[0]['table_field_name'] : ''
                     // return
                     // console.log(n)
-                    len - 1 == n ? query += `"${e[1]}") values('${posSource}','NEW',` : query += `"${e[1]}",`
+                    len - 1 == n ? query += `"${e[1]}") values('${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
                     arr.push(e[1])
                     n++
                 }
@@ -91,7 +91,6 @@ let readExcel = async (fileName, posSource) => {
                 })
                 resultArr.push(obj)
                 await pool.query(`${query} ${query2}`)
-                // console.log(`${query} ${query2}`)
             }
             cnt = 2;
         }
@@ -114,7 +113,8 @@ let getFileFromFTP = async (fileArr) => {
             try {
                 await ftpConnection.downloadTo(`uploads/${file['file_name']}`, `POS/${file['file_name']}`)
                 await ftpConnection.rename(`POS/${file['file_name']}`, `POS/POS_ARCHIVE/${file['file_name']}`)
-                await readExcel(file['file_name'], file['pos_source'])
+                
+                await readExcel(file['file_name'], file['pos_source'], file['sync_id'])
             } catch (e) {
                 await pool.query(`update tlcsalesforce.pos_tracking set status = 'SYNC ERROR',error_description='${e}' where file_name = '${file['file_name']}'`)
             }
