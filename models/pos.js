@@ -37,7 +37,7 @@ let uploadExcel=async(file ,fileName , body)=>{
 
 let updatePOSTracking = (body, fileName) => {
     try {
-        pool.query(`INSERT INTO tlcsalesforce.pos_tracking(
+            pool.query(`INSERT INTO tlcsalesforce.pos_tracking(
              brand_name, property_name, program_name, outlet_name, status, file_name, error_description, file_uploaded_by,created_date , pos_source)
             VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}')`)
     } catch (e) {
@@ -49,7 +49,7 @@ let updatePOSTracking = (body, fileName) => {
 let getPosData=async()=>{
     try{
         console.log('get Pos data api called');
-        const result=await pool.query(`select file_name,pos_source from tlcsalesforce.pos_tracking where status='UPLOADED'`);
+        const result=await pool.query(`select file_name,pos_source,sync_id from tlcsalesforce.pos_tracking where status='UPLOADED'`);
         getFileFromFTP((result) ? result.rows : null);
     }catch( e ){
         return e;
@@ -58,14 +58,14 @@ let getPosData=async()=>{
 
 
 
-let readExcel=async(fileName,posSource)=>{
+let readExcel=async(fileName,posSource,pos_tracking_id)=>{
     try{
         const result = await excelToJson({  
             source: fs.readFileSync(`uploads/${fileName}`)});
             let cnt = 1;
             let resultArr =[]
             let arr =[]
-            let query = `INSERT INTO tlcsalesforce.pos_log(pos_source,status,`;
+            let query = `INSERT INTO tlcsalesforce.pos_log(pos_source,status,pos_tracking_id,`;
             for(d of result['Sheet1']){
                 let query2=``;
                 let len = Object.entries(d).length
@@ -77,7 +77,7 @@ let readExcel=async(fileName,posSource)=>{
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name'] : ''
                         // return
                         // console.log(n)
-                        len- 1 == n ? query +=`"${e[1]}") values('${posSource}','NEW',` : query +=`"${e[1]}",` 
+                        len- 1 == n ? query +=`"${e[1]}") values('${posSource}','NEW','${pos_tracking_id}',` : query +=`"${e[1]}",` 
                         arr.push(e[1])
                         n++
                     }
@@ -113,7 +113,7 @@ let getFileFromFTP=async(fileArr)=>{
         try{
             await ftpConnection.downloadTo(`uploads/${file['file_name']}`, `POS/${file['file_name']}`)
             await ftpConnection.rename(`POS/${file['file_name']}`,`POS/POS_ARCHIVE/${file['file_name']}`)
-            await readExcel(file['file_name'],file['pos_source'])
+            await readExcel(file['file_name'],file['pos_source'],file['sync_id'])
         }catch(e){
             await pool.query(`update tlcsalesforce.pos_tracking set status = 'SYNC ERROR',error_description='${e}' where file_name = '${file['file_name']}'`)
         }
@@ -139,16 +139,9 @@ let getPosLogData=async()=>{
 let postLogDataToPosChequeDetails=async(data)=>{
     try{
         for (n of data){
-            ConvertedBillDate=convert(n.BillDate);
-            console.log('+++++++++++++++++++++++++++++++');
-            console.log(ConvertedBillDate);
-            console.log('+++++++++++++++++++++++++++++++');
+            ConvertedBillDate=convert(n.BillDate)
              
          console.log("uploading POS log data to POS cheque details");
-        //  console.log(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
-        //     membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c)
-        //   VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}')`)
-          
           let  insertedValue= await  pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
             membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c)
           VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}') RETURNING id`);           
@@ -156,9 +149,7 @@ let postLogDataToPosChequeDetails=async(data)=>{
           console.log('id',insertedValue.rows[0].id);
           console.log('n',n)
           
-         let syncUpadte= insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id,n);
-         
-
+         let syncUpadte= insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id,n);         
         }  
            
     }catch( e ){
@@ -172,9 +163,6 @@ let postLogDataToPosChequeDetails=async(data)=>{
   let insertInPosChequeDetailsItemCategory=async(foreignKey,data)=>{
       try{
       console.log("insert in insertInPosChequeDetailsItemCategory");
-    //   console.log(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
-    //     cheque__c,gross_amount__c,tax_amount__c)
-    //    VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`)
      let insertedValueID=await  pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
        cheque__c,gross_amount__c,tax_amount__c)
       VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`); 
