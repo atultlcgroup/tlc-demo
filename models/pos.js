@@ -147,7 +147,7 @@ let readExcel=async(fileName,posSource,pos_tracking_id)=>{
         console.log(e)
     }
 }
-
+go
 
 <<<<<<< HEAD
 let getFileFromFTP = async (fileArr) => {
