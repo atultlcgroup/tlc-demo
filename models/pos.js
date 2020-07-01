@@ -149,8 +149,8 @@ let postLogDataToPosChequeDetails = async (data) => {
 
             console.log("uploading POS log data to POS cheque details");
             let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
-            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c)
-          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}') RETURNING id`);
+            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,pos_log_id)
+          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}','${n.mapping_id}') RETURNING id`);
 
             console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
             console.log('n', n)
