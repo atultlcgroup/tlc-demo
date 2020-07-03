@@ -37,8 +37,8 @@ let uploadExcel = async (file, fileName, body) => {
 
 let updatePOSTracking = (body, fileName) => {
     try {
-        pool.query(`INSERT INTO tlcsalesforce.pos_tracking(
-             brand_name, property_name, program_name, outlet_name, status, file_name, error_description, file_uploaded_by,created_date , pos_source)
+        pool.query(`INSERT INTO tlcsalesforce.pos_tracking__c(
+             brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c)
             VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}')`)
     } catch (e) {
         return e;
@@ -49,9 +49,10 @@ let updatePOSTracking = (body, fileName) => {
 let getPosData = async () => {
     try {
         console.log('get Pos data api called');
-        const result = await pool.query(`select file_name,pos_source,sync_id from tlcsalesforce.pos_tracking where status='UPLOADED'`);
+        const result = await pool.query(`select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`);
         getFileFromFTP((result) ? result.rows : null);
     } catch (e) {
+        console.log(e)
         return e;
     }
 }
@@ -73,15 +74,13 @@ let readExcel = async (fileName, posSource,posTrackingId) => {
             if (cnt == 1) {
                 let n = 0;
                 for (e of Object.entries(d)) {
-                    // console.log(`select table_field_name from tlcsalesforce.pos_mapping where pos_source='${posSource}' and excel_field_name='${e[1]}'`)
-                    let resultObj = await pool.query(`select table_field_name from tlcsalesforce.pos_mapping where pos_source='${posSource}' and excel_field_name='${e[1]}'`)
-                    e[1] = (resultObj) ? resultObj.rows[0]['table_field_name'] : ''
-                    // return
-                    // console.log(n)
+                    let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
+                    e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
                     len - 1 == n ? query += `"${e[1]}") values('${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
                     arr.push(e[1])
                     n++
                 }
+            
             } else {
                 let n = 0;
                 let obj = {};
@@ -90,6 +89,7 @@ let readExcel = async (fileName, posSource,posTrackingId) => {
                     obj[arr[n++]] = e[1]
                 })
                 resultArr.push(obj)
+                console.log(`${query} ${query2}`)
                 await pool.query(`${query} ${query2}`)
             }
             cnt = 2;
@@ -98,9 +98,9 @@ let readExcel = async (fileName, posSource,posTrackingId) => {
             if (err)
                 throw err;
         })
-        await pool.query(`update tlcsalesforce.pos_tracking set status = 'SYNC STARTED ' where file_name = '${fileName}'`)
+        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC STARTED ' where file_name__c = '${fileName}'`)
     } catch (e) {
-        await pool.query(`update tlcsalesforce.pos_tracking set status = 'SYNC ERROR',error_description='${e}' where file_name = '${fileName}'`)
+        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
         console.log(e)
     }
 }
@@ -116,7 +116,7 @@ let getFileFromFTP = async (fileArr) => {
                 
                 await readExcel(file['file_name'], file['pos_source'], file['sync_id'])
             } catch (e) {
-                await pool.query(`update tlcsalesforce.pos_tracking set status = 'SYNC ERROR',error_description='${e}' where file_name = '${file['file_name']}'`)
+                await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${file['file_name']}'`)
             }
         }
         ftpConnection.close();
@@ -217,7 +217,7 @@ let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
 let updateStatusPostrackingTable = (status, posTrackingId) => {
     try {
         console.log("updating pos_tracikng table status ");
-        pool.query(`update tlcsalesforce.pos_tracking set status='${status}' where sync_id='${posTrackingId}'`);
+        pool.query(`update tlcsalesforce.pos_tracking__c set status__c='${status}' where id='${posTrackingId}'`);
 
     } catch (e) {
         return e
