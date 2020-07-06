@@ -141,9 +141,10 @@ let getPosLogData = async (fileName) => {
         console.log("get POS data API called");
         let qry = ``
         if(fileName)
-        qry=  `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC STARTED' and pt.file_name__c = '${fileName}'`;
+        qry=  `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC STARTED' and pt.file_name__c = '${fileName}'`;
         else
-        qry = `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC STARTED'`;
+        qry = `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC STARTED'`;
+        console.log(qry)
         const result = await pool.query(qry);
         await postLogDataToPosChequeDetails(result.rows);
 
