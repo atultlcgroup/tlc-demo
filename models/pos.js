@@ -106,6 +106,8 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
         await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC STARTED ' where file_name__c = '${fileName}'`)
        console.log(`_____=+============_________=`)
        console.log(bodyFileName)
+       if(bodyFileName)
+       getPosLogData(bodyFileName)
        console.log(`_____=+============_________=`)
 
     } catch (e) {
