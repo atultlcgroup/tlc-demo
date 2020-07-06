@@ -103,11 +103,11 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
             if (err)
                 throw err;
         })
-        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_STARTED ' where file_name__c = '${fileName}'`)
+        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_STARTED' where file_name__c = '${fileName}'`)
        console.log(`_____=+============_________=`)
        console.log(bodyFileName)
        if(bodyFileName)
-       getPosLogData(bodyFileName)
+       await getPosLogData(bodyFileName)
        console.log(`_____=+============_________=`)
 
     } catch (e) {
@@ -145,7 +145,9 @@ let getPosLogData = async (fileName) => {
         else
         qry = `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
         console.log(qry)
+
         const result = await pool.query(qry);
+        console.log(result.rows)
         await postLogDataToPosChequeDetails(result.rows);
 
         return result.rows;
