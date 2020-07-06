@@ -103,7 +103,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
             if (err)
                 throw err;
         })
-        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC STARTED ' where file_name__c = '${fileName}'`)
+        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_STARTED ' where file_name__c = '${fileName}'`)
        console.log(`_____=+============_________=`)
        console.log(bodyFileName)
        if(bodyFileName)
@@ -141,9 +141,9 @@ let getPosLogData = async (fileName) => {
         console.log("get POS data API called");
         let qry = ``
         if(fileName)
-        qry=  `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC STARTED' and pt.file_name__c = '${fileName}'`;
+        qry=  `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
         else
-        qry = `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC STARTED'`;
+        qry = `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
         console.log(qry)
         const result = await pool.query(qry);
         await postLogDataToPosChequeDetails(result.rows);
@@ -194,7 +194,7 @@ let insertInPosChequeDetailsItemCategory = async (foreignKey, data) => {
       VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`);
         console.log('data.mapping id', data.mapping_id);
         console.log('data.pos_tracking_id', data.pos_tracking_id);
-        updatePosLogTableNewToSYnc('SYNC_COMPLTED', data.mapping_id, data.pos_tracking_id);
+        updatePosLogTableNewToSYnc('SYNC_COMPLETED', data.mapping_id, data.pos_tracking_id);
 
 
 
@@ -222,7 +222,7 @@ let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
         console.log("changing the sync status");
         console.log('with mapping id', mappingId)
         let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}' where mapping_id='${mappingId}' RETURNING status`);
-        updateStatusPostrackingTable('SYNC_COMPLTED', posTrackingId);
+        updateStatusPostrackingTable('SYNC_COMPLETED', posTrackingId);
     } catch (e) {
         updateStatusPostrackingTable('SYNC_ERROR', posTrackingId);
 
