@@ -41,7 +41,8 @@ let uploadExcel=(req,res)=>{
 
 let getPosData=async(req,res)=>{
     console.log("Get POS api called");
-    excelModel.getPosData().then(data=>{
+    let fileName = req.body.fileName || "";
+    excelModel.getPosData(fileName).then(data=>{
         res.status(200).json({code: 200, message: 'success' , data : data});
     }).catch(err=>{
         res.status(200).join({code: 500, message: err});
@@ -56,7 +57,8 @@ let readExcelInDirectory=async(result)=>{
 
 let getPosLogData=async(req,res)=>{
     console.log("get pos log data");
-    excelModel.getPosLogData().then(data=>{
+    let fileName = ``
+    excelModel.getPosLogData(fileName).then(data=>{
         res.status(200).json({code: 200, message: 'success' , data : data});
     }).catch(err=>{
         res.status(200).json({code:500,message:err});
