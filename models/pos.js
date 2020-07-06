@@ -55,7 +55,7 @@ let getPosData = async (fileName) => {
         else
         qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
         const result = await pool.query(qry);
-        getFileFromFTP((result) ? result.rows : null,fileName);
+        await getFileFromFTP((result) ? result.rows : null,fileName);
     } catch (e) {
         console.log(e)
         return e;
@@ -113,6 +113,8 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
     } catch (e) {
         await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
         console.log(e)
+        if(bodyFileName)
+        return err;
     }
 }
 
@@ -133,6 +135,8 @@ let getFileFromFTP = async (fileArr , fileName) => {
         ftpConnection.close();
     } catch (err) {
         console.log(err)
+        if(fileName)
+        return err
     }
 }
 
