@@ -113,8 +113,6 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
     } catch (e) {
         await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
         console.log(e)
-        if(bodyFileName)
-        return err;
     }
 }
 
