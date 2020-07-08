@@ -1,4 +1,3 @@
-
 let NODE_ENV = process.env.NODE_ENV || 'development';
 let ENV_OBJ ;
 switch (NODE_ENV) {
@@ -8,6 +7,7 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
+        SCHEDULED_TIME: '* * * * *'
         }
         break;
     case 'microtest':
@@ -16,6 +16,7 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
+        SCHEDULED_TIME: '* * * * *'
         }
         break;
     case 'production':
@@ -24,6 +25,7 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
+        SCHEDULED_TIME: '* * * * *'
         }
         break;
     default:
@@ -32,6 +34,7 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
+        SCHEDULED_TIME: '* * * * *'
         }
         break;
 }
