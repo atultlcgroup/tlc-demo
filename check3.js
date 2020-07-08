@@ -1,19 +1,5 @@
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Bill_No','Bill_No','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Tax','Tax','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','BillTime','BillTime','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Card_No','Card_No','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','GrossBilltotal','Grossbilltotal','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Actual_Pax','Actual_Pax','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Pos_Code','Pos_Code','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Disc_Food','Disc_Food','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Food','Food','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Disc_Soft_Bev','Disc_Soft_Bev','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Soft_Bev','Soft_Bev','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Disc_Misc','Disc_Misc','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Misc','Misc','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Disc_Dom_Liq','Disc_Dom_Liq','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Dom_Liq','Dom_Liq','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Disc_Imp_Liq','Disc_Imp_Liq','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Imp_Liq','Imp_Liq','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Disc_Tobacco','Disc_Tobacco','ACTIVE');
-INSERT INTO tlcsalesforce.pos_mapping__c(  pos_source__c, excel_field_name__c, table_field_name__c, status__c)    VALUES ('POS','Tobacco','Tobacco','ACTIVE');
+var schedule = require('node-schedule');
+ 
+var j = schedule.scheduleJob('* * * * * *', function(){
+  console.log('The answer to life, the universe, and everything!');
+});

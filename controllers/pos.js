@@ -27,7 +27,7 @@ let uploadExcel=(req,res)=>{
             return
         }
         excelModel.uploadExcel(file,createFileName(req.body),req.body).then(data=>{
-            res.status(200).send({code: 200, message: 'success' , data : data})
+            res.status(200).send({code: 200, message: data})
         }).catch(e=>{
             res.status(500).send({code: 500, message: e})
         })
