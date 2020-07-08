@@ -45,6 +45,8 @@ let getPosData=async(req,res)=>{
     excelModel.getPosData(fileName).then(data=>{
         res.status(200).json({code: 200, message: 'success' , data : data});
     }).catch(err=>{
+        console.log("In get pos data controller");
+        console.log(err);
         res.status(200).join({code: 500, message: err});
     })
 }
