@@ -3,9 +3,6 @@ const pool = require("../databases/db").pool
 const ftp = require('../databases/ftp')
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
-const { DH_UNABLE_TO_CHECK_GENERATOR } = require("constants");
-const { resolve } = require("path");
-const { rejects } = require("assert");
 
 let uploadExcelToFTP = async (fileName, file) => {
     return new Promise(async(resolve,reject)=>{
@@ -14,10 +11,16 @@ let uploadExcelToFTP = async (fileName, file) => {
             // console.log(await ftpConnection.list())
             await ftpConnection.uploadFrom(`uploads/${fileName}`, `POS/${fileName}`)
             ftpConnection.close();
-          
+            fs.unlink(`uploads/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
             resolve('Success')
         } catch (e) {
-            
+            fs.unlink(`uploads/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
             reject(`${e}`);
         }
     })
