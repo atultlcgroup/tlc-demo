@@ -3,36 +3,40 @@ const pool = require("../databases/db").pool
 const ftp = require('../databases/ftp')
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
+const { DH_UNABLE_TO_CHECK_GENERATOR } = require("constants");
+const { resolve } = require("path");
+const { rejects } = require("assert");
 
 let uploadExcelToFTP = async (fileName, file) => {
-    try {
-        ftpConnection = await ftp.connect();
-        // console.log(await ftpConnection.list())
-        await ftpConnection.uploadFrom(`uploads/${fileName}`, `POS/${fileName}`)
-        ftpConnection.close();
-        fs.unlink(`uploads/${fileName}`, (err, da) => {
-            if (err)
-                throw err;
-        })
-        return 'Success'
-    } catch (e) {
-        return e;
-    }
+    return new Promise(async(resolve,reject)=>{
+        try {
+            ftpConnection = await ftp.connect();
+            // console.log(await ftpConnection.list())
+            await ftpConnection.uploadFrom(`uploads/${fileName}`, `POS/${fileName}`)
+            ftpConnection.close();
+          
+            resolve('Success')
+        } catch (e) {
+            
+            reject(`${e}`);
+        }
+    })
 }
 
 
 let uploadExcel = async (file, fileName, body) => {
-    try {
-        console.log(`from here 1`)
+        return new Promise(async (resolve,reject)=>{
+            console.log(`from here 1`)
+        try{
         const data = await writeFileSync(`./uploads/${fileName}`, `${file}`, { encoding: "base64" })
         console.log(`from here 1`)
         await uploadExcelToFTP(fileName, file);
-        updatePOSTracking(body, fileName)
-        return data;
-    } catch (e) {
-        console.log(e)
-        return e
-    }
+        await updatePOSTracking(body, fileName)
+        resolve(`SUCCESSFULLY TRANSFERRED`); 
+        }catch(err){
+             reject(err)
+        }
+        })
 }
 
 let updatePOSTracking = (body, fileName) => {
