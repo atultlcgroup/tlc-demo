@@ -1,5 +1,7 @@
-var schedule = require('node-schedule');
- 
-var j = schedule.scheduleJob('* * * * * *', function(){
-  console.log('The answer to life, the universe, and everything!');
-});
+console.time("dbsave");
+var i;
+
+for(let i =0 ;i< 100;i++){
+  console.log(`hi`)
+}
+console.timeEnd("dbsave");

@@ -3,7 +3,6 @@ const pool = require("../databases/db").pool
 const ftp = require('../databases/ftp')
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
-const { exit } = require("process");
 
 
 let uploadExcelToFTP = async (fileName, file) => {
@@ -121,7 +120,6 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
            console.log(bodyFileName);
            if(bodyFileName)
            await getPosLogData(bodyFileName);
-           
            console.log(`_____=+============_________=`)
             // resolve(`SUCCESS`)
         } catch (e) {
