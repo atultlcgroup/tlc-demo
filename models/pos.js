@@ -3,6 +3,7 @@ const pool = require("../databases/db").pool
 const ftp = require('../databases/ftp')
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
+const { exit } = require("process");
 
 
 let uploadExcelToFTP = async (fileName, file) => {
@@ -91,7 +92,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
                     let n = 0;
                     for (e of Object.entries(d)) {
                         let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
-                       console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
+                    //    console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
                         len - 1 == n ? query += `"${e[1]}") values('${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
                         arr.push(e[1])
@@ -118,8 +119,9 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
             await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_STARTED' where file_name__c = '${fileName}'`)
            console.log(`_____=+============_________=`)
            console.log(bodyFileName);
-           if(bodyFileName);
+           if(bodyFileName)
            await getPosLogData(bodyFileName);
+           
            console.log(`_____=+============_________=`)
             // resolve(`SUCCESS`)
         } catch (e) {
