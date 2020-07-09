@@ -5,6 +5,10 @@ const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
 
 
+let findDuplicate =async (Card_No,Bill_No,BillDate,BillTime)=>{
+    let result= await pool.query(`select Card_No from tlcsalesforce.pos_log where Card_No='${Card_No}' and Bill_No='${Bill_No}' and BillDate='${BillDate}' and BillTime = '${BillTime}'`)
+    return result ? result.rows.length : 0;
+}
 let uploadExcelToFTP = async (fileName, file) => {
     return new Promise(async(resolve,reject)=>{
         try {
@@ -73,10 +77,14 @@ let getPosData = async (fileName) => {
     })
 }
 
+let deleteErrorExcelRecords=(tracking_id)=>{
+    pool.query(`delete from tlcsalesforce.pos_log where pos_tracking_id = ${tracking_id}`)
+}
 
 
 let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
         try {
+            let findErr =0 ;
             const result = await excelToJson({
                 source: fs.readFileSync(`uploads/${fileName}`)
             });
@@ -106,11 +114,31 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
                         obj[arr[n++]] = e[1]
                     })
                     resultArr.push(obj)
-                    console.log(`${query} ${query2}`)
-                    await pool.query(`${query} ${query2}`)
+                    try{
+                        if(findErr == 0)
+                        await pool.query(`${query} ${query2}`)
+                    }catch(e1){
+                        console.log(`==========+++++++++++++=========++++++++++=========+++++++++`)
+                        console.log(`${e1}`)
+                        if(!(`${e1}`.includes('duplicate key value'))){
+                            findErr= 1;
+                        fs.unlink(`uploads/${fileName}`, (err, da) => {
+                            if (err)
+                                throw err;
+                        })
+                        deleteErrorExcelRecords(posTrackingId)
+                        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
+                        console.log(e);
+                        if(bodyFileName)
+                         return {code:1,err:`${e1}`};
+                      }
+                     
+                    }
+                   
                 }
                 cnt = 2;
             }
+            if(findErr==0){
             fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
                     throw err;
@@ -121,12 +149,14 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
            if(bodyFileName)
            await getPosLogData(bodyFileName);
            console.log(`_____=+============_________=`)
+        }
             // resolve(`SUCCESS`)
         } catch (e) {
             fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
                     throw err;
             })
+            deleteErrorExcelRecords(posTrackingId)
             await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
             console.log(e);
             if(bodyFileName)
