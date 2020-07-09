@@ -43,9 +43,9 @@ let getPosData=async(req,res)=>{
     console.log("Get POS api called");
     let fileName = req.body.fileName || "";
     excelModel.getPosData(fileName).then(data=>{
-        res.status(200).json({code: 200, message: 'success' , data : data});
+        res.status(200).json({code: 200, message: data});
     }).catch(err=>{
-        res.status(200).join({code: 500, message: err});
+        res.status(200).json({code: 500, message: err});
     })
 }
 
