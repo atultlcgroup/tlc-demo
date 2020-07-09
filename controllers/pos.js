@@ -37,6 +37,7 @@ let uploadExcel=(req,res)=>{
         })
         
     }catch( e ){
+        console.timeEnd("dbsave");
         res.status(500).json({code : 500 , message : e})
     }
     
