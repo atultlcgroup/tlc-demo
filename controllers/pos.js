@@ -8,6 +8,7 @@ let createFileName= (body)=>{
     return fileName;
 }
 let uploadExcel=(req,res)=>{
+    console.time("dbsave");
     try{
         console.log(`uploadExcel api called in controller`)
         if(!req.body.fileName|| !req.body.fileContent || !req.body.brandName
@@ -27,27 +28,32 @@ let uploadExcel=(req,res)=>{
             return
         }
         excelModel.uploadExcel(file,createFileName(req.body),req.body).then(data=>{
+            console.timeEnd("dbsave");
             res.status(200).send({code: 200, message: data})
         }).catch(e=>{
+            console.timeEnd("dbsave");
             res.status(500).send({code: 500, message: e})
+            
         })
+        
     }catch( e ){
         res.status(500).json({code : 500 , message : e})
     }
-   
+    
 }
 
 
 
 let getPosData=async(req,res)=>{
+    console.time("dbsave");
     console.log("Get POS api called");
     let fileName = req.body.fileName || "";
     excelModel.getPosData(fileName).then(data=>{
-        res.status(200).json({code: 200, message: 'success' , data : data});
+        console.timeEnd("dbsave");
+        res.status(200).json({code: 200, message: data});
     }).catch(err=>{
-        console.log("In get pos data controller");
-        console.log(err);
-        res.status(200).join({code: 500, message: err});
+        console.timeEnd("dbsave");
+        res.status(200).json({code: 500, message: err});
     })
 }
 
@@ -58,11 +64,14 @@ let readExcelInDirectory=async(result)=>{
 
 
 let getPosLogData=async(req,res)=>{
+    console.time("dbsave");
     console.log("get pos log data");
     let fileName = ``
     excelModel.getPosLogData(fileName).then(data=>{
-        res.status(200).json({code: 200, message: 'success' , data : data});
+        console.timeEnd("dbsave");
+        res.status(200).json({code: 200, message: 'success' });
     }).catch(err=>{
+        console.timeEnd("dbsave");
         res.status(200).json({code:500,message:err});
     })
     
