@@ -54,19 +54,23 @@ let updatePOSTracking = (body, fileName) => {
 
 
 let getPosData = async (fileName) => {
-    try {
-        console.log('get Pos data api called');
-        let qry = ``;
-        if(fileName)
-        qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
-        else
-        qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
-        const result = await pool.query(qry);
-        await getFileFromFTP((result) ? result.rows : null,fileName);
-    } catch (e) {
-        console.log(e)
-        return e;
-    }
+    return new Promise((resolve,reject)=>{
+        try {
+            console.log('get Pos data api called');
+            let qry = ``;
+            if(fileName)
+            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
+            else
+            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
+            const result = await pool.query(qry);
+            await getFileFromFTP((result) ? result.rows : null,fileName);
+        } catch (e) {
+            console.log(e)
+            return e;
+        }
+
+    })
+    
 }
 
 
