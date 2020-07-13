@@ -127,8 +127,8 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
                                 throw err;
                         })
                         deleteErrorExcelRecords(posTrackingId)
-                        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
-                        console.log(e);
+                        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e1}' where file_name__c = '${fileName}'`)
+                        console.log(e1);
                         if(bodyFileName)
                          return {code:1,err:`${e1}`};
                       }
