@@ -26,7 +26,7 @@ let uploadExcel=(req,res)=>{
             res.status(401).send({code: 401, message: `Please provide excel among ${extensions.join(",")} format!`})
             return
         }
-        if(`${str}`.includes('*')){
+        if(`${createFileName(req.body)}`.includes('*')){
             res.status(401).send({code: 401, message: `Invalid File Name!`})
             return    
         }
