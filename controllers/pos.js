@@ -26,9 +26,11 @@ let uploadExcel=(req,res)=>{
             res.status(401).send({code: 401, message: `Please provide excel among ${extensions.join(",")} format!`})
             return
         }
-        if(`${createFileName(req.body)}`.includes('*')){
-            res.status(401).send({code: 401, message: `Invalid File Name!`})
-            return    
+        if(valudateFileNameSpecialChar(req.body)){
+                   let error=valudateFileNameSpecialChar(req.body)
+                   console.log(error);
+                   res.status(401).send({code: 401, message: error})
+                   return    
         }
         excelModel.uploadExcel(file,createFileName(req.body),req.body).then(data=>{
             res.status(200).send({code: 200, message: data})
@@ -72,11 +74,67 @@ let getPosLogData=async(req,res)=>{
 
 
 
+let GETURL=async(req,res)=>{
+    console.log("get pos log data");
+    if(!req.body.id){
+        res.status(401).send({code: 401, message: 'Invalid Inputs'})
+        return
+    }
+    let url=`https://dashboard.heroku.com/apps/tlc-demo/logs?id=${req.body.id}`
+        res.status(200).json({code: 200, message: 'success' ,URL: url});
+
+    
+}
 
 
+
+
+let valudateFileNameSpecialChar=(data)=>{
+    console.log("inside vlaidation");
+    console.log(data);
+    if(`${data.programUniqueIdentifier}`.includes('*')  ){
+        console.log(`Invalid programUniqueIdentifier in: ${data.programUniqueIdentifier}`)
+        return `Invalid programUniqueIdentifier in: ${data.programUniqueIdentifier}`
+    }
+    if(`${data.propertyUniqueIdentifier}`.includes('*') ){
+        console.log(`Invalid propertyUniqueIdentifier: ${data.propertyUniqueIdentifier}`)
+        return `Invalid propertyUniqueIdentifier: ${data.propertyUniqueIdentifier}`
+    }
+    if(`${data.brandUniqueIdentifier}`.includes('*')  ){
+        console.log(`Invalid  brandUniqueIdentifier: ${data.brandUniqueIdentifier}`);
+        return `Invalid  brandUniqueIdentifier: ${data.brandUniqueIdentifier}`
+    }
+    if(`${data.outletUniqueIdentifier}`.includes('*')  ){
+        console.log(`Invalid outletUniqueIdentifier: ${data.outletUniqueIdentifier}`)
+        return `Invalid outletUniqueIdentifier: ${data.outletUniqueIdentifier}`
+    }
+    if(`${data.fileName}`.includes('*')){
+        console.log(`Invalid outletUniqueIdentifier: ${data.fileName}`)
+        return `Invalid outletUniqueIdentifier : ${data.fileName}`
+    }
+    if(`${data.propertyName}`.includes('*')){
+        console.log(`Invalid outletUniqueIdentifier: ${data.propertyName}`)
+        return `Invalid outletUniqueIdentifier : ${data.propertyName}`
+    }
+    if(`${data.outletName}`.includes('*')){
+        console.log(`Invalid outletUniqueIdentifier: ${data.outletName}`)
+        return `Invalid outletUniqueIdentifier : ${data.outletName}`
+    }
+    if(`${data.outletName}`.includes('*')){
+        console.log(`Invalid outletUniqueIdentifier: ${data.outletName}`)
+        return `Invalid outletUniqueIdentifier : ${data.outletName}`
+    }
+    if(`${data.programName}`.includes('*')){
+        console.log(`Invalid outletUniqueIdentifier: ${data.programName}`)
+        return `Invalid outletUniqueIdentifier : ${data.programName}`
+    }
+
+    return ``
+}
 
 module.exports={
     uploadExcel,
     getPosData,
-    getPosLogData
+    getPosLogData,
+    GETURL
 }
