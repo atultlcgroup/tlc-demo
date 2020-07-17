@@ -9,7 +9,6 @@ let createFileName= (body)=>{
 }
 let uploadExcel=(req,res)=>{
     try{
-        console.log(JSON.stringify(req.body))
         console.log(`uploadExcel api called in controller`)
         if(!req.body.fileName|| !req.body.fileContent || !req.body.brandName
             || !req.body.programName || !req.body.propertyName || !req.body.outletName
@@ -26,6 +25,10 @@ let uploadExcel=(req,res)=>{
         if(!extensions.includes(extension)){
             res.status(401).send({code: 401, message: `Please provide excel among ${extensions.join(",")} format!`})
             return
+        }
+        if(`${str}`.includes('*')){
+            res.status(401).send({code: 401, message: `Invalid File Name!`})
+            return    
         }
         excelModel.uploadExcel(file,createFileName(req.body),req.body).then(data=>{
             res.status(200).send({code: 200, message: data})
