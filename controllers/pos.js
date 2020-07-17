@@ -109,28 +109,31 @@ let valudateFileNameSpecialChar=(data)=>{
         return `Invalid outletUniqueIdentifier: ${data.outletUniqueIdentifier}`
     }
     if(`${data.fileName}`.includes('*')){
-        console.log(`Invalid outletUniqueIdentifier: ${data.fileName}`)
-        return `Invalid outletUniqueIdentifier : ${data.fileName}`
+        console.log(`Invalid fileName: ${data.fileName}`)
+        return `Invalid fileName : ${data.fileName}`
     }
     if(`${data.propertyName}`.includes('*')){
-        console.log(`Invalid outletUniqueIdentifier: ${data.propertyName}`)
-        return `Invalid outletUniqueIdentifier : ${data.propertyName}`
+        console.log(`Invalid propertyName: ${data.propertyName}`)
+        return `Invalid propertyName : ${data.propertyName}`
     }
     if(`${data.outletName}`.includes('*')){
-        console.log(`Invalid outletUniqueIdentifier: ${data.outletName}`)
-        return `Invalid outletUniqueIdentifier : ${data.outletName}`
+        console.log(`Invalid outletName: ${data.outletName}`)
+        return `Invalid outletName : ${data.outletName}`
     }
     if(`${data.outletName}`.includes('*')){
-        console.log(`Invalid outletUniqueIdentifier: ${data.outletName}`)
-        return `Invalid outletUniqueIdentifier : ${data.outletName}`
+        console.log(`Invalid outletName: ${data.outletName}`)
+        return `Invalid outletName : ${data.outletName}`
     }
     if(`${data.programName}`.includes('*')){
-        console.log(`Invalid outletUniqueIdentifier: ${data.programName}`)
-        return `Invalid outletUniqueIdentifier : ${data.programName}`
+        console.log(`Invalid programName: ${data.programName}`)
+        return `Invalid programName : ${data.programName}`
     }
 
     return ``
+
+
 }
+
 
 module.exports={
     uploadExcel,
