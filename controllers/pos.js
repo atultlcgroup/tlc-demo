@@ -9,6 +9,7 @@ let createFileName= (body)=>{
 }
 let uploadExcel=(req,res)=>{
     try{
+        console.log(JSON.stringify(req.body))
         console.log(`uploadExcel api called in controller`)
         if(!req.body.fileName|| !req.body.fileContent || !req.body.brandName
             || !req.body.programName || !req.body.propertyName || !req.body.outletName
