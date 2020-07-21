@@ -18,5 +18,5 @@ app.use("/",(req,res)=>{
 })
 
 app.listen( process.env.PORT || port,()=>{
-    console.log(`server started at posrt : ${port}`)
+    console.log(`server started at port : ${port}`)
 })
