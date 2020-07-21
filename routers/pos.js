@@ -9,4 +9,7 @@ Routers.post("/POS2",excelControllers.getPosData);
 Routers.post("/POS3",excelControllers.getPosLogData)
 
 
+Routers.post("/GETURL",excelControllers.GETURL)
+
+
 module.exports= Routers;
