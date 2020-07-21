@@ -7,7 +7,8 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
-        SCHEDULED_TIME: '* * * * *'
+        SCHEDULED_TIME: '* * * * *',
+        FEEDBACK_URL:'https://tlcclubmarriott.app.link?action=feedback'
         }
         break;
     case 'microtest':
@@ -16,7 +17,8 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
-        SCHEDULED_TIME: '* * * * *'
+        SCHEDULED_TIME: '* * * * *',
+        FEEDBACK_URL:'https://tlcclubmarriott.app.link?action=feedback'
         }
         break;
     case 'production':
@@ -25,7 +27,8 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
-        SCHEDULED_TIME: '* * * * *'
+        SCHEDULED_TIME: '* * * * *',
+        FEEDBACK_URL:'https://tlcclubmarriott.app.link?action=feedback'
         }
         break;
     default:
@@ -34,7 +37,8 @@ switch (NODE_ENV) {
         FTP_USER: 'clubmarriot',
         FTP_HOST: '52.20.202.8',
         FTP_PASSWORD: 'DF3tfr#RRdftt4',
-        SCHEDULED_TIME: '* * * * *'
+        SCHEDULED_TIME: '* * * * *',
+        FEEDBACK_URL:'https://tlcclubmarriott.app.link?action=feedback'
         }
         break;
 }
