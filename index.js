@@ -18,6 +18,5 @@ app.use("/",(req,res)=>{
 })
 
 app.listen( process.env.PORT || port,()=>{
-    console.log(process.env.FTP_PASSWORD)
     console.log(`server started at posrt : ${port}`)
 })
