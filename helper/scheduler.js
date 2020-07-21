@@ -1,5 +1,4 @@
 const schedule = require('node-schedule');
-const config = require('../config').ENV_OBJ
 
 let posModel = require('../models/pos')
 let scheduleTask =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
@@ -9,4 +8,4 @@ let scheduleTask =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=
     await posModel.getPosLogData()
     console.log(`=================   SCHEDULER END     ========================`)
 });
-  scheduleTask(config.SCHEDULED_TIME)
+  scheduleTask(process.env.SCHEDULED_TIME)

@@ -1,6 +1,6 @@
 const express = require("express");
 // const scheduler = require('./helper/scheduler');
-const port = require("./config").ENV_OBJ.PORT;
+const port = process.env.PORT;
 const posRouters= require("./routers/posCheque");
 const reservationRouters= require("./routers/reservation");
 const excelRouters = require("./routers/pos");

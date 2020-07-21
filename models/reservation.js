@@ -1,8 +1,5 @@
 let pool = require("../databases/db").pool
-const DBURL = require('../config').ENV_OBJ
-
-let feedbackUrl= DBURL.FEEDBACK_URL;
-
+let feedbackUrl= process.env.FEEDBACK_URL;
 let getFeedbackUrl=async(reservationId)=>{
     return new Promise(async(resolve, reject)=>{
         try{
