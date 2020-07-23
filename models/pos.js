@@ -128,7 +128,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
                                 throw err;
                         })
                         deleteErrorExcelRecords(posTrackingId)
-                        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e1}' where file_name__c = '${fileName}'`)
+                        await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e1}' where file_name__c = '${fileName}'`)
                         console.log(e1);
                         if(bodyFileName)
                          return {code:1,err:`${e1}`};
@@ -167,7 +167,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
         } catch (e) {
    
             deleteErrorExcelRecords(posTrackingId)
-            await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
+            await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
             fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
                     throw err;
@@ -180,7 +180,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
 
 
 let updateStatusForDuplicateRecord = async(fileName)=>{
-    await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'DUPLICATE FILE',error_description__c='' where file_name__c = '${fileName}'`)
+    await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='DUPLICATE FILE' where file_name__c = '${fileName}'`)
 } 
 
 
@@ -201,7 +201,7 @@ let getFileFromFTP = async (fileArr , fileName) => {
                 } catch (e) {
                     if(fileName)
                     reject(e)
-                    await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC ERROR',error_description__c='${e}' where file_name__c = '${file['file_name']}'`)
+                    await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e}' where file_name__c = '${file['file_name']}'`)
                 }
             }
             ftpConnection.close();
