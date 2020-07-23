@@ -51,7 +51,7 @@ let getPosData=async(req,res)=>{
     excelModel.getPosData(fileName).then(data=>{
         res.status(200).json({code: 200, message: data});
     }).catch(err=>{
-        res.status(200).json({code: 500, message: err});
+        res.status(500).json({code: 500, message: err});
     })
 }
 
