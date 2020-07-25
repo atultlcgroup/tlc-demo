@@ -1,7 +1,7 @@
 const summaryModel= require("../models/FandBSummary")
 let FandBSummaryReport=(req,res)=>{
     try{
-        console.log(`getPosCheque api called in controller`)
+        console.log(`FandBSummaryReport api called in controller`)
         summaryModel.FandBSummaryReport().then(data=>{
             res.status(200).send({code: 200, message: 'success' , data : data})
         }).catch(e=>{
