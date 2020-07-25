@@ -49,9 +49,9 @@ let uploadExcel = async (file, fileName, body) => {
 
 let updatePOSTracking = (body, fileName) => {
     try {
-        pool.query(`INSERT INTO tlcsalesforce.pos_tracking__c(
-             brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c)
-            VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}')`)
+               pool.query(`INSERT INTO tlcsalesforce.pos_tracking__c(
+             brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c, "brandUniqueIdentifier","programUniqueIdentifier","propertyUniqueIdentifier","outletUniqueIdentifier",outlet)
+            VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select if(sfid)  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'))`)
     } catch (e) {
         return e;
     }
