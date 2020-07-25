@@ -64,9 +64,9 @@ let getPosData = async (fileName) => {
             console.log('get Pos data api called');
             let qry = ``;
             if(fileName)
-            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
+            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
             else
-            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
+            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
             const result = await pool.query(qry);
             await getFileFromFTP((result) ? result.rows : null,fileName);
             resolve(`SUCCESS`)
@@ -82,7 +82,7 @@ let deleteErrorExcelRecords=(tracking_id)=>{
 }
 
 
-let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
+let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) => {
         try {
             let checkDuplicateExcel = 1;
             let findErr =0 ;
@@ -92,7 +92,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
             let cnt = 1;
             let resultArr = []
             let arr = []
-            let query = `INSERT INTO tlcsalesforce.pos_log(pos_source,status,pos_tracking_id,`;
+            let query = `INSERT INTO tlcsalesforce.pos_log(outlet,pos_source,status,pos_tracking_id,`;
             for (d of result['Sheet1']) {
                 let query2 = ``;
                 let len = Object.entries(d).length
@@ -102,7 +102,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName ) => {
                         let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                     //    console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
-                        len - 1 == n ? query += `"${e[1]}") values('${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
+                        len - 1 == n ? query += `"${e[1]}") values('${outlet}','${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
                         arr.push(e[1])
                         n++
                     }
@@ -195,7 +195,7 @@ let getFileFromFTP = async (fileArr , fileName) => {
                     console.log(`rename to ====`)
                     await ftpConnection.rename(`POS/${file['file_name']}`, `POS/POS_ARCHIVE/${file['file_name']}`)
                     console.log(`readexcel to ====`)
-                    let checkErr =await readExcel(file['file_name'], file['pos_source'], file['sync_id'],fileName)
+                    let checkErr =await readExcel(file['file_name'], file['pos_source'], file['sync_id'],fileName,file['outlet'])
                     if(checkErr && checkErr.code==1)
                     reject(`${checkErr.err}`)
                 } catch (e) {
@@ -220,9 +220,9 @@ let getPosLogData = async (fileName) => {
         console.log("get POS data API called");
         let qry = ``
         if(fileName)
-        qry=  `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
+        qry=  `select *,pl.oulet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
         else
-        qry = `select * from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
+        qry = `select *,pl.oulet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
         console.log(qry)
 
         const result = await pool.query(qry);
@@ -247,8 +247,8 @@ let postLogDataToPosChequeDetails = async (data) => {
 
             console.log("uploading POS log data to POS cheque details");
             let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
-            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,pos_log_id)
-          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}','${n.mapping_id}') RETURNING id`);
+            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id)
+          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}','${outlet__c}','${n.mapping_id}') RETURNING id`);
 
             console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
             console.log('n', n)
