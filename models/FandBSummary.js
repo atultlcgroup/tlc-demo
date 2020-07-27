@@ -1,4 +1,89 @@
 const pool = require("../databases/db").pool;
+const BREAKFASTTIME = process.env.BREAKFAST_TIME.split(",") || ['04:00','11:00']
+const LUNCHTIME = process.env.LUNCH_TIME.split(",") || ['11:00', '17:00']
+const DINNERTIME = process.env.DINNER_TIME.split(",") || [ '17:00', '04:00' ]
+console.log(BREAKFASTTIME, LUNCHTIME,DINNERTIME)
+
+let findNetSpentAPCTCovers = (outlet_id)=>{
+    return new Promise(async(resolve,reject)=>{
+        try{
+           
+          let data = await pool.query(`Select SUM (cast(pos_cheque_details__c.net_amount__c AS DOUBLE PRECISION)) AS totalamount,
+          SUM (cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) AS totalcovers,
+          SUM( cast(pos_cheque_details__c.net_amount__c AS DOUBLE PRECISION))/SUM (cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) AS APC
+          from tlcsalesforce.pos_cheque_details__c where  date_part('year', actual_bill_date__c)= date_part('year',CURRENT_DATE) 
+          and date_part('month', actual_bill_date__c) = date_part('month',CURRENT_DATE) AND actual_bill_date__c<=CURRENT_DATE AND outlet__c='${outlet_id}'`)
+        const result = data ? data.rows : [{totalamount: 0,totalcovers:0,APC:0}]
+           resolve(result)
+         }catch( e ){
+            reject(e);
+        }
+
+    })
+}
+
+let totalCoversInDBL = (outlet_id)=>{
+    return new Promise(async(resolve,reject)=>{
+    try{
+        let coversObject = {}
+    let totalCoverForBreakFast = await pool.query(`select sum(cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) covers_in_breakfaset from tlcsalesforce.pos_cheque_details__c where length(bill_time__c)>0 and bill_time__c::time <= '${BREAKFASTTIME[1]}'::time and bill_time__c::time >= '${BREAKFASTTIME[0]}'::time and length(covers__c)>0  and date_part('year', actual_bill_date__c)= date_part('year',CURRENT_DATE) 
+    and date_part('month', actual_bill_date__c) = date_part('month',CURRENT_DATE) AND actual_bill_date__c<=CURRENT_DATE AND outlet__c='${outlet_id}'`)
+       const resultcovers_in_breakfaset = totalCoverForBreakFast ? totalCoverForBreakFast.rows : [{covers_in_breakfaset: 0}]
+    let totalCoverForLunch = await pool.query(`select  sum(cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) covers_in_lunch from tlcsalesforce.pos_cheque_details__c where length(bill_time__c)>0 and bill_time__c::time > '${LUNCHTIME[0]}'::time and bill_time__c::time <= '${LUNCHTIME[1]}'::time   and length(covers__c)>0 and  date_part('year', actual_bill_date__c)= date_part('year',CURRENT_DATE) 
+    and date_part('month', actual_bill_date__c) = date_part('month',CURRENT_DATE) AND actual_bill_date__c<=CURRENT_DATE AND outlet__c='${outlet_id}' `)
+    const resulttotalCoverForLunch = totalCoverForLunch ? totalCoverForLunch.rows : [{covers_in_lunch: 0}]
+    let totalCoverForDinner = await pool.query(`select sum(cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) covers_in_dinner from tlcsalesforce.pos_cheque_details__c where length(bill_time__c)>0 and (bill_time__c::time  >'${DINNERTIME[0]}'::time or bill_time__c::time < '${DINNERTIME[1]}'::time)  and length(covers__c)>0 and date_part('year', actual_bill_date__c)= date_part('year',CURRENT_DATE) 
+    and date_part('month', actual_bill_date__c) = date_part('month',CURRENT_DATE) AND actual_bill_date__c<=CURRENT_DATE AND outlet__c='${outlet_id}'`)
+    const resultCoverForDinner = totalCoverForDinner ? totalCoverForDinner.rows : [{covers_in_lunch: 0}]
+    coversObject['covers_in_breakfaset'] =   resultcovers_in_breakfaset[0].covers_in_breakfaset || 0
+    coversObject['covers_in_lunch'] =   resulttotalCoverForLunch[0].covers_in_lunch || 0
+    coversObject['covers_in_dinner'] =   resultCoverForDinner[0].covers_in_dinner || 0
+    resolve(coversObject)
+    }catch(e){
+        reject(`${e}`)
+    }
+  })
+}
+
+
+let coversDayWise= (outlet_id)=>{
+    return new Promise(async(resolve,reject)=>{
+        try{
+            let coversDayWiseObject = {}
+        //    let  coversOfDayInCurrentMonth=await  pool.query(`select sum(cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) ,to_char(pos_cheque_details__c.bill_date__c, 'Day') AS "Day"
+        //    from tlcsalesforce.pos_cheque_details__c where length(covers__c) >0  group by "Day"`)
+         
+        let  coversOfDayInCurrentMonth=await  pool.query(`select sum(cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)),to_char(pos_cheque_details__c.bill_date__c, 'Day') AS "Day"
+           from tlcsalesforce.pos_cheque_details__c where length(covers__c) >0 and date_part('year', actual_bill_date__c)= date_part('year',CURRENT_DATE) 
+          and date_part('month', actual_bill_date__c) = date_part('month',CURRENT_DATE) AND actual_bill_date__c<=CURRENT_DATE AND outlet__c='${outlet_id}' group by "Day"`)
+           const resultcoversOfDayInCurrentMonth = coversOfDayInCurrentMonth ? coversOfDayInCurrentMonth.rows : []
+           let resultcoversOfDayInCurrentMonthObject = {}
+           for(d of resultcoversOfDayInCurrentMonth){
+            resultcoversOfDayInCurrentMonthObject[` ${d.Day}`.trim()] = d.sum
+          }
+          coversDayWiseObject['Sunday'] =   resultcoversOfDayInCurrentMonthObject['Sunday'] || 0
+          coversDayWiseObject['Monday'] =  resultcoversOfDayInCurrentMonthObject['Monday'] || 0
+          coversDayWiseObject['Tuesday'] = resultcoversOfDayInCurrentMonthObject['Tuesday'] || 0
+          coversDayWiseObject['Wednesday'] = resultcoversOfDayInCurrentMonthObject['Wednesday']  || 0
+          coversDayWiseObject['Thursday'] = resultcoversOfDayInCurrentMonthObject['Thursday'] || 0
+          coversDayWiseObject['Friday'] = resultcoversOfDayInCurrentMonthObject['Friday'] || 0
+          coversDayWiseObject['Saturday'] = resultcoversOfDayInCurrentMonthObject['Saturday'] || 0
+          resolve(coversDayWiseObject)
+        }catch(e){
+            reject(`${e}`)
+        }
+    })
+}
+
+let insertSummarizedDataToFandB=async()=>{
+    return new Promise(async(resolve,reject)=>{
+        let data = await pool.query(`INSERT INTO tlcsalesforce.f_b_summary__c(
+            covers_for_wed__c, name, net_spends__c, covers_by_time_in_a_day_for_breakfast__c, covers_by_time_in_a_day_for_dinner__c, isdeleted, systemmodstamp, covers_for_mon__c, covers_for_sun__c, apc_month_wise__c, outlet__c, createddate, covers_for_sat__c, covers_for_tue__c, covers_by_time_in_a_day_for_lunch__c, covers_for_thr__c, covers_for_fri__c, sfid, id, _hc_lastop, _hc_err)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+
+    })
+
+}
 
 
 let FandBSummaryReport = async () => {
@@ -7,7 +92,12 @@ let FandBSummaryReport = async () => {
             console.log('FandBSummaryReport data api called in controller ');
             let qry = `select distinct o.sfid outlet_id from tlcsalesforce.outlet__c o inner join tlcsalesforce.membershiptype__c  ms on  o.property__c = ms.property__c  inner join  tlcsalesforce.program__c p on ms.program__c = p.sfid where p.unique_identifier__c = 'TLC_MAR_CLMA'`;
             const result =await pool.query(`${qry}`)
-            let data = result ? result.rows : null;
+            let data = result ? result.rows : [];
+            for(d of data){
+                    const netSpentAPCTCovers = await findNetSpentAPCTCovers(d.outlet_id)
+                    const coversInDBL = await totalCoversInDBL(d.outlet_id)
+                    const coversOfDayInCurrentMonth= await coversDayWise(d.outlet_id)
+                }
             resolve(data)
         } catch (e) {
             console.log(`${e}`)
