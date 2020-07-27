@@ -68,9 +68,9 @@ let getPosData = async (fileName) => {
             console.log('get Pos data api called');
             let qry = ``;
             if(fileName)
-            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
+            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet__c outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
             else
-            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
+            qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet__c outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
             const result = await pool.query(qry);
             await getFileFromFTP((result) ? result.rows : null,fileName);
             resolve(`SUCCESS`)
