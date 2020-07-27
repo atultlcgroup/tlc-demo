@@ -9,6 +9,7 @@
     "convert-excel-to-json": "^1.7.0",
     "cors": "^2.8.5",
     "dateformat": "^3.0.3",
+    "dotenv": "^8.2.0",
     "easy-ftp": "^0.4.1",
     "execution-time": "^1.4.1",
     "express": "^4.17.1",
