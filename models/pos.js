@@ -305,9 +305,25 @@ let updateStatusPostrackingTable = (status, posTrackingId) => {
 };
 
 
+let getRefferalData2=(data)=>{
+    console.log('refferalData',data);
+    return new Promise((resolve,reject)=>{
+        try{
+            console.log("under the resolve promise",data);
+            resolve(data)
+
+        }catch(err){
+            console.log("under the promise reject");
+            reject("promise reject");
+        }
+    })
+}
+
+
 module.exports = {
     uploadExcel,
     getPosData,
-    getPosLogData
+    getPosLogData,
+    getRefferalData2
 
 }

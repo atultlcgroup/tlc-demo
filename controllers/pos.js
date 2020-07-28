@@ -149,9 +149,31 @@ let valudateFileNameSpecialChar=(data)=>{
 }
 
 
+let getRefferalData2=(req,res)=>{
+    let  refferalData={
+     membershipNumber:req.body.membershipNumber,
+     referralCode:req.body.referralCode,
+     membershipTypeId:req.body.membershipTypeId,
+     transactionType:req.body.transactionType
+     }
+     
+ 
+     console.log("by promise getting the data");
+     refferalModel.getRefferalData2(refferalData).then(data=>{
+         console.log("under the promise",data);  
+         res.status(200).json({code: 200, message: data});
+ 
+     }).catch(err=>{
+         res.status(200).json({code: 500, message: err});
+     })
+     
+ }
+
+
 module.exports={
     uploadExcel,
     getPosData,
     getPosLogData,
-    GETURL
+    GETURL,
+    getRefferalData2
 }

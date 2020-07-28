@@ -11,5 +11,7 @@ Routers.post("/POS3",excelControllers.getPosLogData)
 
 Routers.post("/GETURL",excelControllers.GETURL)
 
+Routers.post("/getRefferalData",excelControllers.getRefferalData2);
+
 
 module.exports= Routers;
