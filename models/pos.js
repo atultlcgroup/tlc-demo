@@ -222,16 +222,23 @@ let getFileFromFTP = async (fileArr , fileName) => {
 let getPosLogData = async (fileName) => {
     try {
         console.log("get POS data API called");
+        let findPropertyId=`select id pos_tracking_id,  propertyuniqueidentifier__c, (select sfid from tlcsalesforce.property__c where unique_identifier__c = pt.propertyuniqueidentifier__c) property_id from tlcsalesforce.pos_tracking__c pt where status__c = 'SYNC_STARTED'`
+        let propertyResultArray= await pool.query(findPropertyId) ;  
+
+        const propertyResult = propertyResultArray ? propertyResultArray.rows : []
+
         let qry = ``
         if(fileName)
         qry=  `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
         else
         qry = `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
         console.log(qry)
-
+        
         const result = await pool.query(qry);
         console.log(result.rows)
-        await postLogDataToPosChequeDetails(result.rows);
+
+
+        await postLogDataToPosChequeDetails(result.row,propertyResults);
 
         return result.rows;
     } catch (e) {
@@ -240,10 +247,12 @@ let getPosLogData = async (fileName) => {
 
 }
 
-let postLogDataToPosChequeDetails = async (data) => {
+let postLogDataToPosChequeDetails = async (data,propertyResults) => {
     try {
 
         for (n of data) {
+            let findPrpertyId=propertyFindFunction(propertyResults,n.)
+            
             ConvertedBillDate = convert(n.BillDate);
             console.log('+++++++++++++++++++++++++++++++');
             console.log('mapping ID', n.mapping_id)
@@ -268,7 +277,7 @@ let postLogDataToPosChequeDetails = async (data) => {
             console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
             console.log('n', n)
 
-            let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n);
+            let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n,billDiscount,billTotal);
 
 
         }
@@ -281,13 +290,13 @@ let postLogDataToPosChequeDetails = async (data) => {
 
 
 
-let insertInPosChequeDetailsItemCategory = async (foreignKey, data) => {
+let insertInPosChequeDetailsItemCategory = async (foreignKey, data,billDiscount,billTotal) => {
     try {
         console.log("insert in insertInPosChequeDetailsItemCategory");
 
         await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
-       cheque__c,gross_amount__c,tax_amount__c)
-      VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}') RETURNING id`);
+       cheque__c,gross_amount__c,tax_amount__c,disc_amount__c,net_amount__c)
+      VALUES ('${foreignKey}', '${data.Grossbilltotal}', '${data.Tax}','${billDiscount}','${billTotal}') RETURNING id`);
         console.log('data.mapping id', data.mapping_id);
         console.log('data.pos_tracking_id', data.pos_tracking_id);
         updatePosLogTableNewToSYnc('SYNC_COMPLETED', data.mapping_id, data.pos_tracking_id);
