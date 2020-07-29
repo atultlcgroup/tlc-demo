@@ -222,23 +222,21 @@ let getFileFromFTP = async (fileArr , fileName) => {
 let getPosLogData = async (fileName) => {
     try {
         console.log("get POS data API called");
-        let findPropertyId=`select id pos_tracking_id,  propertyuniqueidentifier__c, (select sfid from tlcsalesforce.property__c where unique_identifier__c = pt.propertyuniqueidentifier__c) property_id from tlcsalesforce.pos_tracking__c pt where status__c = 'SYNC_STARTED'`
-        let propertyResultArray= await pool.query(findPropertyId) ;  
-
-        const propertyResult = propertyResultArray ? propertyResultArray.rows : []
-
+        let findProperty =await pool.query(`select id pos_tracking_id,  propertyuniqueidentifier__c, (select sfid from tlcsalesforce.property__c where unique_identifier__c = pt.propertyuniqueidentifier__c) property_id from tlcsalesforce.pos_tracking__c pt where status__c = 'SYNC_STARTED'`)
+        let propertyResult = (findProperty) ?  findProperty.rows : [];
+        let propertObj ={};
+        for(p of propertyResult){
+            propertObj[p.pos_tracking_id] = p.property_id
+        }
+        console.log(`--------------------------------`)
+        console.log(`${JSON.stringify(propertObj)}`)
         let qry = ``
         if(fileName)
         qry=  `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
         else
-        qry = `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
-        console.log(qry)
-        
+        qry = `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;        
         const result = await pool.query(qry);
-        console.log(result.rows)
-
-
-        await postLogDataToPosChequeDetails(result.row,propertyResults);
+        await postLogDataToPosChequeDetails(result.rows,propertObj);
 
         return result.rows;
     } catch (e) {
@@ -247,36 +245,29 @@ let getPosLogData = async (fileName) => {
 
 }
 
-let postLogDataToPosChequeDetails = async (data,propertyResults) => {
+let postLogDataToPosChequeDetails = async (data,propertObj) => {
     try {
+       
 
-        for (n of data) {
-            let findPrpertyId=propertyFindFunction(propertyResults,n.)
-            
+        for (n of data) {            
             ConvertedBillDate = convert(n.BillDate);
             console.log('+++++++++++++++++++++++++++++++');
             console.log('mapping ID', n.mapping_id)
             console.log(ConvertedBillDate);
-            console.log('+++++++++++++++++++++++++++++++');
-            let property= await pool.query(`select id pos_tracking_id,  propertyuniqueidentifier__c, (select sfid from tlcsalesforce.property__c where unique_identifier__c = pt.propertyuniqueidentifier__c) property_id from tlcsalesforce.pos_tracking__c pt where status__c = 'SYNC_STARTED'`);
-            console.log('property',property.rows[0].property_id);
-      
+            console.log('+++++++++++++++++++++++++++++++')
             let billDiscount=parseInt(n.Disc_Food) + parseInt(n.Disc_Soft_Bev) + parseInt(n.Disc_Misc) + parseInt(n.Disc_Dom_Liq) + parseInt(n.Disc_Imp_Liq) + parseInt(n.Disc_Tobacco);
             let billTotal=parseInt(n.Grossbilltotal) - parseInt(n.Tax) + billDiscount;
             console.log('type');
             console.log(typeof billDiscount);
             console.log('billDiscount',billDiscount);
             console.log('billTotal',billTotal);
-
-
             console.log("uploading POS log data to POS cheque details");
             let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
             membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c)
-          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${property.rows[0].property_id}','${billTotal}','${billDiscount}',now()) RETURNING id`);
+          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now()) RETURNING id`);
 
             console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
             console.log('n', n)
-
             let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n,billDiscount,billTotal);
 
 
