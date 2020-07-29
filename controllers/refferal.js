@@ -33,7 +33,7 @@ let getRefferalData2=(req,res)=>{
     agent:req.body.agent  || ""
     }
     if(!refferalData.membershipNumber){
-        res.status(401).send({code: 401, message: 'invalid membershipNumber'})
+        res.status(401).send({code: 401, message: 'missing membershipNumber'})
         return
     }
     else if(!refferalData.referralCode) {
@@ -52,10 +52,15 @@ let getRefferalData2=(req,res)=>{
     console.log("by promise getting the data");
     refferalModel.getRefferalData2(refferalData).then(data=>{
         console.log("under the promise",data);  
-        res.status(200).json({code: 200, message: data});
+        console.log(data[0].referral_code__c)
+        console.log('requested referralcode',refferalData.referralCode);
 
+        
+            res.status(200).json({code: 200, message: data});
+    
+        
     }).catch(err=>{
-        res.status(200).json({code: 500, message: err});
+        res.status(500).json({code: 500, message: 'envalid refferal code'});
     })
     
 }

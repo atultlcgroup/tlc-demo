@@ -1,7 +1,7 @@
 const express = require("express");
-// const scheduler = require('./helper/scheduler');
 const dotenv = require('dotenv');
 dotenv.config();
+// const scheduler = require('./helper/scheduler');
 const port = process.env.PORT;
 console.log(port);
 const posRouters= require("./routers/posCheque");
@@ -23,5 +23,5 @@ app.use("/",(req,res)=>{
 })
 
 app.listen( process.env.PORT || port,()=>{
-    console.log(`server started at posrt : ${port}`)
+    console.log(`server started at port : ${port}`)
 })
