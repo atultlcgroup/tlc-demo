@@ -37,15 +37,15 @@ let getRefferalData2=(req,res)=>{
         return
     }
     else if(!refferalData.referralCode) {
-        res.status(401).send({code: 401, message: 'invalid referralCode'})
+        res.status(401).send({code: 401, message: 'missing referralCode'})
         return
     }
     else if(!refferalData.membershipTypeId){
-        res.status(401).send({code: 401, message: 'invalid membershipTypeId'})
+        res.status(401).send({code: 401, message: 'missing membershipTypeId'})
         return
     }
     else if(!refferalData.transactionType){
-        res.status(401).send({code: 401, message: 'invalid transactionType'})
+        res.status(401).send({code: 401, message: 'missing transactionType'})
         return
     }
     
