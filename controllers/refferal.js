@@ -4,22 +4,10 @@ const { request } = require("express");
 
 
 
-// let getreq.body=async(req,res)=>{   
-    
-//     try{
-//     console.log("under the refferal");    
-//         data= refferalModel.getreq.body(req.body)  
-//         res.status(200).json({code:200,message:data});     
-//     }
-//     catch(e){
-//         console.log("error",e)
-//     }
-
-    
-//}
 
 
 let getRefferalData2=(req,res)=>{
+    
    
     console.log('headers',req.headers)
   
@@ -52,7 +40,7 @@ let getRefferalData2=(req,res)=>{
             
             res.status(200).json({code: 200, message: data});
     
-        
+         
     }).catch(err=>{
         res.status(500).json({code: 500, message: 'envalid refferal code'});
     })
@@ -62,6 +50,6 @@ let getRefferalData2=(req,res)=>{
 
 
 module.exports={
-   // getRefferalData,
+   
     getRefferalData2
 }
