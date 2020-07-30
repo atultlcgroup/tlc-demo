@@ -38,11 +38,11 @@ let getRefferalData2=(req,res)=>{
         console.log('requested referralcode',req.body.referralCode);
 
             
-            res.status(200).json({code: 200, message: data});
+            res.status(200).json({code: 200, message: `Success`,data:data});
     
          
     }).catch(err=>{
-        res.status(500).json({code: 500, message: 'envalid refferal code'});
+        res.status(500).json({code: 500, message: `${err}`});
     })
     
 }
