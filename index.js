@@ -1,9 +1,9 @@
 const express = require("express");
 const dotenv = require('dotenv');
+
 dotenv.config();
 // const scheduler = require('./helper/scheduler');
 const port = process.env.PORT;
-console.log(port);
 const posRouters= require("./routers/posCheque");
 const reservationRouters= require("./routers/reservation");
 const excelRouters = require("./routers/pos");

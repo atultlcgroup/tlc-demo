@@ -1,4 +1,4 @@
-console.log(process.env.DEV_POSTGRES_URL);
+
 const { Pool } = require('pg');
 
 const pool = new Pool({
