@@ -1,16 +1,7 @@
 
 const refferalModel= require("../models/refferal");
-const { request } = require("express");
 
-
-
-
-
-let getRefferalData2=(req,res)=>{
-    
-   
-    console.log('headers',req.headers)
-  
+let getRefferalData2=(req,res)=>{  
     if(!req.body.membershipNumber){
         res.status(401).send({code: 401, message: 'missing membershipNumber'})
         return
@@ -29,20 +20,10 @@ let getRefferalData2=(req,res)=>{
         res.status(401).send({code: 401, message: 'missing programId'})
         return
     }
-    
-    console.log("by promise getting the data");
-    console.log(req.headers)
     refferalModel.getRefferalData2(req.body,req.headers).then(data=>{
-        console.log("under the promise",data);  
-        console.log(data[0].referral_code__c)
-        console.log('requested referralcode',req.body.referralCode);
-
-            
-            res.status(200).json({code: 200, message: data});
-    
-         
+            res.status(200).json({code: 200, message: `Success`});
     }).catch(err=>{
-        res.status(500).json({code: 500, message: 'envalid refferal code'});
+        res.status(500).json({code: 500, message: `${err}`});
     })
     
 }
