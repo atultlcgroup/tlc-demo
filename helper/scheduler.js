@@ -14,10 +14,10 @@ let scheduleTasksForFNB =(scheduledTime)=> schedule.scheduleJob(scheduledTime, a
   console.log(`=================   SCHEDULER END FOR FNB    ========================`)
 });
 
-if(process.env.IS_SCHEDULER_TIME_FOR_POS == true || process.env.IS_SCHEDULER_TIME_FOR_POS == 'true' || process.env.IS_SCHEDULER_TIME_FOR_POS == 'TRUE')
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS == true || process.env.IS_SCHEDULER_ALLOWED_FOR_POS == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_POS == 'TRUE')
 {
   console.log(`POS`)
-  // scheduleTasksForPOS(process.env.SCHEDULER_TIME_FOR_POS)
+  scheduleTasksForPOS(process.env.SCHEDULER_TIME_FOR_POS)
 }
 
 if(process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == true || process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == 'TRUE')
