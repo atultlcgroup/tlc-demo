@@ -41,7 +41,8 @@ let offerApplicableFor=async(member_type, referral_code, membership_number,giftR
 let getRefferalData2=  (data,header)=>{
     console.log("referral");
     return new Promise(async(resolve,reject)=>{
-        try{     
+        try{  
+            console.log(`select referral_code__c,member_id__c,membership_number__C,gift_referral_benefit__c from tlcsalesforce.account p1 inner join tlcsalesforce.membership__c p2 on p1.member_id__c = p2.member__r__member_id__C where p1.referral_code__c='${data.referralCode}'`);   
            let result= await pool.query(`select referral_code__c,member_id__c,membership_number__C,gift_referral_benefit__c from tlcsalesforce.account p1 inner join tlcsalesforce.membership__c p2 on p1.member_id__c = p2.member__r__member_id__C where p1.referral_code__c='${data.referralCode}'`)
            let validateResult=result ? result.rows : [];
            console.log("validateResult",validateResult);
