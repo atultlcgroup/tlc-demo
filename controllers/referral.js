@@ -4,7 +4,7 @@
 const refferalModel= require("../models/referral");
 
 let getRefferalData2=(req,res)=>{  
-    if(!req.body.membershipNumber){
+       if(!req.body.membershipNumber){
         res.status(401).send({code: 401, message: 'missing membershipNumber'})
         return
     }
