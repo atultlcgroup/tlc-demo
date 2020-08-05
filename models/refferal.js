@@ -42,7 +42,7 @@ let getRefferalData2=  (data,header)=>{
            console.log("validateResult",validateResult);
              if(validateResult.length == 0){
                  console.log('Referral code not valid!')
-                 reject(`Referral code not valid!`)
+                 reject(`Referral code not `)
              }
         let finalResultOfJoinBenefitAndProgarm=await fetchReferralProgramAndRefferalBenefits(data,header)
         if(finalResultOfJoinBenefitAndProgarm.length == 0){
