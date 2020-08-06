@@ -6,8 +6,7 @@ let FandBSummaryReport=(req,res)=>{
             res.status(200).send({code: 200, message: 'success' })
         }).catch(e=>{
             res.status(500).send({code: 500, message: e})
-        res.status(200).json({code : 200 , message : 'success'})
-
+            res.status(200).json({code : 200 , message : 'success'})
         })
     }catch( e ){
         res.status(500).json({code : 500 , message : e})
