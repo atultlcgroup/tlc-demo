@@ -4,7 +4,7 @@ const pool = require("../databases/db").pool;
 const BREAKFASTTIME = process.env.BREAKFAST_TIME.split(",") || ['04:00','11:00']
 const LUNCHTIME = process.env.LUNCH_TIME.split(",") || ['11:00', '17:00']
 const DINNERTIME = process.env.DINNER_TIME.split(",") || [ '17:00', '04:00' ]
-const APPLICABLE_MONTH_FOR_FNB = process.env.APPLICABLE_MONTH_FOR_FNB || 1;
+const APPLICABLE_MONTH_FOR_FNB = process.env.DURATION_OF_MONTH_FOR_FNB || 1;
 console.log(BREAKFASTTIME, LUNCHTIME,DINNERTIME)
 
 let findNetSpentAPCTCovers = (outlet_id , i)=>{
