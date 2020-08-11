@@ -7,6 +7,23 @@ const DINNERTIME = process.env.DINNER_TIME.split(",") || [ '17:00', '04:00' ]
 const APPLICABLE_MONTH_FOR_FNB = process.env.DURATION_OF_MONTHS_FOR_FNB || 1;
 console.log(BREAKFASTTIME, LUNCHTIME,DINNERTIME)
 
+let monthsArr = [
+    "",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+]
+
+
 let findNetSpentAPCTCovers = (outlet_id , i)=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -108,9 +125,9 @@ let insertSummarizedDataToFandB=async(netSpentAPCTCovers,coversInDBL,coversOfDay
             and month__c = cast(date_part('month',CURRENT_DATE - INTERVAL '${i} MONTH') as varchar) and outlet__c='${outlet_id}'`)
             let data = checkOutletForMonth ? checkOutletForMonth.rows : [];
             if(data.length ==0){
-            await pool.query(`INSERT INTO tlcsalesforce.f_b_summary__c(Month__c,Year__c,Monthly_Total_Cover__c,
+            await pool.query(`INSERT INTO tlcsalesforce.f_b_summary__c( external_id__c,Month__c,Year__c,Monthly_Total_Cover__c,
             covers_for_wed__c, net_spends__c, covers_by_time_in_a_day_for_breakfast__c, covers_by_time_in_a_day_for_dinner__c, covers_for_mon__c, covers_for_sun__c, apc_month_wise__c, outlet__c, createddate, covers_for_sat__c, covers_for_tue__c, covers_by_time_in_a_day_for_lunch__c, covers_for_thr__c, covers_for_fri__c)
-            VALUES (date_part('month',CURRENT_DATE - INTERVAL '${i} MONTH'),date_part('year',CURRENT_DATE - INTERVAL '${i} MONTH'),'${netSpentAPCTCovers['totalcovers']}','${coversOfDayInCurrentMonth['Wednesday']}','${netSpentAPCTCovers['totalamount']}','${coversInDBL['covers_in_breakfaset']}','${coversInDBL['covers_in_dinner']}','${coversOfDayInCurrentMonth['Monday']}','${coversOfDayInCurrentMonth['Sunday']}','${netSpentAPCTCovers['apc']}','${outlet_id}',NOW(),'${coversOfDayInCurrentMonth['Saturday']}','${coversOfDayInCurrentMonth['Tuesday']}','${coversInDBL['covers_in_lunch']}','${coversOfDayInCurrentMonth['Thursday']}','${coversOfDayInCurrentMonth['Friday']}')`);
+            VALUES (gen_random_uuid(),date_part('month',CURRENT_DATE - INTERVAL '${i} MONTH'),date_part('year',CURRENT_DATE - INTERVAL '${i} MONTH'),'${netSpentAPCTCovers['totalcovers']}','${coversOfDayInCurrentMonth['Wednesday']}','${netSpentAPCTCovers['totalamount']}','${coversInDBL['covers_in_breakfaset']}','${coversInDBL['covers_in_dinner']}','${coversOfDayInCurrentMonth['Monday']}','${coversOfDayInCurrentMonth['Sunday']}','${netSpentAPCTCovers['apc']}','${outlet_id}',NOW(),'${coversOfDayInCurrentMonth['Saturday']}','${coversOfDayInCurrentMonth['Tuesday']}','${coversInDBL['covers_in_lunch']}','${coversOfDayInCurrentMonth['Thursday']}','${coversOfDayInCurrentMonth['Friday']}')`);
             console.log(`Data Inserted Successfully in f_b_summary__c !`)
             }else{
             await pool.query(`update tlcsalesforce.f_b_summary__c set  Monthly_Total_Cover__c='${netSpentAPCTCovers['totalcovers']}',
