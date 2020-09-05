@@ -23,6 +23,8 @@ app.use("/api/pos",excelRouters)
 app.use("/api/feedback",reservationRouters)
 app.use("/api/referral",referralRouters);
 app.use("/api/FandBSummary",FandBSummary)
+const check = require("./check")
+app.post("/sendMsg",check.sendMsg)
 app.use("/",(req,res)=>{
     res.status(200).send("SUCCESS")
 })

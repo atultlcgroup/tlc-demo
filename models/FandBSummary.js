@@ -6,28 +6,10 @@ const LUNCHTIME = process.env.LUNCH_TIME.split(",") || ['11:00', '17:00']
 const DINNERTIME = process.env.DINNER_TIME.split(",") || [ '17:00', '04:00' ]
 const APPLICABLE_MONTH_FOR_FNB = process.env.DURATION_OF_MONTHS_FOR_FNB || 1;
 console.log(BREAKFASTTIME, LUNCHTIME,DINNERTIME)
-
-let monthsArr = [
-    "",
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"
-]
-
-
 let findNetSpentAPCTCovers = (outlet_id , i)=>{
     return new Promise(async(resolve,reject)=>{
         try{
-          let data = await pool.query(`Select SUM (cast(pos_cheque_details__c.gross_bill_total__c AS DOUBLE PRECISION)) AS totalamount,
+            let data = await pool.query(`Select SUM (cast(pos_cheque_details__c.gross_bill_total__c AS DOUBLE PRECISION)) AS totalamount,
           SUM (cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) AS totalcovers,
           SUM( cast(pos_cheque_details__c.gross_bill_total__c AS DOUBLE PRECISION))/SUM (cast(pos_cheque_details__c.covers__c AS DOUBLE PRECISION)) AS apc
           from tlcsalesforce.pos_cheque_details__c where date_part('year', actual_bill_date__c)= date_part('year',CURRENT_DATE - INTERVAL '${i} MONTH') 
