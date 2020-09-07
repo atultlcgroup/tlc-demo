@@ -1,14 +1,21 @@
 
 const pool = require("../databases/db").pool
+
 let createOffers=(benefit_id,membership_number)=>{
     return new Promise(async(resolve,reject)=>{
         try{
-           if(membership_number)
+
+           if(membership_number){
+               console.log(`INSERT INTO tlcsalesforce.membership_offers__c(
+                currencyisocode, customer_set_offer__c, offer_type__c, membership2__r__membership_number__c, status__c)
+                VALUES ((select currencyisocode from tlcsalesforce.membershiptypeoffer__c where sfid = '${benefit_id}'),'${benefit_id}',(select offer_type__c from tlcsalesforce.membershiptypeoffer__c where sfid = '${benefit_id}'),'${membership_number}','Available')`)
              insertOffer = await pool.query(`INSERT INTO tlcsalesforce.membership_offers__c(
                 currencyisocode, customer_set_offer__c, offer_type__c, membership2__r__membership_number__c, status__c)
                 VALUES ((select currencyisocode from tlcsalesforce.membershiptypeoffer__c where sfid = '${benefit_id}'),'${benefit_id}',(select offer_type__c from tlcsalesforce.membershiptypeoffer__c where sfid = '${benefit_id}'),'${membership_number}','Available')`)
-           else
-              console.log(`MembershipNumber is not abailable to attach offer`)
+             }
+                else{
+                    console.log(`MembershipNumber is not abailable to attach offer`)
+                }
               resolve(`Offer Attached Successfully!`)
         }catch(e){
             reject(`${e}`)
@@ -40,7 +47,7 @@ let getRefferalData2=  (data,header)=>{
         try{     
             console.log('request body referral api::', data)  
            let result= await pool.query(`select referral_code__c,member_id__c,membership_number__C from tlcsalesforce.account p1 inner join tlcsalesforce.membership__c p2 on p1.member_id__c = p2.member__r__member_id__c where p1.referral_code__c='${data.referralCode}'`)
-           
+        //    console.log(`select referral_code__c,member_id__c,membership_number__C from tlcsalesforce.account p1 inner join tlcsalesforce.membership__c p2 on p1.member_id__c = p2.member__r__member_id__c where p1.referral_code__c='${data.referralCode}'`)
            let validateResult=result ? result.rows : [];
              if(validateResult.length == 0){
                  console.log('data::', data.referralCode)
@@ -71,6 +78,7 @@ let getRefferalData2=  (data,header)=>{
 
 let fetchReferralProgramAndRefferalBenefits=async(data,header)=>{
     try{
+
     let resultOfJoinBenefitAndProgarm=await pool.query(`select p1.name,transaction_type__c,end_date__c,start_date__c,program__r__unique_identifier__c,p1.sfid sfid1,p2.isdeleted,benefit__c,member_type__c,p2.sfid sfid2 from tlcsalesforce.referral_program__c p1 inner join tlcsalesforce.referral_benefits__C p2 on p1.sfid=p2.referral_program__c where p1.transaction_type__c='${data.transactionType}' and program__r__unique_identifier__c='${header.program_id}' and p1.start_date__c::date <= NOW()::date and end_date__c >= NOW()::date`);
     let finalResultOfJoinBenefitAndProgarm=resultOfJoinBenefitAndProgarm ? resultOfJoinBenefitAndProgarm.rows : [];
     return finalResultOfJoinBenefitAndProgarm

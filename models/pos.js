@@ -13,7 +13,7 @@ let uploadExcelToFTP = async (fileName, file) => {
     return new Promise(async(resolve,reject)=>{
         try {
             ftpConnection = await ftp.connect();
-            // console.log(await ftpConnection.list())
+            // // console.log(await ftpConnection.list())
             await ftpConnection.uploadFrom(`uploads/${fileName}`, `POS/${fileName}`)
             ftpConnection.close();
             fs.unlink(`uploads/${fileName}`, (err, da) => {
@@ -34,10 +34,10 @@ let uploadExcelToFTP = async (fileName, file) => {
 
 let uploadExcel = async (file, fileName, body) => {
         return new Promise(async (resolve,reject)=>{
-            console.log(`from here 1`)
+            // console.log(`from here 1`)
         try{
         const data = await writeFileSync(`./uploads/${fileName}`, `${file}`, { encoding: "base64" })
-        console.log(`from here 1`)
+        // console.log(`from here 1`)
         await uploadExcelToFTP(fileName, file);
         await updatePOSTracking(body, fileName)
         resolve(`SUCCESSFULLY TRANSFERRED`); 
@@ -65,7 +65,7 @@ let updatePOSTracking = (body, fileName) => {
 let getPosData = async (fileName) => {
     return new Promise(async(resolve,reject)=>{
         try {
-            console.log('get Pos data api called');
+            // console.log('get Pos data api called');
             let qry = ``;
             if(fileName)
             qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet__c outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
@@ -75,7 +75,7 @@ let getPosData = async (fileName) => {
             await getFileFromFTP((result) ? result.rows : null,fileName);
             resolve(`SUCCESS`)
         } catch (e) {
-            console.log(`${e}`)
+            // console.log(`${e}`)
             reject(`${e}`)
         }
     })
@@ -104,7 +104,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                     let n = 0;
                     for (e of Object.entries(d)) {
                         let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
-                    //    console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
+                    //    // console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
                         len - 1 == n ? query += `"${e[1]}") values('${outlet}','${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
                         arr.push(e[1])
@@ -194,9 +194,9 @@ let getFileFromFTP = async (fileArr , fileName) => {
             ftpConnection = await ftp.connect();
             for (file of fileArr) {
                 try {
-                    console.log(`download to ====`)
+                    // console.log(`download to ====`)
                     await ftpConnection.downloadTo(`uploads/${file['file_name']}`, `POS/${file['file_name']}`)
-                    console.log(`rename to ====`)
+                    // console.log(`rename to ====`)
                     await ftpConnection.rename(`POS/${file['file_name']}`, `POS/POS_ARCHIVE/${file['file_name']}`)
                     console.log(`readexcel to ====`)
                     let checkErr =await readExcel(file['file_name'], file['pos_source'], file['sync_id'],fileName,file['outlet'])
@@ -211,7 +211,7 @@ let getFileFromFTP = async (fileArr , fileName) => {
             ftpConnection.close();
             resolve(`SUCCESS`)
         } catch (err) {
-            console.log(`${err}`)
+            // console.log(`${err}`)
             if(fileName)
             reject( `${err}`)
         }
@@ -283,7 +283,7 @@ let postLogDataToPosChequeDetails = async (data,propertObj) => {
 
 let insertInPosChequeDetailsItemCategory = async (foreignKey, data,billDiscount,billTotal) => {
     try {
-        console.log("insert in insertInPosChequeDetailsItemCategory");
+        // console.log("insert in insertInPosChequeDetailsItemCategory");
 
         await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details_item_category__c(
        cheque__c,gross_amount__c,tax_amount__c,disc_amount__c,net_amount__c)
@@ -315,8 +315,8 @@ let convert = (str) => {
 
 let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
     try {
-        console.log("changing the sync status");
-        console.log('with mapping id', mappingId)
+        // console.log("changing the sync status");
+        // console.log('with mapping id', mappingId)
         let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}' where mapping_id='${mappingId}' RETURNING status`);
         updateStatusPostrackingTable('SYNC_COMPLETED', posTrackingId);
     } catch (e) {
@@ -329,7 +329,7 @@ let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
 
 let updateStatusPostrackingTable = (status, posTrackingId) => {
     try {
-        console.log("updating pos_tracikng table status ");
+        // console.log("updating pos_tracikng table status ");
         pool.query(`update tlcsalesforce.pos_tracking__c set status__c='${status}' where id='${posTrackingId}'`);
 
     } catch (e) {
@@ -339,9 +339,25 @@ let updateStatusPostrackingTable = (status, posTrackingId) => {
 };
 
 
+let getRefferalData2=(data)=>{
+    console.log('refferalData',data);
+    return new Promise((resolve,reject)=>{
+        try{
+            console.log("under the resolve promise",data);
+            resolve(data)
+
+        }catch(err){
+            console.log("under the promise reject");
+            reject("promise reject");
+        }
+    })
+}
+
+
 module.exports = {
     uploadExcel,
     getPosData,
-    getPosLogData
+    getPosLogData,
+    getRefferalData2
 
 }

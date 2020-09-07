@@ -2,16 +2,17 @@ const express = require("express");
 const dotenv = require('dotenv');
 
 dotenv.config();
-const scheduler = require('./helper/scheduler');
+//const scheduler = require('./helper/scheduler');
 const port = process.env.PORT;
 const posRouters= require("./routers/posCheque");
 const reservationRouters= require("./routers/reservation");
 const excelRouters = require("./routers/pos");
-const FandBSummary = require("./routers/FandBSummary");
 const body_parser = require("body-parser");
+const FandBSummary = require("./routers/FandBSummary")
 
 
 const referralRouters = require("./routers/referral");
+const whatsAppRouters=require("./routers/whatsAppOtp")
 
 const cors = require("cors");
 const app = express();
@@ -25,6 +26,7 @@ app.use("/api/referral",referralRouters);
 app.use("/api/FandBSummary",FandBSummary)
 const check = require("./check")
 app.post("/sendMsg",check.sendMsg)
+ app.use("/api/whatsapp",whatsAppRouters)
 app.use("/",(req,res)=>{
     res.status(200).send("SUCCESS")
 })
