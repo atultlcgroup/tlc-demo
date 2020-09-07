@@ -21,6 +21,9 @@ let getRefferalData2=(req,res)=>{
     }else if(!req.headers.program_id){
         res.status(401).send({code: 401, message: 'missing programId'})
         return
+    }else if(!req.body.membershipTypeId){
+        res.status(401).send({code: 401, message: 'missing membershipTypeId'})
+        return
     }
     refferalModel.getRefferalData2(req.body,req.headers).then(data=>{
             res.status(200).json({code: 200, message: `Success`});
