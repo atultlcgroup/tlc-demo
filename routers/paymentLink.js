@@ -2,5 +2,5 @@ const express = require("express");
 const Routers = express.Router();
 const paymentController = require("../controllers/paymentLink")
 
-Routers.post("/url",paymentController.getPaymentLink)
+Routers.get("/url",paymentController.getPaymentLink)
 module.exports= Routers;

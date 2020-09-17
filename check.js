@@ -1,14 +1,16 @@
-var xl = require('excel4node');
+
+let sendMail = require('./helper/sendMail')
+let xl = require('excel4node');
  
 // Create a new instance of a Workbook class
-var wb = new xl.Workbook();
+let wb = new xl.Workbook();
  
 // Add Worksheets to the workbook
-var ws = wb.addWorksheet('Sheet 1');
-var ws2 = wb.addWorksheet('Sheet 2');
+let ws = wb.addWorksheet('Sheet 1');
+let ws2 = wb.addWorksheet('Sheet 2');
  
 // Create a reusable style
-var style = wb.createStyle({
+let style = wb.createStyle({
   font: {
     color: '#FF0800',
     size: 12,
@@ -42,6 +44,6 @@ ws.cell(3, 1)
   .style(style)
   .style({font: {size: 14}});
  
-wb.write(`paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
+// wb.write(`paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
 // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
 //  ws.write(`Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
