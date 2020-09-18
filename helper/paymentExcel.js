@@ -44,8 +44,8 @@ ws.cell(3, 1)
   .bool(true)
   .style(style)
   .style({font: {size: 14}});
-  wb.write(`paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
-  console.log(`paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`)
+  wb.write(`./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
+  console.log(`./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`)
   sendMail('req','error','unique_id')
 
 }
