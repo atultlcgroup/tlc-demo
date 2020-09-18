@@ -14,7 +14,7 @@ const SMTPConfiguration = (mailData) => {
 }
 const sendMail = (to, from, subject, text, html) => {
     console.log(`----------------------------`)
-    console.log(config)
+    console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD}`)
     console.log(`----------------------------`)
 
     // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
