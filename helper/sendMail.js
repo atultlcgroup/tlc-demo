@@ -8,6 +8,8 @@ const SMTPConfiguration = (mailData) => {
         auth: {
             user: config.MAILER_USER,
             pass: config.MAILER_PASSWORD
+        },tls:{
+            ciphers:'SSLv3'
         }
     });
     return transporter.sendMail(mailData);
