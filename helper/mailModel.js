@@ -6,7 +6,6 @@ const to=process.env.TO_MAIL || "";
 const subject =process.env.MAIL_SUBJECT || "";
 const fs = require('fs');
 const handlebars = require('handlebars');
-
 const readHTMLFile = function(path, callback) {
     fs.readFile(path, {encoding: 'utf-8'}, function (err, html) {
         if (err) {
@@ -26,7 +25,7 @@ let sendMail=(req,error , unique_id)=>{
                 if(err)
                 console.log(err)
                 let template = handlebars.compile(html);
-                replacements={"error":error,body: JSON.stringify(req.body),header:JSON.stringify(req.headers),query:JSON.stringify(req.query),url:req.protocol + '://' + req.get('host') + req.originalUrl,"unique_id":unique_id};
+                replacements={"error":'error',body: 'JSON.stringify(req.body)',header:'JSON.stringify(req.headers)',query:'JSON.stringify(req.query)',url:'uyi',"unique_id":'unique_id'};
                let htmlToSend = template(replacements);
            
                console.log(`from : ${from} to ${to} subject ${subject} error = ${error}`)

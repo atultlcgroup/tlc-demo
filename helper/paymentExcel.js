@@ -1,7 +1,8 @@
 
-let sendMail = require('./helper/mailModel').sendMail
+let sendMail = require('./mailModel').sendMail
 let xl = require('excel4node');
  
+let generateExcel = ()=>{
 // Create a new instance of a Workbook class
 let wb = new xl.Workbook();
  
@@ -47,5 +48,13 @@ ws.cell(3, 1)
 
   wb.write(`paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
   sendMail('req','error','unique_id')
+
+}
   // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
 //  ws.write(`Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
+
+
+module.exports={
+    
+    generateExcel
+}

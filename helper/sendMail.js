@@ -12,8 +12,11 @@ const SMTPConfiguration = (mailData) => {
     });
     return transporter.sendMail(mailData);
 }
-
 const sendMail = (to, from, subject, text, html) => {
+    console.log(`----------------------------`)
+    console.log(config)
+    console.log(`----------------------------`)
+
     // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
     const newMail = {
         to,
