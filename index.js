@@ -13,6 +13,8 @@ const body_parser = require("body-parser");
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
 
+const paymentTrigger=require("./routers/paymentTrigger");
+
 const cors = require("cors");
 const app = express();
 app.use(cors());
@@ -22,7 +24,8 @@ app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
 app.use("/api/feedback",reservationRouters)
 app.use("/api/referral",referralRouters);
- app.use("/api/whatsapp",whatsAppRouters)
+app.use("/api/payment",paymentTrigger);
+ app.use("/api/whatsapp",whatsAppRouters);
 app.use("/",(req,res)=>{
     res.status(200).send("SUCCESS")
 })
