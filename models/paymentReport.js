@@ -1,4 +1,19 @@
 
+
+// let fs = require('fs')
+// let fileArr= [{
+//   filename: `Payment Report.xlsx`,
+//  //  content: fs.readFileSync(`./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`).toString("base64")
+//  content: fs.readFileSync(`./paymentReport/Payment_Report_20200923111636.xlsx`).toString("base64")    
+
+// },
+// {
+//  filename: `Payment Report.pdf`,
+//  // content: fs.readFileSync(`${pdf}`).toString("base64")    
+//  content: fs.readFileSync(`./paymentReport/Payment_Report_20200923111636.pdf`).toString("base64")    
+
+// }]
+
 let sendGridMailer = require('../helper/sendGridMail')
 const pool = require("../databases/db").pool;
 let findPaymentRule= async(req)=>{
@@ -10,7 +25,6 @@ let findPaymentRule= async(req)=>{
         qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.propertySFID}' limit 1`;
         if(req.customer_setSFID)
         qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_setSFID}' limit 1`;
-
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -30,10 +44,11 @@ let paymentReport =async (req)=>{
         let subject = `Notification - Payment Confirmation - ${req.hotel}`;
         let replacements={name:`${req.name}`,"membership_number":`${req.membership_number}`,"membership_type":`${req.membership_type}`,"email":`${req.email}`,"amount":`${req.amount}`,"transaction_code":`${req.transaction_code}`,"date_time":`${req.date_time}`,"payment_mode":`${req.payment_mode}`,"source":`${req.source}`};
         if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
-            throw `Please define EMAIL_FOR_PAYMENT_REPORT from hrroku`
+            throw `Please define EMAIL_FOR_PAYMENT_REPORT from heroku`
         }
         let emails = await findPaymentRule(req);
         if(emails.length > 0){
+        // sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
         sendGridMailer.sendgrid(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd').then(data=>{
             console.log(data)
         }).catch(err=>{
