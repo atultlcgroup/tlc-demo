@@ -1,18 +1,11 @@
 
+let generatePdf = require("../helper/generatePdfForPayments")
+let generateExcel = require("../helper/generateExcelForPayments")
+let today = new Date();
+let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
+let month= `${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`
+let fs = require('fs')
 
-// let fs = require('fs')
-// let fileArr= [{
-//   filename: `Payment Report.xlsx`,
-//  //  content: fs.readFileSync(`./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`).toString("base64")
-//  content: fs.readFileSync(`./paymentReport/Payment_Report_20200923111636.xlsx`).toString("base64")    
-
-// },
-// {
-//  filename: `Payment Report.pdf`,
-//  // content: fs.readFileSync(`${pdf}`).toString("base64")    
-//  content: fs.readFileSync(`./paymentReport/Payment_Report_20200923111636.pdf`).toString("base64")    
-
-// }]
 
 let sendGridMailer = require('../helper/sendGridMail')
 const pool = require("../databases/db").pool;
@@ -63,6 +56,56 @@ let paymentReport =async (req)=>{
     }
 }
 
+
+let getPaymentDetailsData = async (type) => {
+    try {
+            console.log("get peyment datails data !");
+            let subject = ``
+            console.log(`${subject}`)
+            if (type =='EOD'){
+                subject=`Payment report for ${day}`;
+            }else{
+                subject=`Pyament report for ${month}`
+            }
+            console.log(subject)
+            let pdfFile = await generatePdf.generatePDF()
+            let excelFile = await generateExcel.generateExcel();
+            let fileArr = getFileArr(excelFile,pdfFile);
+
+            sendGridMailer.sendgridAttachement('atul.srivastava@tlcgroup.com',process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,{},'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
+                console.log(data)
+            }).catch(err=>{
+                console.log(err)
+            })
+
+            
+            return `${fileArr}`;
+         } catch (e) {
+             console.log(e)
+        return e;
+    }
+
+}
+
+
+
+let getFileArr = (excelFile,pdfFile)=>{
+    let fileArr= [{
+            filename: `Payment Report.xlsx`,
+            //  content: fs.readFileSync(`./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`).toString("base64")
+            content: fs.readFileSync(`${excelFile}`).toString("base64")    
+    
+            },
+            {
+                filename: `Payment Report.pdf`,
+                // content: fs.readFileSync(`${pdf}`).toString("base64")    
+                content: fs.readFileSync(`${pdfFile}`).toString("base64")    
+                }
+            ]
+            return fileArr;
+    }
+    
 module.exports={
-    paymentReport
+    paymentReport,
+    getPaymentDetailsData
 }
