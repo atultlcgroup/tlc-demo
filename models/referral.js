@@ -1,8 +1,10 @@
-
 const pool = require("../databases/db").pool
 let createOffers=(benefit_id,membership_number)=>{
     return new Promise(async(resolve,reject)=>{
         try{
+            console.log(`INSERT INTO tlcsalesforce.membership_offers__c(
+                currencyisocode, customer_set_offer__c, offer_type__c, membership2__r__membership_number__c, status__c)
+                VALUES ((select currencyisocode from tlcsalesforce.membershiptypeoffer__c where sfid = '${benefit_id}'),'${benefit_id}',(select offer_type__c from tlcsalesforce.membershiptypeoffer__c where sfid = '${benefit_id}'),'${membership_number}','Available')`)
            if(membership_number)
              insertOffer = await pool.query(`INSERT INTO tlcsalesforce.membership_offers__c(
                 currencyisocode, customer_set_offer__c, offer_type__c, membership2__r__membership_number__c, status__c)
@@ -80,11 +82,10 @@ let getRefferalData2=  (data,header)=>{
                 memberBenefit=header.memberid;
                 
             }
-
-            await pool.query(`INSERT INTO tlcsalesforce.referral_conversion__c(
-                counter_party__c, rule_used__c, member_type__c, referred_date__c, member__c, name, benefit__c,  createddate, agent__c,Is_receiver_benefit_gifted__c)
-               VALUES ('${conuterParty}','${d.sfid2}', '${d.member_type__c}', now(),'${memberBenefit}', '${d.transaction_type__c}', '${d.sfid2}', now(), '${data.agent}','${validateResult[0].gift_referral_benefit__c}')`);
-   
+            d.agent = d.agent ? d.agent : null
+            let pushIntoRefferlConersion=await pool.query(`INSERT INTO tlcsalesforce.referral_conversion__c(
+                counter_party__c, rule_used__c, member_type__c, referred_date__c, member__r__member_id__c, name, benefit__c,  createddate, agent__c)
+                VALUES ('${validateResult[0].member_id__c}','${d.sfid2}', '${d.member_type__c}', now(),'${header.memberid}', '${d.transaction_type__c}', '${d.sfid2}', now(), '${data.agent}')`);
             // await pool.query(`INSERT INTO tlcsalesforce.referral_conversion__c(
             //              counter_party__c, rule_used__c, member_type__c, referred_date__c, member__c, name, benefit__c,  createddate, agent__c,Is_receiver_benefit_gifted__c)
             //             VALUES ('${validateResult[0].member_id__c}','${d.sfid2}', '${d.member_type__c}', now(),'${header.memberid}', '${d.transaction_type__c}', '${d.sfid2}', now(), '${data.agent}','${validateResult[0].gift_referral_benefit__c}')`);
@@ -102,8 +103,12 @@ let getRefferalData2=  (data,header)=>{
 
 let fetchReferralProgramAndRefferalBenefits=async(data,header)=>{
     try{
-    console.log(`select p1.name,transaction_type__c,end_date__c,start_date__c,program__r__unique_identifier__c,p1.sfid sfid1,p2.isdeleted,benefit__c,member_type__c,p2.sfid sfid2 from tlcsalesforce.referral_program__c p1 inner join tlcsalesforce.referral_benefits__C p2 on p1.sfid=p2.referral_program__c where p1.transaction_type__c='${data.transactionType}' and program__r__unique_identifier__c='${header.programid}' and p1.start_date__c::date <= NOW()::date and end_date__c >= NOW()::date`);    
-    let resultOfJoinBenefitAndProgarm=await pool.query(`select p1.name,transaction_type__c,end_date__c,start_date__c,program__r__unique_identifier__c,p1.sfid sfid1,p2.isdeleted,benefit__c,member_type__c,p2.sfid sfid2 from tlcsalesforce.referral_program__c p1 inner join tlcsalesforce.referral_benefits__C p2 on p1.sfid=p2.referral_program__c where p1.transaction_type__c='${data.transactionType}' and program__r__unique_identifier__c='${header.programid}' and p1.start_date__c::date <= NOW()::date and end_date__c >= NOW()::date`);
+    let resultOfJoinBenefitAndProgarm=await pool.query(`select p1.name,transaction_type__c,end_date__c,start_date__c,program__r__unique_identifier__c,p1.sfid sfid1
+    ,p2.isdeleted,benefit__c,member_type__c,p2.sfid sfid2 from   tlcsalesforce.membership_type_referral_mapping__c m inner join tlcsalesforce.referral_program__c p1  on p1.sfid =  m.referral_program__c  inner join
+    tlcsalesforce.referral_benefits__C p2 on p1.sfid=p2.referral_program__c 
+    where p1.transaction_type__c='${data.transactionType}' and program__r__unique_identifier__c='${header.program_id}'
+    and p1.start_date__c::date <= NOW()::date and p1.end_date__c >= NOW()::date 
+    and m.membership_type__c = '${data.membershipTypeId}'`);
     let finalResultOfJoinBenefitAndProgarm=resultOfJoinBenefitAndProgarm ? resultOfJoinBenefitAndProgarm.rows : [];
     return finalResultOfJoinBenefitAndProgarm
     }catch(e){

@@ -18,8 +18,11 @@ let getRefferalData2=(req,res)=>{
     }else if(!req.headers.memberid){
         res.status(401).send({code: 401, message: 'missing memberId'})
         return
-    }else if(!req.headers.programid){
+    }else if(!req.headers.program_id){
         res.status(401).send({code: 401, message: 'missing programId'})
+        return
+    }else if(!req.body.membershipTypeId){
+        res.status(401).send({code: 401, message: 'missing membershipTypeId'})
         return
     }
     refferalModel.getRefferalData2(req.body,req.headers).then(data=>{

@@ -1,19 +1,26 @@
 const express = require("express");
 const dotenv = require('dotenv');
+const cron = require("node-cron");
 
 dotenv.config();
 //const scheduler = require('./helper/scheduler');
 const port = process.env.PORT;
 const posRouters= require("./routers/posCheque");
+
+let paymentReport = require("./routers/paymentReport")
+
+
+//const generateExcel = require("./helper/paymentExcel")
 const reservationRouters= require("./routers/reservation");
+const paymentRouters= require("./routers/paymentLink");
+
 const excelRouters = require("./routers/pos");
 const body_parser = require("body-parser");
-
-
+const FandBSummary = require("./routers/FandBSummary")
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
 
-const paymentTrigger=require("./routers/paymentTrigger");
+
 
 const cors = require("cors");
 const app = express();
@@ -23,9 +30,19 @@ app.use(body_parser.json({limit: '50mb'}));
 app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
 app.use("/api/feedback",reservationRouters)
+app.use("/api/paymentLink",paymentRouters)
 app.use("/api/referral",referralRouters);
-app.use("/api/payment",paymentTrigger);
  app.use("/api/whatsapp",whatsAppRouters);
+app.use("/api/FandBSummary",FandBSummary);
+cron.schedule("* * * * *", function() {
+    console.log("running a task every minute index");
+    app.use("/api/payment",paymentReport)
+  });
+
+
+// const check = require("./check")
+// app.post("/sendMsg",check.sendMsg)
+ app.use("/api/whatsapp",whatsAppRouters)
 app.use("/",(req,res)=>{
     res.status(200).send("SUCCESS")
 })
