@@ -39,14 +39,16 @@ let scheduleTasksForEachPaymentReport=(scheduledTime)=> schedule.scheduleJob(sch
 
 let scheduleTasksForEOD=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
   console.log(`=================   SCHEDULER START EOD   ========================`)
- let data= await paymentReport.reportForEODandEOM('EOD')
+  let req = {type:'EOD'}
+ let data= await paymentReport.reportForEODandEOM(req)
  console.log(data) 
  console.log(`================= payment report for EOD Success=============`)
 });
 
 let scheduleTasksForEOM =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
   console.log(`=================   SCHEDULER START EOM   ========================`)
-  let data =await paymentReport.reportForEODandEOM('EOM')
+  let req = {type:'EOD'}
+  let data =await paymentReport.reportForEODandEOM(req)
   console.log(data) 
   console.log(`================= payment report for EOM Success =============`)
 });

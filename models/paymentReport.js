@@ -6,7 +6,6 @@ let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('d
 let month= `${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`
 let fs = require('fs')
 let sendGridMailer = require('../helper/sendGridMail');
-const { text } = require("body-parser");
 const pool = require("../databases/db").pool;
 let findPaymentRule= async(req)=>{
     try{
@@ -63,9 +62,7 @@ let paymentReport =async (req)=>{
         Left Join tlcsalesforce.tax_breakup__c
         On tax_breakup__c.tax_master__c = tax_master__c.sfid
         Left Join tlcsalesforce.payment_email_rule__c
-        On payment_email_rule__c.customer_set__c = membershiptype__c.sfid 
-        
-        
+        On payment_email_rule__c.customer_set__c = membershiptype__c.sfid      
         where payment__c.createddate >= current_timestamp - interval '15 minutes'
         AND payment_bifurcation__c.account_number__c = 'SECOND'
         AND 
@@ -101,9 +98,102 @@ let paymentReport =async (req)=>{
 }
 
 
+let queryForEOD=async()=>{
+    try{
+        let query=await pool.query(`Select  distinct payment__c.membership__r__membership_number__c,  firstname, lastname, membershiptype__c.name membership_type_name,
+        membershiptype__c.sfid membership_type_id, 
+        Case when payment_for__c = 'New Membership' OR payment_for__c = 'Add-On'
+        Then 'Fresh'
+        when  payment_for__c = 'Renewal'
+        THEN 'Renewal'
+        Else
+            'Other'
+        END as FreshRenewal, payment__c.createddate,transcationCode__c, payment__c.transaction_id__c,
+        GST_details__c, manager_email__c, account.billingcountry,account.billingstate, account.billingcity,account.billingstreet,
+        account.billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee, tax_breakup__c.name breakup
+        from 
+        tlcsalesforce.payment__c
+        Inner Join tlcsalesforce.account
+        On account.sfid = payment__c.account__c
+        Inner Join tlcsalesforce.payment_bifurcation__c
+        On payment_bifurcation__c.payment__c = payment__c.sfid
+        Left Join tlcsalesforce.membership__c On 
+        payment__c.membership__c = membership__c.sfid
+        Left Join tlcsalesforce.membershiptype__c On
+        membership__c.customer_set__c = membershiptype__c.sfid
+        Left join tlcsalesforce.tax_master__c
+        On membershiptype__c.tax_master__c = tax_master__c.sfid
+        Left Join tlcsalesforce.tax_breakup__c
+        On tax_breakup__c.tax_master__c = tax_master__c.sfid
+        Left Join tlcsalesforce.payment_email_rule__c
+        On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
+        
+        
+        where date(payment__c.createddate) = current_date
+        AND payment_bifurcation__c.account_number__c = 'SECOND'
+        AND 
+        (payment__c.payment_status__c = 'CONSUMED' OR 
+        payment__c.payment_status__c = 'SUCCESS')
+        
+        `);
+        let result = query ? query.rows : []
+        return result;
+
+    }catch(e){
+        return [];
+    }
+}
+
+let queryForEOM = async()=>{
+     try{
+         let qry=await  pool.query(`Select  distinct payment__c.membership__r__membership_number__c,  firstname, lastname, membershiptype__c.name membership_type_name,
+         membershiptype__c.sfid membership_type_id, 
+         Case when payment_for__c = 'New Membership' OR payment_for__c = 'Add-On'
+         Then 'Fresh'
+         when  payment_for__c = 'Renewal'
+         THEN 'Renewal'
+         Else
+             'Other'
+         END as FreshRenewal, createddate,transcationCode__c, payment__c.transaction_id__c,
+         GST_details__c, manager_email__c, account.billingcountry,account.billingstate, account.billingcity,account.billingstreet,
+         account.billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee, tax_breakup__c.name breakup
+         from 
+         tlcsalesforce.payment__c
+         Inner Join tlcsalesforce.account
+         On account.sfid = payment__c.account__c
+         Inner Join tlcsalesforce.payment_bifurcation__c
+         On payment_bifurcation__c.payment__c = payment__c.sfid
+         Left Join tlcsalesforce.membership__c On 
+         payment__c.membership__c = membership__c.sfid
+         Left Join tlcsalesforce.membershiptype__c On
+         membership__c.customer_set__c = membershiptype__c.sfid
+         Left join tlcsalesforce.tax_master__c
+         On membershiptype__c.tax_master__c = tax_master__c.sfid
+         Left Join tlcsalesforce.tax_breakup__c
+         On tax_breakup__c.tax_master__c = tax_master__c.sfid
+         Left Join tlcsalesforce.payment_email_rule__c
+         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
+         
+         
+         where payment__c.createddate = current_date - interval '1 month'
+         AND payment_bifurcation__c.account_number__c = 'SECOND'
+         AND 
+         (payment__c.payment_status__c = 'CONSUMED' OR 
+         payment__c.payment_status__c = 'SUCCESS')
+         
+         `)
+         let result = query ? query.rows : []
+         return result;
+     }catch(e){
+         return [];
+     }
+}
+
+
 let reportForEODandEOM = async (req) => {
     return new Promise(async (resolve,reject)=>{
     try {
+            
             console.log("get peyment datails data !");         
             let subject =req.type =='EOD' ? `Payment report for ${day}`:`Pyament report for ${month}`
             console.log(subject)
