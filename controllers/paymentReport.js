@@ -20,11 +20,14 @@ let paymentReport = (req , res)=>{
 }
 
 
-let getPaymentData=(req,res)=>{  
-    let type =req.query.type || 'EOD';
+let reportForEODandEOM=(req,res)=>{ 
 
-          
-    paymentModel.getPaymentDetailsData(type).then(data=>{
+    req.body.type =req.body.type || 'EOD';
+    if(!req.body.propertySFID && !req.body.customer_setSFID){
+        res.status(401).json({code : 401 , message : `Please provide either propertySFID or customer_setSFID`})
+        return ;  
+    }
+    paymentModel.reportForEODandEOM(req.body).then(data=>{
             res.status(200).json({code: 200, message: data});
     }).catch(err=>{
         res.status(500).json({code: 500, message: `${err}`});
@@ -33,5 +36,5 @@ let getPaymentData=(req,res)=>{
 
 module.exports={
     paymentReport,
-    getPaymentData
+    reportForEODandEOM
 }

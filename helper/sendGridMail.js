@@ -5,8 +5,6 @@ let addSubstitutions = function (mail, variables) {
 }
 
 
-
-
 const sendgridConfiguration = (mailData, params, templateID) => {
     let apiKey = process.env.SENDGRID_API_KEY || "";
     console.log(apiKey)

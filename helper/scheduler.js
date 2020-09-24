@@ -1,4 +1,5 @@
 const schedule = require('node-schedule');
+const paymentReport=require('../models/paymentReport');
 const FandBSummary = require('../models/FandBSummary')
 let posModel = require('../models/pos')
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
@@ -25,3 +26,45 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == true || process.env.IS_SCHEDULER_
   console.log(`FNB`)
   scheduleTasksForFNB(process.env.SCHEDULER_TIME_FOR_FNB)
 }
+
+//Scheduler for Payment report
+
+let scheduleTasksForEachPaymentReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR EACH PAYMENT REPORT   ========================`)
+ let data= await paymentReport.paymentReport('')
+ console.log(data) 
+ console.log(`================= payment report for each payment: Success=============`)
+});
+
+
+let scheduleTasksForEOD=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START EOD   ========================`)
+ let data= await paymentReport.reportForEODandEOM('EOD')
+ console.log(data) 
+ console.log(`================= payment report for EOD Success=============`)
+});
+
+let scheduleTasksForEOM =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START EOM   ========================`)
+  let data =await paymentReport.reportForEODandEOM('EOM')
+  console.log(data) 
+  console.log(`================= payment report for EOM Success =============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_EACH_PAYMENT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_EACH_PAYMENT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_EACH_PAYMENT == 'TRUE')
+{
+  console.log(`payment report for each payment`);
+  scheduleTasksForEachPaymentReport(process.env.SECHEDULER_TIME_FOR_EACH_PAYMENT_REPORT);
+}
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOD == true || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOD == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOD == 'TRUE')
+{
+  console.log(`payment report for EOD`);
+  scheduleTasksForEOD(process.env.SCHEDULER_TIME_FOR_PAYMENT_REPORT_EOD);
+}
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == true || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'TRUE')
+{
+  console.log(`payment report for EOM`);
+  scheduleTasksForEOM(process.env.SCHEDULER_TIME_FOR_PAYMENT_REPORT_EOM);
+}
+
