@@ -44,10 +44,9 @@ let scheduleTasksForEOD=(scheduledTime)=> schedule.scheduleJob(scheduledTime, as
  console.log(data) 
  console.log(`================= payment report for EOD Success=============`)
 });
-
 let scheduleTasksForEOM =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
   console.log(`=================   SCHEDULER START EOM   ========================`)
-  let req = {type:'EOD'}
+  let req = {type:'EOM'}
   let data =await paymentReport.reportForEODandEOM(req)
   console.log(data) 
   console.log(`================= payment report for EOM Success =============`)
