@@ -32,7 +32,6 @@ let findPaymentRule= async(req)=>{
         qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' limit 1`;
        
 
-        console.log(`-----------`)
         console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
@@ -82,18 +81,18 @@ let paymentReport =async (req)=>{
         On tax_breakup__c.tax_master__c = tax_master__c.sfid
         Left Join tlcsalesforce.payment_email_rule__c
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid  
-        limit 2    
-        --where payment__c.createddate >= current_timestamp - interval '15 minutes'
-        --AND payment_bifurcation__c.account_number__c = 'SECOND'
-       -- AND 
-       -- (payment__c.payment_status__c = 'CONSUMED' OR 
-       -- payment__c.payment_status__c = 'SUCCESS')
+        --limit 2    
+        where payment__c.createddate >= current_timestamp - interval '15 minutes'
+        AND payment_bifurcation__c.account_number__c = 'SECOND'
+       AND 
+        (payment__c.payment_status__c = 'CONSUMED' OR 
+        payment__c.payment_status__c = 'SUCCESS')
         `)
         let resultForPaymentsOf15Minutes = getPaymentsOf15Minutes ? getPaymentsOf15Minutes.rows : []
         console.log(resultForPaymentsOf15Minutes)
         
         resultForPaymentsOf15Minutes.map(async req=>{
-            req.property_sfid ='a0D0k000009eJcIEAU'
+            // req.property_sfid ='a0D0k000009eJcIEAU'
         let emails = await findPaymentRule(req);
         if(emails.length > 0){
         let hotelName = req.hotel_name ? req.hotel_name : '';
@@ -158,12 +157,12 @@ let queryForEOD=async()=>{
         Left Join tlcsalesforce.payment_email_rule__c
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
         
-        limit 2
-        --where date(payment__c.createddate) = current_date
-        --AND payment_bifurcation__c.account_number__c = 'SECOND'
-        --AND 
-        --(payment__c.payment_status__c = 'CONSUMED' OR 
-        --payment__c.payment_status__c = 'SUCCESS')
+        --limit 2
+        where date(payment__c.createddate) = current_date
+        AND payment_bifurcation__c.account_number__c = 'SECOND'
+        AND 
+        (payment__c.payment_status__c = 'CONSUMED' OR 
+        payment__c.payment_status__c = 'SUCCESS')
         
         `);
         let result = query ? query.rows : []
@@ -240,12 +239,12 @@ let queryForEOM = async()=>{
          Left Join tlcsalesforce.payment_email_rule__c
          On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
          
-         limit 2
-         --where payment__c.createddate = current_date - interval '1 month'
-         --AND payment_bifurcation__c.account_number__c = 'SECOND'
-         --AND 
-         --(payment__c.payment_status__c = 'CONSUMED' OR 
-         --payment__c.payment_status__c = 'SUCCESS')
+         --limit 2
+         where payment__c.createddate = current_date - interval '1 month'
+         AND payment_bifurcation__c.account_number__c = 'SECOND'
+         AND 
+         (payment__c.payment_status__c = 'CONSUMED' OR 
+         payment__c.payment_status__c = 'SUCCESS')
          `)
          let result = qry ? qry.rows : []
          let customerSetData = await filterDataBasedOnCustometSet(result)
@@ -269,7 +268,7 @@ let reportForEODandEOM = async (req) => {
                 console.log(key)
                 console.log(value)
                 req.customer_set_sfid = key;
-                req.customer_set_sfid = 'a0f0k000003FSKyAAO';
+                // req.customer_set_sfid = 'a0f0k000003FSKyAAO';
                     console.log("get peyment datails data !");         
                     let subject =req.type =='EOD' ? `Payment report for ${day}`:`Pyament report for ${month}`
                     console.log(subject)
