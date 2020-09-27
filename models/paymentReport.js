@@ -1,11 +1,13 @@
 
 let generatePdf = require("../helper/generatePdfForPayments")
 let generateExcel = require("../helper/generateExcelForPayments")
+let sendMail= require("../helper/mailModel")
 let today = new Date();
 let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 let month= `${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`
 let fs = require('fs')
-let sendGridMailer = require('../helper/sendGridMail');
+// let sendGridMailer = require('../helper/sendGridMail');
+
 const pool = require("../databases/db").pool;
 let formatDate=(date)=>{
     var hours = date.getHours();
@@ -20,13 +22,18 @@ let formatDate=(date)=>{
   
 let findPaymentRule= async(req)=>{
     try{
+        console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
-        if(req.propertySFID && req.customer_setSFID)
-        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_setSFID}' limit 1`;
-        if(req.propertySFID)
+        if(req.property_sfid && req.customer_set_sfid)
+        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' limit 1`;
+        if(req.property_sfid)
         qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' limit 1`;
-        if(req.customer_setSFID)
-        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_setSFID}' limit 1`;
+        if(req.customer_set_sfid)
+        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' limit 1`;
+       
+
+        console.log(`-----------`)
+        console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -37,6 +44,7 @@ let findPaymentRule= async(req)=>{
         console.log(resultArray)
         return resultArray
     }catch(e){
+        console.log(e)
         return [];
     }
 }
@@ -74,35 +82,40 @@ let paymentReport =async (req)=>{
         On tax_breakup__c.tax_master__c = tax_master__c.sfid
         Left Join tlcsalesforce.payment_email_rule__c
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid  
-        --limit 2    
-        where payment__c.createddate >= current_timestamp - interval '15 minutes'
-        AND payment_bifurcation__c.account_number__c = 'SECOND'
-        AND 
-        (payment__c.payment_status__c = 'CONSUMED' OR 
-        payment__c.payment_status__c = 'SUCCESS')
+        limit 2    
+        --where payment__c.createddate >= current_timestamp - interval '15 minutes'
+        --AND payment_bifurcation__c.account_number__c = 'SECOND'
+       -- AND 
+       -- (payment__c.payment_status__c = 'CONSUMED' OR 
+       -- payment__c.payment_status__c = 'SUCCESS')
         `)
         let resultForPaymentsOf15Minutes = getPaymentsOf15Minutes ? getPaymentsOf15Minutes.rows : []
         console.log(resultForPaymentsOf15Minutes)
+        
         resultForPaymentsOf15Minutes.map(async req=>{
+            req.property_sfid ='a0D0k000009eJcIEAU'
         let emails = await findPaymentRule(req);
         if(emails.length > 0){
         let hotelName = req.hotel_name ? req.hotel_name : '';
         let subject = `Notification - Payment Confirmation - ${hotelName}`;
-        let dateFormat1 = (req.createddate?req.createddate:  "")
-        let dateTime1 = ``
-        if(formatDate){
-            dateTime1 = formatDate(dateFormat1)
-        }
-        let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number_c ?membership_number_c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
+        // let dateFormat1 = (req.createddate?req.createddate:  "")
+        // let dateTime1 = ``
+        // if(formatDate){
+        //     dateTime1 = formatDate(dateFormat1)
+        // }
+        // let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number_c ?membership_number_c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
         if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
                  console.log(`Please define EMAIL_FOR_PAYMENT_REPORT from heroku`)
         }else{
+
+            sendMail.sendMailForEachPayment(req,emails , subject)
         // sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
-            sendGridMailer.sendgrid(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd').then(data=>{
-            console.log(data)
-            }).catch(err=>{
-            console.log(err)
-         })
+       //use to send mail for each payment by sendgrid
+        //     sendGridMailer.sendgrid(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd').then(data=>{
+        //     console.log(data)
+        //     }).catch(err=>{
+        //     console.log(err)
+        //  })
         }
         }else{
             console.log(`Hotel/TLC emails not found!`)
@@ -145,12 +158,12 @@ let queryForEOD=async()=>{
         Left Join tlcsalesforce.payment_email_rule__c
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
         
-        --limit 2
-        where date(payment__c.createddate) = current_date
-        AND payment_bifurcation__c.account_number__c = 'SECOND'
-        AND 
-        (payment__c.payment_status__c = 'CONSUMED' OR 
-        payment__c.payment_status__c = 'SUCCESS')
+        limit 2
+        --where date(payment__c.createddate) = current_date
+        --AND payment_bifurcation__c.account_number__c = 'SECOND'
+        --AND 
+        --(payment__c.payment_status__c = 'CONSUMED' OR 
+        --payment__c.payment_status__c = 'SUCCESS')
         
         `);
         let result = query ? query.rows : []
@@ -227,12 +240,12 @@ let queryForEOM = async()=>{
          Left Join tlcsalesforce.payment_email_rule__c
          On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
          
-         --limit 2
-         where payment__c.createddate = current_date - interval '1 month'
-         AND payment_bifurcation__c.account_number__c = 'SECOND'
-         AND 
-         (payment__c.payment_status__c = 'CONSUMED' OR 
-         payment__c.payment_status__c = 'SUCCESS')
+         limit 2
+         --where payment__c.createddate = current_date - interval '1 month'
+         --AND payment_bifurcation__c.account_number__c = 'SECOND'
+         --AND 
+         --(payment__c.payment_status__c = 'CONSUMED' OR 
+         --payment__c.payment_status__c = 'SUCCESS')
          `)
          let result = qry ? qry.rows : []
          let customerSetData = await filterDataBasedOnCustometSet(result)
@@ -255,33 +268,38 @@ let reportForEODandEOM = async (req) => {
             for(let [key,value] of Object.entries(finalData)){
                 console.log(key)
                 console.log(value)
-                req.customer_setSFID = key;
-                // req.customer_setSFID = 'a0f0k000003FSKyAAO';
+                req.customer_set_sfid = key;
+                req.customer_set_sfid = 'a0f0k000003FSKyAAO';
                     console.log("get peyment datails data !");         
                     let subject =req.type =='EOD' ? `Payment report for ${day}`:`Pyament report for ${month}`
                     console.log(subject)
                     let emails = await findPaymentRule(req);
-                    let templateId = req.type == 'EOD' ? 'ac3c9b94-d2a9-4872-ba55-92b784aa5a2b' : 'f2c3746e-607c-4c7c-8f5c-7c75860e30e0'
+                    // let templateId = req.type == 'EOD' ? 'ac3c9b94-d2a9-4872-ba55-92b784aa5a2b' : 'f2c3746e-607c-4c7c-8f5c-7c75860e30e0'
                     let text = req.type == 'EOD' ? `Please find attachments for payment report of ${day}.` : `Please find attachments for payment report of ${month}.`
-                    let replacements={text : `${text}`};
-                    console.log(templateId)
+                    // let replacements={text : `${text}`};
+                    // console.log(templateId)
                     if(emails.length == 0 ){
                         console.log(`Hotel/TLC emails not found!`)        
                     }else{
                         let pdfFile = await generatePdf.generatePDF(value)
                         let excelFile = await generateExcel.generateExcel(value);
-                        console.log(excelFile)
-                        let fileArr = getFileArr(excelFile,pdfFile);
-                        await sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,templateId,fileArr).then(data=>{
-                            console.log(data)
-                            resolve(`Success`)
-                            return
-                        }).catch(err=>{
-                            console.log(`${err}`)
-                            reject(`${err}`)
-                            return
-                        })  
-                        console.log(`${fileArr}`);
+                        // console.log(excelFile)
+                        // let fileArr = getFileArr(excelFile,pdfFile);
+                     
+                        req.type == 'EOD'?
+                          sendMail.sendEODPaymentReport(excelFile,pdfFile , emails):sendMail.sendEOMPaymentReport(excelFile,pdfFile , emails)
+
+                        //To send emails for payment report for eod report
+                        // await sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,templateId,fileArr).then(data=>{
+                        //     console.log(data)
+                        //     resolve(`Success`)
+                        //     return
+                        // }).catch(err=>{
+                        //     console.log(`${err}`)
+                        //     reject(`${err}`)
+                        //     return
+                        // })  
+                        // console.log(`${fileArr}`);
                     }
                     
             }

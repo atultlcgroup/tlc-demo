@@ -1,5 +1,7 @@
+
+
 const express = require("express");
-const dotenv = require('dotenv');
+let  dotenv = require('dotenv');
 
 dotenv.config();
 const scheduler = require('./helper/scheduler');
@@ -9,7 +11,6 @@ const posRouters= require("./routers/posCheque");
 let paymentReport = require("./routers/paymentReport")
 
 
-// const generateExcel = require("./helper/paymentExcel")
 const reservationRouters= require("./routers/reservation");
 const paymentRouters= require("./routers/paymentLink");
 

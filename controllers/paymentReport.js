@@ -5,8 +5,8 @@ let paymentReport = (req , res)=>{
             res.status(401).json({code : 401 , message : `Invalid Inputs`})
             return ;
         }
-        if(!req.body.propertySFID && !req.body.customer_setSFID){
-            res.status(401).json({code : 401 , message : `Please provide either propertySFID or customer_setSFID`})
+        if(!req.body.property_sfid && !req.body.customer_set_sfid){
+            res.status(401).json({code : 401 , message : `Please provide either property_sfid or customer_set_sfid`})
             return ;  
         }
         paymentModel.paymentReport(req.body).then(data=>{
@@ -23,8 +23,8 @@ let paymentReport = (req , res)=>{
 let reportForEODandEOM=(req,res)=>{ 
 
     req.body.type =req.body.type || 'EOD';
-    if(!req.body.propertySFID && !req.body.customer_setSFID){
-        res.status(401).json({code : 401 , message : `Please provide either propertySFID or customer_setSFID`})
+    if(!req.body.property_sfid && !req.body.customer_set_sfid){
+        res.status(401).json({code : 401 , message : `Please provide either property_sfid or customer_set_sfid`})
         return ;  
     }
     paymentModel.reportForEODandEOM(req.body).then(data=>{

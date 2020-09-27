@@ -51,9 +51,8 @@ ws.cell(3, 1)
 }
   // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
 //  ws.write(`Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);
+generateExcel()
+// module.exports={
 
-
-module.exports={
-
-    generateExcel
-}
+//     generateExcel
+// }
