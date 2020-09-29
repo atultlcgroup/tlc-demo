@@ -154,7 +154,7 @@ let paymentReport =async (req)=>{
             (payment__c.createddate >=  '${lastRunTime}'::timestamp
             AND payment_bifurcation__c.account_number__c = 'SECOND'
             )
-            OR (payment_report_log.email_status = 'FAILED')
+            OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EPR')
             )
             AND 
             (payment__c.payment_status__c = 'CONSUMED' OR 
@@ -248,7 +248,7 @@ let queryForEOD=async()=>{
               AND payment_bifurcation__c.account_number__c = 'SECOND'
                
               )
-              OR (payment_report_log.email_status = 'FAILED')
+              OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EODPR')
               )
               AND 
                 (payment__c.payment_status__c = 'CONSUMED' OR 
@@ -355,7 +355,7 @@ let queryForEOM = async()=>{
                  AND payment_bifurcation__c.account_number__c = 'SECOND'
                 
                  )
-                 OR (payment_report_log.email_status = 'FAILED')
+                 OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EOMPR') 
                  )
              AND 
                 (payment__c.payment_status__c = 'CONSUMED' OR 
