@@ -1,6 +1,8 @@
 let  dotenv = require('dotenv');
 dotenv.config();
 const sendmail = require('./sendMail')
+const pool = require("../databases/db").pool;
+
 // const config = require('../config').ENV_OBJ
 
 const from=process.env.FROM_MAIL || "";
@@ -21,6 +23,11 @@ let formatDate=(date)=>{
     var strTime = hours + ':' + minutes + ' ' + ampm;
     return (`${String(date.getDate()).padStart(2, '0')} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()} ${strTime}`);
   }
+
+
+
+
+  
 
 
 const readHTMLFile = function(path, callback) {
@@ -58,7 +65,21 @@ let sendMail=(req,error , unique_id)=>{
             }
 
 
-let sendEODPaymentReport=(file,pdf,emails)=>{
+
+            let updatePayentLog=(transactionIdArr,status)=>{
+                try{
+                    for(a of transactionIdArr){
+                        pool.query(`UPDATE tlcsalesforce.payment_report_log
+                        SET  email_status='${status}' 
+                        WHERE transaction_id='${a}'`)  ;
+                    }
+                 console.log(`success`)
+                }catch(e){
+                    console.log(`Got error in insertPayentLog function. Error:${e}`)
+                }
+            }
+
+let sendEODPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
     try{
         readHTMLFile(__dirname + `/Payment_Report_For_EOD.html`, function(err, html) {
             console.log('hi')
@@ -72,10 +93,13 @@ let sendEODPaymentReport=(file,pdf,emails)=>{
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} Pdf:${pdf}`)
             sendmail.smtpAttachment(emails, fromEmailForPyament , subjectForEODPayentReport,`htmlToSend` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
+                updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
+
                 // res.status(200).send(`email sent from: ${from} to: ${to}`)
     }).catch((err)=>{
         // res.status(500).send(`${JSON.stringify(err)}`)
+        updatePayentLog(transactionIdsArr,'FAILED')
         console.log(err)
         console.log(`Email snet has err :${JSON.stringify(err)}`)
     })
@@ -87,7 +111,7 @@ let sendEODPaymentReport=(file,pdf,emails)=>{
     }
 }
 
-let sendEOMPaymentReport=(file,pdf,emails)=>{
+let sendEOMPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
     try{
    
         readHTMLFile(__dirname + `/Payment_Report_For_EOM.html`, function(err, html) {
@@ -102,10 +126,13 @@ let sendEOMPaymentReport=(file,pdf,emails)=>{
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} pdf:${pdf}`)
             sendmail.smtpAttachment(emails, fromEmailForPyament , subjectForEODPayentReport,`htmlToSend` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
-        console.log(`Email Sent Successfully`)
+                updatePayentLog(transactionIdsArr,'SUCCESS')
+
+                console.log(`Email Sent Successfully`)
         // res.status(200).send(`email sent from: ${from} to: ${to}`)
     }).catch((err)=>{
         // res.status(500).send(`${JSON.stringify(err)}`)
+        updatePayentLog(transactionIdsArr,'FAILED')
         console.log(err)
         console.log(`Email snet has err :${JSON.stringify(err)}`)
     })
@@ -117,7 +144,7 @@ let sendEOMPaymentReport=(file,pdf,emails)=>{
     }
 }
 
-let sendMailForEachPayment = async(req,toEmails, emailSubject)=>{
+let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>{
     try{
         readHTMLFile(__dirname + `/Payment_Report_For_Each_Payment.html`, function(err, html) {
             console.log('hi')
@@ -132,11 +159,17 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject)=>{
             }
             let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number_c ?membership_number_c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
             let htmlToSend = template(replacements);
-            sendmail.smtp(toEmails, fromEmailForPyament , emailSubject,`htmlToSend` , `${htmlToSend}`).then((data)=>{
-            console.log(`Email Sent Successfully`)
+            sendmail.smtp(toEmails, fromEmailForPyament , emailSubject,`htmlToSend` , `${htmlToSend}`).then(async(data)=>{
+                pool.query(`UPDATE tlcsalesforce.payment_report_log
+                SET  email_status='SUCCESS' 
+                WHERE transaction_id='${transaction_id}'`)  
+                                console.log(`Email Sent Successfully`)
         // res.status(200).send(`email sent from: ${from} to: ${to}`)
-    }).catch((err)=>{
+    }).catch(async(err)=>{
         // res.status(500).send(`${JSON.stringify(err)}`)
+        pool.query(`UPDATE tlcsalesforce.payment_report_log
+                SET  email_status='FAILED' 
+                WHERE transaction_id='${transaction_id}'`)  
         console.log(err)
         console.log(`Email snet has err :${JSON.stringify(err)}`)
     })

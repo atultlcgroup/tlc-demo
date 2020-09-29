@@ -21,7 +21,6 @@ let paymentReport = (req , res)=>{
 
 
 let reportForEODandEOM=(req,res)=>{ 
-
     req.body.type =req.body.type || 'EOD';
     if(!req.body.property_sfid && !req.body.customer_set_sfid){
         res.status(401).json({code : 401 , message : `Please provide either property_sfid or customer_set_sfid`})

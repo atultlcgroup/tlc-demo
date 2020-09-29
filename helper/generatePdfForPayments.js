@@ -57,13 +57,13 @@ let generatePDF =async(resultArr)=>{
         let SGST = resultArr[i].SGST ? resultArr[i].SGST : '--'
         let IGST = resultArr[i].IGST ? resultArr[i].IGST : '--'
         h+=`<td>${CGST}</td>`;
-        total+=0
+        total+=resultArr[i].CGST
         gstTotal+=resultArr[i].CGST ;
         h+=`<td>${SGST}</td>`;
-        total+=0
+        total+=resultArr[i].SGST
         gstTotal+=resultArr[i].SGST;
         h+=`<td>${IGST}</td>`;
-        total+=0
+        total+=resultArr[i].IGST
         gstTotal+=resultArr[i].IGST;
         h+=`<td>${total}</td>`;
       h+=`</tr>`

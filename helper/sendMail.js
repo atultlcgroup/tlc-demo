@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const fs = require('fs')
 const config = process.env;
 const SMTPConfiguration = (mailData) => {
     const transporter = nodemailer.createTransport({
@@ -30,6 +31,7 @@ const sendMail = (to, from, subject, text, html) => {
     return new Promise((resolve, reject) => {
          SMTPConfiguration(newMail).then((res) => {
             resolve(res);
+            
         }).catch((err) => {
             reject(err);
         });    
@@ -59,8 +61,12 @@ const sendMailAttachment = (to, from, subject, text, html,file,pdf) => {
     };
     return new Promise((resolve, reject) => {
          SMTPConfiguration(newMail).then((res) => {
+             unlinkFiles(file)
+             unlinkFiles(pdf)
             resolve(res);
         }).catch((err) => {
+            unlinkFiles(file)
+            unlinkFiles(pdf)
             reject(err);
         });    
     })
@@ -69,5 +75,11 @@ const sendMailAttachment = (to, from, subject, text, html,file,pdf) => {
 
 
 
+let unlinkFiles = (files)=>{
+    fs.unlink(`${files}`, (err, da) => {
+        if (err)
+            reject(`${err}`);
+    })
+}
 exports.smtp = (to, from, subject, text, html) => sendMail(to, from, subject, text, html, {}, 'smtp');
 exports.smtpAttachment = (to, from, subject, text, html,file,pdf) => sendMailAttachment(to, from, subject, text, html, file,pdf);
