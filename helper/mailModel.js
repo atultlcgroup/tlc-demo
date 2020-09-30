@@ -8,7 +8,7 @@ const pool = require("../databases/db").pool;
 const from=process.env.FROM_MAIL || "";
 const to=process.env.TO_MAIL || ""
 const subject =process.env.MAIL_SUBJECT || "";
-let fromEmailForPyament = process.env.EMAIL_FOR_PAYMENT_REPORT || "";
+let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 const fs = require('fs');
@@ -87,12 +87,12 @@ let sendEODPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
             console.log(err)
             let dateForEODReport = new Date();
             dateForEODReport = `${String(dateForEODReport.getDate()).padStart(2, '0')} ${dateForEODReport.toLocaleString('default', { month: 'short' })} ${dateForEODReport.getFullYear()}`
-            let subjectForEODPayentReport = `Payment report for ${dateForEODReport}.`
+            let subjectForEODPayentReport = `Daily Summary I Membership Fee Collection`
             let template = handlebars.compile(html);
             replacements={"text":`Please find attachments for Parment Report of "${dateForEODReport}".`};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} Pdf:${pdf}`)
-            sendmail.smtpAttachment(emails, fromEmailForPyament , subjectForEODPayentReport,`htmlToSend` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
+            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
                 updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
 
@@ -120,12 +120,12 @@ let sendEOMPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
             console.log(err)
             let dateforEOMReport= new Date();
             dateforEOMReport = `${dateforEOMReport.toLocaleString('default', { month: 'short' })} ${dateforEOMReport.getFullYear()}`
-            let subjectForEODPayentReport = `Payment report for ${dateforEOMReport}.`
+            let subjectForEODPayentReport = `Monthly Summary I Membership Fee Collection`
             let template = handlebars.compile(html);
             replacements={"text":`Please find attachments for Parment Report of "${dateforEOMReport}".`};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} pdf:${pdf}`)
-            sendmail.smtpAttachment(emails, fromEmailForPyament , subjectForEODPayentReport,`htmlToSend` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
+            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
                 updatePayentLog(transactionIdsArr,'SUCCESS')
 
                 console.log(`Email Sent Successfully`)
@@ -159,7 +159,7 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
             }
             let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number_c ?membership_number_c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
             let htmlToSend = template(replacements);
-            sendmail.smtp(toEmails, fromEmailForPyament , emailSubject,`htmlToSend` , `${htmlToSend}`).then(async(data)=>{
+            sendmail.smtp(toEmails, `Club Marriott <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
                 pool.query(`UPDATE tlcsalesforce.payment_report_log
                 SET  email_status='SUCCESS' 
                 WHERE transaction_id='${transaction_id}'`)  

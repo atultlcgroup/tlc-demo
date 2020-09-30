@@ -149,16 +149,16 @@ let paymentReport =async (req)=>{
             On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
             Left Join tlcsalesforce.payment_report_log
             On payment__c.transaction_id__c = payment_report_log.transaction_id 
-            --limit 2
-            where (
-            (payment__c.createddate >=  '${lastRunTime}'::timestamp
-            AND payment_bifurcation__c.account_number__c = 'SECOND'
-            )
-            OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EPR')
-            )
-            AND 
-            (payment__c.payment_status__c = 'CONSUMED' OR 
-            payment__c.payment_status__c = 'SUCCESS') 
+         --   limit 2
+          where (
+          (payment__c.createddate >=  '${lastRunTime}'::timestamp
+          AND payment_bifurcation__c.account_number__c = 'SECOND'
+          )
+          OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EPR')
+          )
+          AND 
+          (payment__c.payment_status__c = 'CONSUMED' OR 
+          payment__c.payment_status__c = 'SUCCESS') 
     `;
         let getPaymentsOf15Minutes =await pool.query(`${qry1}`);
 
@@ -175,7 +175,8 @@ let paymentReport =async (req)=>{
             let emailRuleId = await getEmailRuleId(req)
             insertUpdateLogsForPayments(req.transaction_id__c,"PENING","EPR",emails.join(","), process.env.EMAIL_FOR_PAYMENT_REPORT,emailRuleId)
         let hotelName = req.hotel_name ? req.hotel_name : '';
-        let subject = `Notification - Payment Confirmation - ${hotelName}`;
+        // let subject = `Notification - Payment Confirmation - ${hotelName}`;
+        let subject = `Membership Fee Confirmation`
         // let dateFormat1 = (req.createddate?req.createddate:  "")
         // let dateTime1 = ``
         // if(formatDate){
@@ -241,18 +242,18 @@ let queryForEOD=async()=>{
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
         Left Join tlcsalesforce.payment_report_log
         On payment__c.transaction_id__c = payment_report_log.transaction_id 
-       -- limit 2
+  --      limit 5
      where 
-     (
-           (date(payment__c.createddate) = current_date
-              AND payment_bifurcation__c.account_number__c = 'SECOND'
-               
-              )
-              OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EODPR')
-              )
-              AND 
-                (payment__c.payment_status__c = 'CONSUMED' OR 
-                payment__c.payment_status__c = 'SUCCESS')        
+   (
+         (date(payment__c.createddate) = current_date
+            AND payment_bifurcation__c.account_number__c = 'SECOND'
+             
+)
+            OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EODPR')
+            )
+            AND 
+              (payment__c.payment_status__c = 'CONSUMED' OR 
+              payment__c.payment_status__c = 'SUCCESS')        
         `);
         let result = query ? query.rows : []
         let customerSetData = await filterDataBasedOnCustometSet(result)
@@ -348,18 +349,18 @@ let queryForEOM = async()=>{
          On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
          Left Join tlcsalesforce.payment_report_log
          On payment__c.transaction_id__c = payment_report_log.transaction_id 
-        -- limit 2
-         where 
-         (
-                 (payment__c.createddate >= current_date - interval '1 month'
-                 AND payment_bifurcation__c.account_number__c = 'SECOND'
+    --     limit 5
+        where 
+      (
+              (payment__c.createddate >= current_date - interval '1 month'
+              AND payment_bifurcation__c.account_number__c = 'SECOND'
                 
-                 )
-                 OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EOMPR') 
-                 )
-             AND 
-                (payment__c.payment_status__c = 'CONSUMED' OR 
-                 payment__c.payment_status__c = 'SUCCESS')
+              )
+              OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EOMPR') 
+              )
+          AND 
+             (payment__c.payment_status__c = 'CONSUMED' OR 
+              payment__c.payment_status__c = 'SUCCESS')
          `)
          console.log(`hii`)
          

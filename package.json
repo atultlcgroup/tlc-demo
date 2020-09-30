@@ -15,6 +15,7 @@
     "dateformat": "^3.0.3",
     "dotenv": "^8.2.0",
     "easy-ftp": "^0.4.1",
+    "email-templates": "^7.1.1",
     "excel4node": "^1.7.2",
     "execution-time": "^1.4.1",
     "express": "^4.17.1",
