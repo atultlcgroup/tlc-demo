@@ -3,22 +3,22 @@ let generatePdf = require("../helper/generatePdfForPayments")
 let generateExcel = require("../helper/generateExcelForPayments")
 let sendMail= require("../helper/mailModel")
 var dateFormat = require('dateformat');
-let lastRunTime = new Date();
+// let lastRunTime = new Date();
 let today = new Date();
 let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 let month= `${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`
 let fs = require('fs');
 // let sendGridMailer = require('../helper/sendGridMail');
-let idenLastRunTime = 1;
+// let idenLastRunTime = 1;
 const pool = require("../databases/db").pool;
 
 
-let lastRunTimeFun = async(iden)=>{
-         let qry = `select NOW() as last_run_time `
-       let getLastRunTime = await pool.query(qry)
-        let lastRunTime1 =  getLastRunTime ? getLastRunTime.rows[0].last_run_time : new Date();
-        return dateFormat(lastRunTime1, "yyyy-mm-dd HH:MM:ss")
-    }
+// let lastRunTimeFun = async(iden)=>{
+//          let qry = `select NOW() as last_run_time `
+//        let getLastRunTime = await pool.query(qry)
+//         let lastRunTime1 =  getLastRunTime ? getLastRunTime.rows[0].last_run_time : new Date();
+//         return dateFormat(lastRunTime1, "yyyy-mm-dd HH:MM:ss")
+//     }
 
 
 
@@ -111,65 +111,66 @@ let findPaymentRule= async(req)=>{
 
 let paymentReport =async (req)=>{
     try{
-        console.log(idenLastRunTime)
-        let runTime = await lastRunTimeFun(idenLastRunTime)
-        if(idenLastRunTime == 1)
-        lastRunTime = runTime
-        idenLastRunTime = 2;
+        // console.log(idenLastRunTime)
+        // let runTime = await lastRunTimeFun(idenLastRunTime)
+        // if(idenLastRunTime == 1)
+        // lastRunTime = runTime
+        // idenLastRunTime = 2;
         let qry1= `Select  distinct 
-            membershiptype__c.property__c property_sfid,
-            membershiptype__c.sfid customer_set_sfid,
-            property__c.name hotel_name,
-            account.name member_name,
-            membership__c.membership_number__c,
-            membershiptype__c.name membership_type_name,
-             payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee,
-             payment__c.transcationCode__c, payment__c.transaction_id__c,
-             payment__c.createddate,
-             payment__c.payment_mode__c,
-             payment__c.payment_gateway__c as source, 
-            payment__c.email__c
-            from 
-            tlcsalesforce.payment__c
-            Inner Join tlcsalesforce.account
-            On account.sfid = payment__c.account__c
-            Inner Join tlcsalesforce.payment_bifurcation__c
-            On payment_bifurcation__c.payment__c = payment__c.sfid
-            Left Join tlcsalesforce.membership__c On 
-            payment__c.membership__c = membership__c.sfid
-            Left Join tlcsalesforce.membershiptype__c On
-            membership__c.customer_set__c = membershiptype__c.sfid
-            Left join tlcsalesforce.tax_master__c
-            On membershiptype__c.tax_master__c = tax_master__c.sfid
-            Left Join tlcsalesforce.property__c
-            On membershiptype__c.property__c = property__c.sfid
-            Left Join tlcsalesforce.tax_breakup__c
-            On tax_breakup__c.tax_master__c = tax_master__c.sfid
-            Left Join tlcsalesforce.payment_email_rule__c
-            On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
-            Left Join tlcsalesforce.payment_report_log
-            On payment__c.transaction_id__c = payment_report_log.transaction_id 
-         --   limit 2
-          where (
-          (payment__c.createddate >=  '${lastRunTime}'::timestamp
-          AND payment_bifurcation__c.account_number__c = 'SECOND'
-          )
-          OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EPR')
-          )
-          AND 
-          (payment__c.payment_status__c = 'CONSUMED' OR 
-          payment__c.payment_status__c = 'SUCCESS') 
+        membershiptype__c.property__c property_sfid,
+        membershiptype__c.sfid customer_set_sfid,
+        property__c.name hotel_name,
+        account.name member_name,
+        membership__c.membership_number__c,
+        membershiptype__c.name membership_type_name,
+         payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee,
+         payment__c.transcationCode__c, payment__c.transaction_id__c,
+         payment__c.createddate,
+         payment__c.payment_mode__c,
+         payment__c.payment_gateway__c as source, 
+        payment__c.email__c
+        from 
+        tlcsalesforce.payment__c
+        Inner Join tlcsalesforce.account
+        On account.sfid = payment__c.account__c
+        Inner Join tlcsalesforce.payment_bifurcation__c
+        On payment_bifurcation__c.payment__c = payment__c.sfid
+        Inner Join tlcsalesforce.membership__c On  
+        payment__c.membership__c = membership__c.sfid
+        Inner Join tlcsalesforce.membershiptype__c On 
+        membership__c.customer_set__c = membershiptype__c.sfid
+        Left join tlcsalesforce.tax_master__c
+        On membershiptype__c.tax_master__c = tax_master__c.sfid
+        Left Join tlcsalesforce.property__c
+        On membershiptype__c.property__c = property__c.sfid
+        Left Join tlcsalesforce.tax_breakup__c
+        On tax_breakup__c.tax_master__c = tax_master__c.sfid
+        Left Join tlcsalesforce.payment_email_rule__c
+        On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
+        Left Join tlcsalesforce.payment_report_log
+        On payment__c.transaction_id__c = payment_report_log.transaction_id
+        where (
+        (payment__c.createddate >=  current_timestamp - interval '15 minutes'
+        AND payment_bifurcation__c.account_number__c = 'SECOND'
+       
+        )
+        OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EPR')
+        )
+        AND 
+        (payment__c.payment_status__c = 'CONSUMED' OR 
+        payment__c.payment_status__c = 'SUCCESS')
+ 
     `;
         let getPaymentsOf15Minutes =await pool.query(`${qry1}`);
 
 
         let resultForPaymentsOf15Minutes = getPaymentsOf15Minutes ? getPaymentsOf15Minutes.rows : []
         console.log(resultForPaymentsOf15Minutes)
-        lastRunTime = runTime
-        console.log(lastRunTime)
+        // lastRunTime = runTime
+        // console.log(lastRunTime)
         resultForPaymentsOf15Minutes.map(async req=>{
 
-            // req.property_sfid ='a0D0k000009eJcIEAU'
+            // req.property_sfid ='a0g6D000000ruT7QAI'
         let emails = await findPaymentRule(req);
         if(emails.length > 0){
             let emailRuleId = await getEmailRuleId(req)
@@ -230,9 +231,9 @@ let queryForEOD=async()=>{
         On account.sfid = payment__c.account__c
         Inner Join tlcsalesforce.payment_bifurcation__c
         On payment_bifurcation__c.payment__c = payment__c.sfid
-        Left Join tlcsalesforce.membership__c On 
+        Inner Join tlcsalesforce.membership__c On --change here
         payment__c.membership__c = membership__c.sfid
-        Left Join tlcsalesforce.membershiptype__c On
+        Inner Join tlcsalesforce.membershiptype__c On --change here
         membership__c.customer_set__c = membershiptype__c.sfid
         Left join tlcsalesforce.tax_master__c
         On membershiptype__c.tax_master__c = tax_master__c.sfid
@@ -242,19 +243,20 @@ let queryForEOD=async()=>{
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
         Left Join tlcsalesforce.payment_report_log
         On payment__c.transaction_id__c = payment_report_log.transaction_id 
-  --      limit 5
-     where 
-   (
-         (date(payment__c.createddate) = current_date
-            AND payment_bifurcation__c.account_number__c = 'SECOND'
-             
-)
-            OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EODPR')
-            )
-            AND 
-              (payment__c.payment_status__c = 'CONSUMED' OR 
-              payment__c.payment_status__c = 'SUCCESS')        
-        `);
+        
+        where 
+        (
+                (date(payment__c.createddate) = current_date
+                AND payment_bifurcation__c.account_number__c = 'SECOND'
+               
+                )
+                OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EODPR')
+                )
+                AND 
+                (payment__c.payment_status__c = 'CONSUMED' OR 
+                payment__c.payment_status__c = 'SUCCESS')
+        
+                `);
         let result = query ? query.rows : []
         let customerSetData = await filterDataBasedOnCustometSet(result)
         return customerSetData;
@@ -337,9 +339,9 @@ let queryForEOM = async()=>{
          On account.sfid = payment__c.account__c
          Inner Join tlcsalesforce.payment_bifurcation__c
          On payment_bifurcation__c.payment__c = payment__c.sfid
-         Left Join tlcsalesforce.membership__c On 
+         Inner Join tlcsalesforce.membership__c On  
          payment__c.membership__c = membership__c.sfid
-         Left Join tlcsalesforce.membershiptype__c On
+         Inner Join tlcsalesforce.membershiptype__c On 
          membership__c.customer_set__c = membershiptype__c.sfid
          Left join tlcsalesforce.tax_master__c
          On membershiptype__c.tax_master__c = tax_master__c.sfid
@@ -349,19 +351,19 @@ let queryForEOM = async()=>{
          On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
          Left Join tlcsalesforce.payment_report_log
          On payment__c.transaction_id__c = payment_report_log.transaction_id 
-    --     limit 5
-        where 
-      (
-              (payment__c.createddate >= current_date - interval '1 month'
-              AND payment_bifurcation__c.account_number__c = 'SECOND'
+         
+         where 
+         (
+                 (payment__c.createddate >= current_date - interval '1 month'
+                 AND payment_bifurcation__c.account_number__c = 'SECOND'
                 
-              )
-              OR (payment_report_log.email_status = 'FAILED'  and payment_report_log.payment_report_type ='EOMPR') 
-              )
-          AND 
-             (payment__c.payment_status__c = 'CONSUMED' OR 
-              payment__c.payment_status__c = 'SUCCESS')
-         `)
+                 )
+                 OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EOMPR')
+                 )
+                 AND 
+                 (payment__c.payment_status__c = 'CONSUMED' OR 
+                 payment__c.payment_status__c = 'SUCCESS')         
+       `)
          console.log(`hii`)
          
 
@@ -402,7 +404,7 @@ let reportForEODandEOM = async (req) => {
                 console.log(key)
                 console.log(value)
                 req.customer_set_sfid = key;
-                // req.customer_set_sfid = 'a0f0k000003FSKyAAO';
+                // req.customer_set_sfid = 'a0J6D000001mCazUAE';
                     console.log("get peyment datails data !");         
                     let subject =req.type =='EOD' ? `Payment report for ${day}`:`Pyament report for ${month}`
                     console.log(subject)

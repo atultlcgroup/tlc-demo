@@ -153,13 +153,12 @@ let style = wb.createStyle({
       ws2.cell(cell, index++).string(`${(resultArr[i].billingpostalcode ? resultArr[i].billingpostalcode : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].billingcountry ? resultArr[i].billingcountry : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].payment_mode__c ? resultArr[i].payment_mode__c : '')}`).style(style);
-      ws2.cell(cell, index++).number((resultArr[i].membership_fee ? resultArr[i].membership_fee : '')).style(style);
-     total +=(resultArr[i].membership_fee ? resultArr[i].membership_fee : '');
-     feeTotal+=(resultArr[i].membership_fee ? resultArr[i].membership_fee : '')
+      ws2.cell(cell, index++).number((resultArr[i].membership_fee ? resultArr[i].membership_fee : 0)).style(style);
+     total +=(resultArr[i].membership_fee ? resultArr[i].membership_fee : 0);
+     feeTotal+=(resultArr[i].membership_fee ? resultArr[i].membership_fee : 0)
      let CGST = resultArr[i].CGST ? resultArr[i].CGST : '--'
      let SGST = resultArr[i].SGST ? resultArr[i].SGST : '--'
      let IGST = resultArr[i].IGST ? resultArr[i].IGST : '--'
-     
      ws2.cell(cell, index++).string(`${CGST}`).style(style);
       total+=resultArr[i].CGST
       gstTotal+=resultArr[i].CGST
@@ -204,6 +203,7 @@ return new Promise(async(resolve,reject)=>{
     reject(`${e}`)
   }
 })
+
 }
   // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
 //  ws.write(`Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);

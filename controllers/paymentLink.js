@@ -1,4 +1,3 @@
-const url = require('url');
 let getPaymentLink = async(req, res)=>{
     try{
     console.log(`uploadExcel api called in controller`)
