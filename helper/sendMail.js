@@ -89,7 +89,7 @@ const sendMailAttachment = (to, from, subject, text, html,file,pdf) => {
 let unlinkFiles = (files)=>{
     fs.unlink(`${files}`, (err, da) => {
         if (err)
-            reject(`${err}`);
+            return(`${err}`);
     })
 }
 exports.smtp = (to, from, subject, text, html) => sendMail(to, from, subject, text, html, {}, 'smtp');

@@ -159,6 +159,7 @@ let style = wb.createStyle({
      let CGST = resultArr[i].CGST ? resultArr[i].CGST : '--'
      let SGST = resultArr[i].SGST ? resultArr[i].SGST : '--'
      let IGST = resultArr[i].IGST ? resultArr[i].IGST : '--'
+     
      ws2.cell(cell, index++).string(`${CGST}`).style(style);
       total+=resultArr[i].CGST
       gstTotal+=resultArr[i].CGST
@@ -203,7 +204,6 @@ return new Promise(async(resolve,reject)=>{
     reject(`${e}`)
   }
 })
-
 }
   // Set value of cell A3 to true as a boolean type styled with paramaters of style but with an adjustment to the font size.
 //  ws.write(`Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`);

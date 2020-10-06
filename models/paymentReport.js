@@ -212,7 +212,7 @@ let paymentReport =async (req)=>{
 let queryForEOD=async()=>{
     try{
 
-        let query=await pool.query(`Select  distinct payment__c.membership__r__membership_number__c,  firstname, lastname, membershiptype__c.name membership_type_name,
+        let query=await pool.query(`Select  distinct payment__c.membership__r__membership_number__c, payment__c.email__c, firstname, lastname, membershiptype__c.name membership_type_name,
         membershiptype__c.sfid membership_type_id, 
         Case when payment_for__c = 'New Membership' OR payment_for__c = 'Add-On'
         Then 'Fresh'
@@ -320,7 +320,7 @@ let filterDataBasedOnCustometSet=async(data)=>{
 let queryForEOM = async()=>{
      try{
         console.log(`hii`)
-         let qry=await  pool.query(`Select  distinct payment__c.membership__r__membership_number__c,  firstname, lastname, membershiptype__c.name membership_type_name,
+         let qry=await  pool.query(`Select  distinct payment__c.membership__r__membership_number__c, payment__c.email__c, firstname, lastname, membershiptype__c.name membership_type_name,
          membershiptype__c.sfid membership_type_id, 
          Case when payment_for__c = 'New Membership' OR payment_for__c = 'Add-On'
          Then 'Fresh'
@@ -354,7 +354,7 @@ let queryForEOM = async()=>{
          
          where 
          (
-                 (payment__c.createddate >= current_date - interval '1 month'
+                 (payment__c.createddate > current_date - interval '1 month'
                  AND payment_bifurcation__c.account_number__c = 'SECOND'
                 
                  )

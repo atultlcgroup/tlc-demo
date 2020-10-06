@@ -157,7 +157,7 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
             if(formatDate){
                 dateTime1 = formatDate(dateFormat1)
             }
-            let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:0),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
+            let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
             let htmlToSend = template(replacements);
             sendmail.smtp(toEmails, `Club Marriott <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
                 pool.query(`UPDATE tlcsalesforce.payment_report_log
