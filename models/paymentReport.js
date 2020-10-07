@@ -3,6 +3,18 @@ let generatePdf = require("../helper/generatePdfForPayments")
 let generateExcel = require("../helper/generateExcelForPayments")
 let sendMail= require("../helper/mailModel")
 var dateFormat = require('dateformat');
+let TLC_ACCOUNT_NUMBER = process.env.TLC_ACCOUNT_NUMBER || 'FIRST'
+TLC_ACCOUNT_NUMBER=TLC_ACCOUNT_NUMBER.split(",")
+let tlcAccountNumber =''
+for(let i =0;i<TLC_ACCOUNT_NUMBER.length;i++){
+    i ==0 ? 
+    tlcAccountNumber +=`'${TLC_ACCOUNT_NUMBER[i]}'`
+    :
+    tlcAccountNumber +=`,'${TLC_ACCOUNT_NUMBER[i]}'`
+}
+
+
+
 // let lastRunTime = new Date();
 let today = new Date();
 let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
@@ -123,7 +135,7 @@ let paymentReport =async (req)=>{
         account.name member_name,
         membership__c.membership_number__c,
         membershiptype__c.name membership_type_name,
-         payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee,
+         payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee,
          payment__c.transcationCode__c, payment__c.transaction_id__c,
          payment__c.createddate,
          payment__c.payment_mode__c,
@@ -151,7 +163,7 @@ let paymentReport =async (req)=>{
         On payment__c.transaction_id__c = payment_report_log.transaction_id
         where (
         (payment__c.createddate >=  current_timestamp - interval '15 minutes'
-        AND payment_bifurcation__c.account_number__c = 'SECOND'
+        AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
        
         )
         OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EPR')
@@ -161,6 +173,7 @@ let paymentReport =async (req)=>{
         payment__c.payment_status__c = 'SUCCESS')
  
     `;
+ 
         let getPaymentsOf15Minutes =await pool.query(`${qry1}`);
 
 
@@ -187,7 +200,7 @@ let paymentReport =async (req)=>{
         if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
                  console.log(`Please define EMAIL_FOR_PAYMENT_REPORT from heroku`)
         }else{
-
+             if(req.membership_fee > 0)
             sendMail.sendMailForEachPayment(req,emails , subject , req.transaction_id__c)
         // sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
        //use to send mail for each payment by sendgrid
@@ -221,8 +234,8 @@ let queryForEOD=async()=>{
         Else
             'Other'
         END as FreshRenewal, payment__c.createddate,transcationCode__c, payment__c.transaction_id__c,
-        GST_details__c, manager_email__c, account.billingcountry,account.billingstate, account.billingcity,account.billingstreet,
-        account.billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee, 
+        GST_details__c, manager_email__c, payment__c.country__c billingcountry,payment__c.state__c billingstate, payment__c.city__c billingcity,payment__c.address_line_1__c billingstreet,
+        payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee, 
         tax_breakup__c.name breakup,
         payment__c.state__c, payment_email_rule__c.state__c hotel_state
         from 
@@ -247,7 +260,7 @@ let queryForEOD=async()=>{
         where 
         (
                 (date(payment__c.createddate) = current_date
-                AND payment_bifurcation__c.account_number__c = 'SECOND'
+                AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
                
                 )
                 OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EODPR')
@@ -290,7 +303,7 @@ let filterDataBasedOnCustometSet=async(data)=>{
         let qryForGST = `select state__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${d.membership_type_id}' limit 1`;
         let dataForGST = await pool.query(`${qryForGST}`)
         let GSTstate = dataForGST.rows.length ?  dataForGST.rows[0].state__c : "";
-         if(GSTstate == d.state__c){
+         if(GSTstate != d.state__c){
              d.IGST = d.membership_fee ? ((d.membership_fee * 18) / 100): 0;
          }else{
             d.CGST=  d.membership_fee ? ((d.membership_fee * 9) / 100): 0;;
@@ -329,8 +342,8 @@ let queryForEOM = async()=>{
          Else
              'Other'
          END as FreshRenewal, payment__c.createddate,transcationCode__c, payment__c.transaction_id__c,
-         GST_details__c, manager_email__c, account.billingcountry,account.billingstate, account.billingcity,account.billingstreet,
-         account.billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c as membership_fee, 
+         GST_details__c, manager_email__c, payment__c.country__c billingcountry,payment__c.state__c billingstate, payment__c.city__c billingcity,payment__c.address_line_1__c billingstreet,
+         payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee, 
          tax_breakup__c.name breakup,
          payment__c.state__c, payment_email_rule__c.state__c hotel_state
          from 
@@ -355,7 +368,7 @@ let queryForEOM = async()=>{
          where 
          (
                  (payment__c.createddate > current_date - interval '1 month'
-                 AND payment_bifurcation__c.account_number__c = 'SECOND'
+                 AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
                 
                  )
                  OR (payment_report_log.email_status = 'FAILED' and payment_report_log.payment_report_type ='EOMPR')
@@ -364,7 +377,6 @@ let queryForEOM = async()=>{
                  (payment__c.payment_status__c = 'CONSUMED' OR 
                  payment__c.payment_status__c = 'SUCCESS')         
        `)
-         console.log(`hii`)
          
 
          let result = qry ? qry.rows : []

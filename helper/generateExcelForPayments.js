@@ -147,7 +147,7 @@ let style = wb.createStyle({
       ws2.cell(cell, index++).string(`${(resultArr[i].transcationcode__c ? resultArr[i].transcationcode__c : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].gst_details__c ? resultArr[i].gst_details__c : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].email__c ? resultArr[i].email__c : '')}`).style(style);
-      ws2.cell(cell, index++).string(`${(resultArr[i].billingstree ? resultArr[i].billingstree : '')}`).style(style);
+      ws2.cell(cell, index++).string(`${(resultArr[i].billingstreet ? resultArr[i].billingstreet : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].billingcity ? resultArr[i].billingcity : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].billingstate ? resultArr[i].billingstate : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].billingpostalcode ? resultArr[i].billingpostalcode : '')}`).style(style);

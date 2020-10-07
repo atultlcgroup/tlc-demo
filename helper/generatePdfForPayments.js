@@ -44,7 +44,7 @@ let generatePDF =async(resultArr)=>{
         h+=`<td>${(resultArr[i].transcationcode__c ? resultArr[i].transcationcode__c : '')}</td>`;
         h+=`<td>${(resultArr[i].gst_details__c ? resultArr[i].gst_details__c : '')}</td>`;
         h+=`<td>${(resultArr[i].email__c ? resultArr[i].email__c : '')}</td>`;
-        h+=`<td>${(resultArr[i].billingstree ? resultArr[i].billingstree : '')}</td>`;
+        h+=`<td>${(resultArr[i].billingstreet ? resultArr[i].billingstreet : '')}</td>`;
         h+=`<td>${(resultArr[i].billingcity ? resultArr[i].billingcity : '')}</td>`;
         h+=`<td>${(resultArr[i].billingstate ? resultArr[i].billingstate : '')}</td>`;
         h+=`<td>${(resultArr[i].billingpostalcode ? resultArr[i].billingpostalcode : '')}</td>`;
