@@ -8,8 +8,9 @@ let getPaymentLink = async(req, res)=>{
     let str = req.url
       let uid = str.substr(str.indexOf('uid=') + 4)
       console.log(uid)
-        let paymentUrl = process.env.PAYMENT_LINK || ""
-        res.status(200).send({code:200 , message : `Success`,paymentURL:  `${paymentUrl}${uid}`})
+        let paymentUrl = process.env.PAYMENT_LINK || "";
+        res.redirect(`${paymentUrl}${uid}`)
+        // res.status(200).send({code:200 , message : `Success`,paymentURL:  `${paymentUrl}${uid}`})
         
  
    }catch( e ){

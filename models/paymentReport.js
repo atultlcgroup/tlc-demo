@@ -311,10 +311,10 @@ let filterDataBasedOnCustometSet=async(data)=>{
          }
 
         if(customerSetObj.hasOwnProperty(d.membership_type_id)){
-            let tax = await updateTax(customerSetObj[d.membership_type_id],d)
-            if(tax.code == 1)
-            customerSetObj[d.membership_type_id] = tax.arr;
-            else
+            // let tax = await updateTax(customerSetObj[d.membership_type_id],d)
+            // if(tax.code == 1)
+            // customerSetObj[d.membership_type_id] = tax.arr;
+            // else
             // //check for CGST,IGST and SGST
 
             customerSetObj[d.membership_type_id].push(d);
