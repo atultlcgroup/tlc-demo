@@ -18,7 +18,7 @@ let formatDate1=(date)=>{
 
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
-let generateExcel = async(resultArr)=>{
+let generateExcel = async(resultArr,hotelName,summaryName)=>{
 //date format 
 
 
@@ -31,7 +31,7 @@ let wb = new xl.Workbook();
  
 // Add Worksheets to the workbook
 // let ws = wb.addWorksheet('tlc collects money');
-let ws2 = wb.addWorksheet('hotel collects money');
+let ws2 = wb.addWorksheet(`${summaryName}`);
 // let ws3 = wb.addWorksheet('Consolidated Reprot to TLC');
  //Sheet 1
 let sheet1HeaderArr= ['SL No','Membership Number','First Name','Last Name','MembershipType','Fresh / Renewal','Transaction Time','TranscationCode','State','Payment Mode','(A) Net_Amount__c','(B) GST Amount','C=(A)+(B)Total Amount']
@@ -100,26 +100,42 @@ let style = wb.createStyle({
   //Sheet 2
 
 
-  let sheet2HeaderArr=['SL No','Membership Number','First Name','Last Name','MembershipType','Fresh / Renewal','Transaction Time','TranscationCode','Member GST Details','Email','Address','City','State','Pin code','Country','Payment Mode','(A) Membership Fee','(B) GST Amount','C=(A)+(B)Total Amount']
-  let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','','','0']
+  let sheet2HeaderArr=['SL No','Membership Number','First Name','Last Name','MembershipType','Fresh / Renewal','Transaction Time','TranscationCode','Member GST Details','Email','Address','City','State','Pin code','Country','Payment Mode','Membership Fee','(A) Membership Amount','(B) GST Amount','C=(A)+(B)Total Amount']
+  let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
 
-  ws2.cell(1, 1).string('Hotel collects the money on Payment Gateway').style(style);
+  // ws2.cell(1, 1).string(`Hotel collects the money on Payment Gateway`).style(style);
+  ws2.cell(1, 1).string(`${summaryName}`).style(style);
+   let membershipName = (resultArr.length && resultArr[0].membership_type_name) ? resultArr[0].membership_type_name : ''
+    let schemeCode = (resultArr.length && resultArr[0].scheme_code) ? resultArr[0].scheme_code : ''
 
-  ws2.cell(4, 1).string('JW Marriott Hotel Pune').style(style);
-  ws2.cell(5, 1).string(`${today}`).style(style);
-  ws2.cell(6, 1).string(`Scheme`).style(style);
+   ws2.cell(4, 1).string(`Level Name`).style(style);
+  ws2.cell(4, 2).string(`${membershipName}`).style(style);
+
+  ws2.cell(6, 1).string(`Transaction Date`).style(style);
+  ws2.cell(6, 2).string(`${today}`).style(style);
+
+  ws2.cell(5, 1).string(`Scheme`).style(style);
+  ws2.cell(5, 2).string(`${schemeCode}`).style(style);
    index= 1
+  
   sheet2HeaderArr.map(d=>{
-    if(index == 18)
-    ws2.cell(8, index++,8, index++,8, index++, true).string(d).style(style);
+    if(index == 19){
+    ws2.cell(8, index++,8, 1 +  index++, true).string(d).style(style);
+    index++
+    ws2.cell(9, index-3).string('CGST').style(style);
+    ws2.cell(9, index-2).string('SGST').style(style);
+    ws2.cell(9, index-1).string('IGST').style(style);
+  }
     else
-    ws2.cell(8, index++).string(d).style(style);
-    
+    ws2.cell(8, index,9,index++,true).string(d).style(style);
   })
-    cell=8;
+
+    cell=9;
     let feeTotal=0;
     let gstTotal = 0;
     let totalAmount =0;
+    let totalFee =0;
+    
   for(let i =0;i<resultArr.length;i++){
     cell +=1
     let total=0;
@@ -153,34 +169,43 @@ let style = wb.createStyle({
       ws2.cell(cell, index++).string(`${(resultArr[i].billingpostalcode ? resultArr[i].billingpostalcode : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].billingcountry ? resultArr[i].billingcountry : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].payment_mode__c ? resultArr[i].payment_mode__c : '')}`).style(style);
-      ws2.cell(cell, index++).number((resultArr[i].membership_fee ? resultArr[i].membership_fee : 0)).style(style);
-     total +=(resultArr[i].membership_fee ? resultArr[i].membership_fee : 0);
-     feeTotal+=(resultArr[i].membership_fee ? resultArr[i].membership_fee : 0)
+      ws2.cell(cell, index++).number(Math.round((resultArr[i].membership_fee ? resultArr[i].membership_fee : 0) * 100) / 100).style(style);
+      ws2.cell(cell, index++).number(Math.round((resultArr[i].membership_amount ? resultArr[i].membership_amount : 0) * 100) / 100).style(style);
+
+     total +=(resultArr[i].membership_amount ? resultArr[i].membership_amount : 0);
+     totalFee += (resultArr[i].membership_fee ? resultArr[i].membership_fee : 0);
+     feeTotal+=(resultArr[i].membership_amount ? resultArr[i].membership_amount : 0)
      let CGST = resultArr[i].CGST ? resultArr[i].CGST : '--'
      let SGST = resultArr[i].SGST ? resultArr[i].SGST : '--'
      let IGST = resultArr[i].IGST ? resultArr[i].IGST : '--'
      
-     ws2.cell(cell, index++).string(`${CGST}`).style(style);
+     resultArr[i].CGST ? ws2.cell(cell, index++).number(Math.round(CGST * 100) / 100).style(style) : ws2.cell(cell, index++).string(`--`).style(style)
       total+=resultArr[i].CGST
       gstTotal+=resultArr[i].CGST
-      ws2.cell(cell, index++).string(`${SGST}`).style(style);
+      resultArr[i].SGST ? ws2.cell(cell, index++).number(Math.round(SGST * 100) / 100).style(style): ws2.cell(cell, index++).string(`--`).style(style)
       total+=resultArr[i].SGST
       gstTotal+=resultArr[i].SGST
-      ws2.cell(cell, index++).string(`${IGST}`).style(style);
+      resultArr[i].IGST ? ws2.cell(cell, index++).number(Math.round(IGST * 100) / 100).style(style):ws2.cell(cell, index++).string(`--`).style(style)
       total+=resultArr[i].IGST
       gstTotal+=resultArr[i].IGST
-      ws2.cell(cell, index++).number(total).style(style);
+      ws2.cell(cell, index++).number(Math.round((resultArr[i].membership_total_amount ? resultArr[i].membership_total_amount : 0) * 100) / 100).style(style);
+      totalAmount +=(resultArr[i].membership_total_amount ? resultArr[i].membership_total_amount : 0)
     }
+
+
+
   cell++;
   index = 1;
-  totalAmount = feeTotal + gstTotal;
+  // totalAmount = feeTotal + gstTotal;
   sheet2FooterArr.map(f=>{
     if(index == 17)
-    ws2.cell(cell, index++).number(feeTotal).style(style);
-    else if(index == 18)
-    ws2.cell(cell, index++).number(gstTotal).style(style);
-    else if(index == 21)
-    ws2.cell(cell, index++).number(totalAmount).style(style);
+    ws2.cell(cell, index++).number(Math.round(totalFee * 100) / 100).style(style);
+      else if(index == 18)
+    ws2.cell(cell, index++).number(Math.round(feeTotal * 100) / 100).style(style);
+    else if(index == 19)
+    ws2.cell(cell, index++,cell,1+index,true).number(Math.round(gstTotal * 100) / 100).style(style);
+    else if(index == 22)
+    ws2.cell(cell, index++).number(Math.round(totalAmount * 100) / 100).style(style);
     else
     ws2.cell(cell, index++).string(f).style(style);
 

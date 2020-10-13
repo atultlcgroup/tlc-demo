@@ -79,7 +79,7 @@ let sendMail=(req,error , unique_id)=>{
                 }
             }
 
-let sendEODPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
+let sendEODPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
     try{
         readHTMLFile(__dirname + `/Payment_Report_For_EOD.html`, function(err, html) {
             console.log('hi')
@@ -91,8 +91,9 @@ let sendEODPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
             let template = handlebars.compile(html);
             replacements={"text":`Please find attachments for Parment Report of "${dateForEODReport}".`};
            let htmlToSend = template(replacements);
-            console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} Pdf:${pdf}`)
-            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
+            console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} fileName:${fileName}`)
+            // sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
+                sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
 
@@ -111,7 +112,7 @@ let sendEODPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
     }
 }
 
-let sendEOMPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
+let sendEOMPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
     try{
    
         readHTMLFile(__dirname + `/Payment_Report_For_EOM.html`, function(err, html) {
@@ -124,8 +125,8 @@ let sendEOMPaymentReport=(file,pdf,emails,transactionIdsArr)=>{
             let template = handlebars.compile(html);
             replacements={"text":`Please find attachments for Parment Report of "${dateforEOMReport}".`};
            let htmlToSend = template(replacements);
-            console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} pdf:${pdf}`)
-            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
+            console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} fileName:${fileName}`)
+            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 updatePayentLog(transactionIdsArr,'SUCCESS')
 
                 console.log(`Email Sent Successfully`)
@@ -157,7 +158,7 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
             if(formatDate){
                 dateTime1 = formatDate(dateFormat1)
             }
-            let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
+            let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_amount?req.membership_amount:0),"fee":(req.membership_fee?req.membership_fee:0),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
             let htmlToSend = template(replacements);
             sendmail.smtp(toEmails, `Club Marriott <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
                 pool.query(`UPDATE tlcsalesforce.payment_report_log

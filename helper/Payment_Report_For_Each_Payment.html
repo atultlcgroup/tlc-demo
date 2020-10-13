@@ -2,122 +2,91 @@
 <html>
   <head>
     <title>Title of the document</title>
-    <style>
-    @media 
-only screen and (max-width: 760px),
-(min-device-width: 10px) and (max-device-width: 10px)  {
-
-	/* Force table to not be like tables anymore */
-	table, thead, tbody, th, td, tr { 
-		display: block; 
-	}
-	
-	/* Hide table headers (but not display: none;, for accessibility) */
-	thead tr { 
-		position: absolute;
-		top: -9999px;
-		left: -9999px;
-	}
-	
-	tr { border: 1px solid #ccc; }
-	
-	td { 
-		/* Behave  like a "row" */
-		border: none;
-		border-bottom: 1px solid #eee; 
-		position: relative;
-		padding-left: 50%; 
-	}
-	
-	td:before { 
-		/* Now like a table header */
-		position: absolute;
-		/* Top/left values mimic padding */
-		top: 6px;
-		left: 6px;
-		width: 45%; 
-		padding-right: 10px; 
-		white-space: nowrap;
-	}
-	
-	/*
-	Label the data
-	*/
-	td:nth-of-type(1):before { content: "First Name"; }
-	td:nth-of-type(2):before { content: "Last Name"; }
-	td:nth-of-type(3):before { content: "Job Title"; }
-	td:nth-of-type(4):before { content: "Favorite Color"; }
-	td:nth-of-type(5):before { content: "Wars of Trek?"; }
-	td:nth-of-type(6):before { content: "Secret Alias"; }
-	td:nth-of-type(7):before { content: "Date of Birth"; }
-	td:nth-of-type(8):before { content: "Dream Vacation City"; }
-	td:nth-of-type(9):before { content: "GPA"; }
-	td:nth-of-type(10):before { content: "Arbitrary Data"; }
-}
-      table,th,
-       /* th , */
-      td  {
-        padding: 10px;
-        border: 1px solid black;
-        border-collapse: collapse;
-        font-size: 10;
-        max-width: 100%;
-      }
-    
-    /* table {
-        border: 1px solid black;
-        display: block;
-        border-collapse: collapse;
-        max-width: 80%;
-        overflow: scroll;
-    } */
-     
-
-     
-
-    </style>
     
   </head>
   <body>
    
     <p style="margin-top: 20px;">Dear Sir / Ma’am, </p>
     <div align= "center" style="margin-bottom: 2%; margin-top: 2%;"><img src="cid:logocm" />    </div>
-        <table align="center">
-            <tbody>
-                <tr>
-                    <th colspan="2"><b>Notification- Online Payment Confirmation</b></th>
-                </tr>
-                <tr>
-                    <td>Name</td><td>{{{name}}}</td>
-                </tr>
-                <tr>
-                    <td>Membership Number</td><td>{{{membership_number}}}</td>
-                </tr>
-                <tr>
-                    <td>Membership Type</td><td>{{{membership_type}}}</td>
-                </tr>
-
-                <tr>
-                    <td>Email ID</td><td>{{{email}}}</td>
-                </tr>
-                <tr>
-                    <td>Amount</td><td>{{{amount}}}</td>
-                </tr>
-                <tr>
-                    <td>Transaction Code</td><td>{{{transaction_code}}}</td>
-                </tr>
-                <tr>
-                    <td>Date and Time</td><td>{{{date_time}}}</td>
-                </tr>
-                <tr>
-                    <td>Payment Mode</td><td>{{{payment_mode}}}</td>
-                </tr>
-                <tr>
-                    <td>Source</td><td>Website</td>
-                </tr>
-            </tbody>
-        </table>
-        <div  style="margin-top: 2%"><span>Team Club Marriott</span></div>
+   
+  <table cellpadding="10" cellspacing="0" style="margin:0 auto; ">
+   <tr>
+    <td style="padding-top: 20px;">
+     <table style="margin: 0 auto; border-collapse: collapse;" cellpadding="10" border="1">
+      <tr>
+       <td colspan="2" style="text-align: center; font-size:16px;">
+        <b>Notification- Online Payment Confirmation</b>
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Name
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{name}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Membership Number
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{membership_number}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Membership Type
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{membership_type}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Email ID
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{email}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Amount
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{amount}}}
+       </td>
+      </tr>
+     
+         <tr>
+       <td style="font-size:15px;">
+        Transaction Code
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{transaction_code}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Date and Time
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{date_time}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Payment Mode
+       </td>
+       <td style="text-align: left; font-size:15px;">{{{payment_mode}}}
+       </td>
+      </tr>
+      <tr>
+       <td style="font-size:15px;">
+        Source
+       </td>
+       <td style="text-align: left; font-size:15px;">Website
+       </td>
+      </tr>
+     </table>
+    </td>
+   </tr>
+  </table>
+       <div  style="margin-top: 2%"><span>Team Club Marriott</span></div>
             <div  style="margin-top: 2%"><span>Email – payments@clubmarriott.in</span></div>
 
  </div>

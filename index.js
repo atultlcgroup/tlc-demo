@@ -19,6 +19,7 @@ const body_parser = require("body-parser");
 const FandBSummary = require("./routers/FandBSummary")
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
+const pdfCheck = require("./helper/pdfCopy")
 const cors = require("cors");
 const app = express();
 app.use(cors());
@@ -31,7 +32,7 @@ app.use("/api/paymentLink",paymentRouters)
 app.use("/api/referral",referralRouters);
 app.use("/api/FandBSummary",FandBSummary);
 app.use("/api/payment",paymentReport)
-
+// app.use("/")
 // const check = require("./check")
 // app.post("/sendMsg",check.sendMsg)
  app.use("/api/whatsapp",whatsAppRouters)

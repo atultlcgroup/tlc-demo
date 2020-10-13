@@ -110,10 +110,11 @@ let findPaymentRule= async(req)=>{
         let result = emailData ? emailData.rows : []
         let resultArray=[];
         if(result){
+            if(result[0].hotel_email_status__c == true)
             resultArray= resultArray.concat(result[0].hotel_emails__c.split(','));
+            if(result[0].tlc_email_status__c == true)
             resultArray=resultArray.concat(result[0].manager_email__c.split(','));
         }
-        console.log(resultArray)
         return resultArray
     }catch(e){
         console.log(e)
@@ -135,7 +136,7 @@ let paymentReport =async (req)=>{
         account.name member_name,
         membership__c.membership_number__c,
         membershiptype__c.name membership_type_name,
-         payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee,
+         payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee,grand_total__c membership_amount,
          payment__c.transcationCode__c, payment__c.transaction_id__c,
          payment__c.createddate,
          payment__c.payment_mode__c,
@@ -185,6 +186,7 @@ let paymentReport =async (req)=>{
 
             // req.property_sfid ='a0g6D000000ruT7QAI'
         let emails = await findPaymentRule(req);
+       
         if(emails.length > 0){
             let emailRuleId = await getEmailRuleId(req)
             insertUpdateLogsForPayments(req.transaction_id__c,"PENING","EPR",emails.join(","), process.env.EMAIL_FOR_PAYMENT_REPORT,emailRuleId)
@@ -224,7 +226,6 @@ let paymentReport =async (req)=>{
 
 let queryForEOD=async()=>{
     try{
-
         let query=await pool.query(`Select  distinct payment__c.membership__r__membership_number__c, payment__c.email__c, firstname, lastname, membershiptype__c.name membership_type_name,
         membershiptype__c.sfid membership_type_id, 
         Case when payment_for__c = 'New Membership' OR payment_for__c = 'Add-On'
@@ -235,9 +236,9 @@ let queryForEOD=async()=>{
             'Other'
         END as FreshRenewal, payment__c.createddate,transcationCode__c, payment__c.transaction_id__c,
         GST_details__c, manager_email__c, payment__c.country__c billingcountry,payment__c.state__c billingstate, payment__c.city__c billingcity,payment__c.address_line_1__c billingstreet,
-        payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee, 
+        payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee, net_amount__c membership_amount , grand_total__c membership_total_amount,
         tax_breakup__c.name breakup,
-        payment__c.state__c, payment_email_rule__c.state__c hotel_state
+        payment__c.state__c, payment_email_rule__c.state__c hotel_state,payment_bifurcation__c.account_number__c as scheme_code
         from 
         tlcsalesforce.payment__c
         Inner Join tlcsalesforce.account
@@ -304,10 +305,10 @@ let filterDataBasedOnCustometSet=async(data)=>{
         let dataForGST = await pool.query(`${qryForGST}`)
         let GSTstate = dataForGST.rows.length ?  dataForGST.rows[0].state__c : "";
          if(GSTstate != d.state__c){
-             d.IGST = d.membership_fee ? ((d.membership_fee * 18) / 100): 0;
+             d.IGST = d.membership_amount ? ((d.membership_amount * 18) / 100): 0;
          }else{
-            d.CGST=  d.membership_fee ? ((d.membership_fee * 9) / 100): 0;;
-            d.SGST= d.membership_fee ? ((d.membership_fee * 9) / 100): 0;;
+            d.CGST=  d.membership_amount ? ((d.membership_amount * 9) / 100): 0;;
+            d.SGST= d.membership_amount ? ((d.membership_amount * 9) / 100): 0;;
          }
 
         if(customerSetObj.hasOwnProperty(d.membership_type_id)){
@@ -343,9 +344,9 @@ let queryForEOM = async()=>{
              'Other'
          END as FreshRenewal, payment__c.createddate,transcationCode__c, payment__c.transaction_id__c,
          GST_details__c, manager_email__c, payment__c.country__c billingcountry,payment__c.state__c billingstate, payment__c.city__c billingcity,payment__c.address_line_1__c billingstreet,
-         payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee, 
+         payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee,net_amount__c membership_amount , grand_total__c membership_total_amount,
          tax_breakup__c.name breakup,
-         payment__c.state__c, payment_email_rule__c.state__c hotel_state
+         payment__c.state__c, payment_email_rule__c.state__c hotel_state,payment_bifurcation__c.account_number__c as scheme_code
          from 
          tlcsalesforce.payment__c
          Inner Join tlcsalesforce.account
@@ -421,7 +422,6 @@ let reportForEODandEOM = async (req) => {
                     let subject =req.type =='EOD' ? `Payment report for ${day}`:`Pyament report for ${month}`
                     console.log(subject)
                     let emails = await findPaymentRule(req);
-
                     // let templateId = req.type == 'EOD' ? 'ac3c9b94-d2a9-4872-ba55-92b784aa5a2b' : 'f2c3746e-607c-4c7c-8f5c-7c75860e30e0'
                     let text = req.type == 'EOD' ? `Please find attachments for payment report of ${day}.` : `Please find attachments for payment report of ${month}.`
                     // let replacements={text : `${text}`};
@@ -432,16 +432,20 @@ let reportForEODandEOM = async (req) => {
                         let emailRuleId = await getEmailRuleId(req)
                         insertPayentLog(finalData.transactionIdArr,req.type,emails.join(","),emailRuleId)
                         //to generate excel 
-                        let pdfFile = await generatePdf.generatePDF(value)
-                        let excelFile = await generateExcel.generateExcel(value);
+                        // let pdfFile = await generatePdf.generatePDF(value)
+                        let hotelName = req.type == 'EOD'  ? '':""
+                        let summaryName = req.type == 'EOD' ? 'Daily Summary' : 'Monthly Summary'
+                        let excelFile = await generateExcel.generateExcel(value,hotelName,summaryName);
                         //end generate excel
                         // // console.log(excelFile)
                         // let fileArr = getFileArr(excelFile,pdfFile);
                      //to send emails
                      //*********** */
-                        req.type == 'EOD'?
-                          sendMail.sendEODPaymentReport(excelFile,pdfFile , emails,finalData.transactionIdArr):sendMail.sendEOMPaymentReport(excelFile,pdfFile , emails,finalData.transactionIdArr)
-                     //*********** */
+                        // req.type == 'EOD'?
+                        //   sendMail.sendEODPaymentReport(excelFile,'pdfFile' , emails,finalData.transactionIdArr):sendMail.sendEOMPaymentReport(excelFile,'pdfFile' , emails,finalData.transactionIdArr)
+                         req.type == 'EOD'?
+                          sendMail.sendEODPaymentReport(excelFile,'Daily Summary' , emails,finalData.transactionIdArr):sendMail.sendEOMPaymentReport(excelFile,'Monthly Summary' , emails,finalData.transactionIdArr)
+                        //*********** */
                         //To send emails for payment report for eod report
                         // await sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,templateId,fileArr).then(data=>{
                         //     console.log(data)

@@ -47,7 +47,7 @@ const sendMail = (to, from, subject, text, html) => {
 }
 
 
-const sendMailAttachment = (to, from, subject, text, html,file,pdf) => {
+const sendMailAttachment = (to, from, subject, text, html,file,fileName) => {
     console.log(`----------------------------`)
     console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
     console.log(`----------------------------`)    // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
@@ -58,12 +58,8 @@ const sendMailAttachment = (to, from, subject, text, html,file,pdf) => {
         text,
         html,
         attachments:[{
-            filename: `Payment Report.xlsx`,
+            filename: `${fileName}.xlsx`,
             path: `${file}`
-        },
-        {
-            filename: `Payment Report.pdf`,
-            path: `${pdf}`    
         },{
             filename: `logo-cm.png`,
             path: `./helper/logo-cm.png`,
@@ -73,11 +69,11 @@ const sendMailAttachment = (to, from, subject, text, html,file,pdf) => {
     return new Promise((resolve, reject) => {
          SMTPConfiguration(newMail).then((res) => {
              unlinkFiles(file)
-             unlinkFiles(pdf)
+            //  unlinkFiles(pdf)
             resolve(res);
         }).catch((err) => {
             unlinkFiles(file)
-            unlinkFiles(pdf)
+            // unlinkFiles(pdf)
             reject(err);
         });    
     })
