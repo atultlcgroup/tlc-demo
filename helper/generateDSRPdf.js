@@ -116,7 +116,7 @@ let htmlStr=`
           .tftable {
               font-size: 9px;
               color: #333333;
-              width: 40%;
+              width: 35%;
               border: 1px solid black;
               border-collapse: collapse;
           }
