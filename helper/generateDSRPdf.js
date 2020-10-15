@@ -1,3 +1,4 @@
+const { onPossiblyUnhandledRejection } = require('bluebird');
 const Promise = require('bluebird');
 let getEmptyIfNull = (val) => {
     return val?val:'';
@@ -37,7 +38,7 @@ let  generateDSRPDF=async(dsrValues,propertyName)=>{
 
 ]
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
-let slNo =1;
+let slNo =0;
 let dailySalesReportRows =``;
 for(obj of dsrValues){
 dailySalesReportRows += `<tr><td>${slNo++}</td>
@@ -159,20 +160,10 @@ let htmlStr=`
         .tftable1 tr:hover {
             background-color: #ffffff;
         }
-        div {
-            
-            margin-top: 60px;
-            margin-bottom: 100px;
-            margin-right: 40px;
-            margin-left: 40px;
-            
-          }
       </style>
   </head>
-  
 
-  <body style="font-family:sans-serif;" >
-  <div>
+  <body style="font-family:sans-serif;">
       <table style="width: 100%;">
           <tr>
               <td style="font-size: 25px;color: #bfa57d; border-bottom: 2px solid black; width: 85%">DSR</td>
@@ -279,7 +270,7 @@ let htmlStr=`
               <li>Comp card authorization if available, else reason</li>
           </ol>
       </div>
-    </div>
+
   </body>
 
   </html>
@@ -287,10 +278,9 @@ let htmlStr=`
 let pdfName = `./DSRReport/DSR_Repoprt_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
-    let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "12.5in", filename: `${pdfName}` })
+    let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName
 }
-
 
 module.exports={
     generateDSRPDF
