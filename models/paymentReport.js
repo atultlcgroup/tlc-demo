@@ -202,7 +202,7 @@ let paymentReport =async (req)=>{
         if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
                  console.log(`Please define EMAIL_FOR_PAYMENT_REPORT from heroku`)
         }else{
-             if(req.membership_fee > 0)
+             if(req.membership_amount > 0)
             sendMail.sendMailForEachPayment(req,emails , subject , req.transaction_id__c)
         // sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
        //use to send mail for each payment by sendgrid

@@ -1,5 +1,7 @@
 const schedule = require('node-schedule');
 const paymentReport=require('../models/paymentReport');
+
+const DSRReport = require('../models/DSRReport')
 const FandBSummary = require('../models/FandBSummary')
 let posModel = require('../models/pos')
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
@@ -68,4 +70,21 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == true || process.en
   console.log(`payment report for EOM`);
   scheduleTasksForEOM(process.env.SCHEDULER_TIME_FOR_PAYMENT_REPORT_EOM);
 }
+
+
+//For DSR Report
+
+let scheduleTasksForDSRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR DSR REPORT   ========================`)
+ let data= await DSRReport.DSRReport('')
+ console.log(data) 
+ console.log(`================= DSR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'TRUE')
+{
+  console.log(`DSR Report`);
+  scheduleTasksForDSRReport(process.env.SCHEDULER_TIME_FOR_DSR_REPORT);
+}
+
 

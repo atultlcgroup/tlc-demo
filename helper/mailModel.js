@@ -9,6 +9,7 @@ const from=process.env.FROM_MAIL || "";
 const to=process.env.TO_MAIL || ""
 const subject =process.env.MAIL_SUBJECT || "";
 let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
+const fromEmailForDSR = process.env.FROM_EMAIL_FOR_DSR || "";
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 const fs = require('fs');
@@ -181,11 +182,45 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
    } 
 }
 
+
+let sendDSRReport=(file,fileName,emails)=>{
+    try{
+        readHTMLFile(__dirname + `/Payment_Report_For_EOM.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForDSRReport= new Date();
+            dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
+            let subjectForDSRReport = `Daily Summary I DSR Report`
+            let template = handlebars.compile(html);
+            replacements={};
+           let htmlToSend = template(replacements);
+            console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
+            sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}      
+
+
             module.exports={
                 sendMail,
                 sendEODPaymentReport,
                 sendEOMPaymentReport,
-                sendMailForEachPayment
+                sendMailForEachPayment,
+                sendDSRReport
             }
 
         
