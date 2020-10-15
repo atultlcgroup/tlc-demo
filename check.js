@@ -1,1 +1,1 @@
-console.log( Math.round(100 * 100) / 100)
+console.log(`<td>${(Math.round(12762187.1289128 * 100) / 100)}</td>`)

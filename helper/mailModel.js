@@ -80,7 +80,7 @@ let sendMail=(req,error , unique_id)=>{
                 }
             }
 
-let sendEODPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
+let sendEODPaymentReport=(file,pdf,fileName,emails,transactionIdsArr)=>{
     try{
         readHTMLFile(__dirname + `/Payment_Report_For_EOD.html`, function(err, html) {
             console.log('hi')
@@ -94,7 +94,7 @@ let sendEODPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} fileName:${fileName}`)
             // sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`).then((data)=>{
-                sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`,`${fileName}`).then((data)=>{
                 updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
 
@@ -113,7 +113,7 @@ let sendEODPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
     }
 }
 
-let sendEOMPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
+let sendEOMPaymentReport=(file,pdf,fileName,emails,transactionIdsArr)=>{
     try{
    
         readHTMLFile(__dirname + `/Payment_Report_For_EOM.html`, function(err, html) {
@@ -127,7 +127,7 @@ let sendEOMPaymentReport=(file,fileName,emails,transactionIdsArr)=>{
             replacements={"text":`Please find attachments for Parment Report of "${dateforEOMReport}".`};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPyament : ${fromEmailForPyament} to ${emails} subject ${subjectForEODPayentReport} File:${file} fileName:${fileName}`)
-            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+            sendmail.smtpAttachment(emails, `Club Marriott <${fromEmailForPyament}>` , subjectForEODPayentReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${pdf}`,`${fileName}`).then((data)=>{
                 updatePayentLog(transactionIdsArr,'SUCCESS')
 
                 console.log(`Email Sent Successfully`)

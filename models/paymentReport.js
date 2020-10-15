@@ -1,5 +1,5 @@
 
-let generatePdf = require("../helper/generatePdfForPayments")
+let generatePdf = require("../helper/generatePdfForPayments1")
 let generateExcel = require("../helper/generateExcelForPayments")
 let sendMail= require("../helper/mailModel")
 var dateFormat = require('dateformat');
@@ -432,10 +432,11 @@ let reportForEODandEOM = async (req) => {
                         let emailRuleId = await getEmailRuleId(req)
                         insertPayentLog(finalData.transactionIdArr,req.type,emails.join(","),emailRuleId)
                         //to generate excel 
-                        // let pdfFile = await generatePdf.generatePDF(value)
                         let hotelName = req.type == 'EOD'  ? '':""
                         let summaryName = req.type == 'EOD' ? 'Daily Summary' : 'Monthly Summary'
                         let excelFile = await generateExcel.generateExcel(value,hotelName,summaryName);
+                        let pdfFile = await generatePdf.generatePDF(value,hotelName,summaryName)
+
                         //end generate excel
                         // // console.log(excelFile)
                         // let fileArr = getFileArr(excelFile,pdfFile);
@@ -444,7 +445,7 @@ let reportForEODandEOM = async (req) => {
                         // req.type == 'EOD'?
                         //   sendMail.sendEODPaymentReport(excelFile,'pdfFile' , emails,finalData.transactionIdArr):sendMail.sendEOMPaymentReport(excelFile,'pdfFile' , emails,finalData.transactionIdArr)
                          req.type == 'EOD'?
-                          sendMail.sendEODPaymentReport(excelFile,'Daily Summary' , emails,finalData.transactionIdArr):sendMail.sendEOMPaymentReport(excelFile,'Monthly Summary' , emails,finalData.transactionIdArr)
+                          sendMail.sendEODPaymentReport(excelFile,pdfFile,'Daily Summary' , emails,finalData.transactionIdArr):sendMail.sendEOMPaymentReport(excelFile,pdfFile,'Monthly Summary' , emails,finalData.transactionIdArr)
                         //*********** */
                         //To send emails for payment report for eod report
                         // await sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,templateId,fileArr).then(data=>{
