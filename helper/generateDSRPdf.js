@@ -1,10 +1,12 @@
+const { onPossiblyUnhandledRejection } = require('bluebird');
 const Promise = require('bluebird');
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateDSRPDF=async()=>{
-let propertyName = `JW Marriott Mumbai Juhu`;
-let dsrValues = [
+let  generateDSRPDF=async(dsrValues,propertyName)=>{
+ propertyName = `JW Marriott Mumbai Juhu`;
+ let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 }]
+ dsrValues = [
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
@@ -27,12 +29,12 @@ let dsrValues = [
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-{name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
+{name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Hotel Transfer",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Complimentary",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-{name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
+{name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Hotel Transfer",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 
 ]
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
@@ -65,9 +67,41 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     salesTax += obj.tax ? obj.tax : 0
                     salesTotalAmount += (obj.amount ? obj.amount : 0 ) + (obj.tax ? obj.tax : 0);
                 }
+                if((obj.paymode).indexOf('Complimentary') >= 0)
+                {
+                    summaryData[0].amount +=  obj.totalamt;
+                    summaryData[0].noOfSale += 1;
+                }
+                if((obj.paymode).indexOf('Credit Card') >= 0){
+                    summaryData[1].amount +=  obj.totalamt;
+                    summaryData[1].noOfSale += 1;
+                }
+                if((obj.paymode).indexOf('Hotel Transfer') >= 0){
+                    summaryData[2].amount +=  obj.totalamt;
+                    summaryData[2].noOfSale += 1;
+                }
                     
 
 }
+
+let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale
+let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount
+
+let summaryHtml = ` <tr>
+<td>${summaryData[0].key}</td>
+<td style="text-align: right;">${summaryData[0].noOfSale}</td>
+<td style="text-align: right;">${summaryData[0].amount}</td>
+</tr>
+<tr>
+<td>${summaryData[1].key}</td>
+<td style="text-align: right;">${summaryData[1].noOfSale}</td>
+<td style="text-align: right;">${summaryData[1].amount}</td>
+</tr>
+<tr>
+<td>${summaryData[2].key}</td>
+<td style="text-align: right;">${summaryData[2].noOfSale}</td>
+<td style="text-align: right;">${summaryData[2].amount}</td>
+</tr>`
 
 let htmlStr=`
  <html>
@@ -78,10 +112,12 @@ let htmlStr=`
           @page {
               size: A4 landscape;
           }
+
+          
           .tftable {
               font-size: 9px;
               color: #333333;
-              width: 100%;
+              width: 50%;
               border: 1px solid black;
               border-collapse: collapse;
           }
@@ -100,6 +136,30 @@ let htmlStr=`
           .tftable tr:hover {
               background-color: #ffffff;
           }
+
+
+          .tftable1 {
+            font-size: 9px;
+            color: #333333;
+            width: 100%;
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        .tftable1 th {
+            font-size: 9px;
+            background-color: #bfa57d;
+            border: 1px solid black;
+            padding: 6px;
+            text-align: center;
+        }
+        .tftable1 td {
+            font-size: 9px;
+            border: 1px solid black;
+            padding: 6px;
+        }
+        .tftable1 tr:hover {
+            background-color: #ffffff;
+        }
       </style>
   </head>
 
@@ -127,7 +187,7 @@ let htmlStr=`
       </table>
 
      
-          <table class="tftable" border="1">
+          <table class="tftable1" align="center" border="1">
               <tr>
                   <th width="2%">S.N.</th>
                   <th width="15%" >Member Name</th>
@@ -178,23 +238,18 @@ let htmlStr=`
               <th>Amount</th>
           </tr>
 
-          <apex:repeat value="{!SummaryRecordsList}" var="summary">
               <!--tr>
               <td>{!summary['mode']}</td>
               <td>{!summary['modefor']}</td>
               <td style="text-align: right;">{!summary['recordCount']}</td>
               <td style="text-align: right;">{!summary['amount']}</td>
           </tr-->
-              <tr>
-                  <td>{!summary.type}</td>
-                  <td style="text-align: right;">{!summary.recordCount}</td>
-                  <td style="text-align: right;">{!summary.amount}</td>
-              </tr>
-          </apex:repeat>
+            ${summaryHtml}
+
           <tr>
               <td>Total</td>
-              <td style="text-align: right;">{!recordCount}</td>
-              <td style="text-align: right;">{!allTotalAmount}</td>
+              <td style="text-align: right;">${summaryTotalSale}</td>
+              <td style="text-align: right;">${summaryTotalAmount}</td>
           </tr>
       </table>
 
