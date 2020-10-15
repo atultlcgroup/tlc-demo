@@ -41,6 +41,7 @@ let DSRReport = async()=>{
             console.log(emails)
             let pdfFile = await generatePdf.generateDSRPDF('resultArr')
             console.log(pdfFile)
+            
             sendMail.sendDSRReport(`${pdfFile}`,'Daily Report',emails)
             console.log(`From Model`)
         }catch(e){
