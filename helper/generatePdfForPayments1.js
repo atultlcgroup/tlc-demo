@@ -10,7 +10,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     let schemeCode = (resultArr.length && resultArr[0].scheme_code) ? resultArr[0].scheme_code : ''
 
     let sheet2HeaderArr=[
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">SL No </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">SL No </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Number </td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">First Name </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Last Name </td>`,
@@ -44,7 +44,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
 
       })
        h+=`</tr>`
-      h+=`<tr><td>CGST</td><td>SGST</td><td>IGST</td></tr>`
+      h+=`<tr><td style="background-color:#bfa57d;">CGST</td><td style="background-color:#bfa57d;">SGST</td><td style="background-color:#bfa57d;">IGST</td></tr>`
     
         cell=9;
         let feeTotal=0;
