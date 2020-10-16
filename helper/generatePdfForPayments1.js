@@ -12,24 +12,24 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     let sheet2HeaderArr=[
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">SL No </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Number </td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">First Name </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Last Name </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Membership Type</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Fresh/ Renewal</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Transaction Time</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Transcation Code</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Member GST Details</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="5%">Email</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">First Name </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Last Name </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Type</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Fresh/ Renewal</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Transaction Time</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Transcation Code</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Member GST Details</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="6%">Email</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Address</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">City</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">State</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Pin code</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Country</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Payment Mode</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Membership Fee</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">(A) Membership Amount</td> `,
-      `<td colspan ="3" style="background-color: #bfa57d;"  width="6%">(B) GST Amount</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">C=(A)+(B)Total Amount</td> `]
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">State</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Pin code</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Country</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Payment Mode</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Fee</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">(A) Membership Amount</td> `,
+      `<td colspan ="3" style="background-color: #bfa57d;"  width="9%">(B) GST Amount</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">C=(A)+(B)Total Amount</td> `]
     let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
     let h = `<tr>`;
     let index= 1
@@ -44,7 +44,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
 
       })
        h+=`</tr>`
-      h+=`<tr><th>CGST</th><th>SGST</th><th>IGST</th></tr>`
+      h+=`<tr><td>CGST</td><td>SGST</td><td>IGST</td></tr>`
     
         cell=9;
         let feeTotal=0;
