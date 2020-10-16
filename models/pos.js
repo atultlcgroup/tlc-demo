@@ -211,7 +211,7 @@ let getFileFromFTP = async (fileArr , fileName) => {
             ftpConnection.close();
             resolve(`SUCCESS`)
         } catch (err) {
-            // console.log(`${err}`)
+            // console.log(`${err}`)    
             if(fileName)
             reject( `${err}`)
         }

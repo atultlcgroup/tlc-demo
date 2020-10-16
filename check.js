@@ -1,7 +1,11 @@
-let emails='a'
-let emails1='a'
-let arr=[]
-let emailsArr = emails.split(',')
-let emailsArr1 = emails1.split(',')
-console.log(arr.concat(emailsArr1))
-console.log(arr)
+let generatePdf = require("./helper/generatePdfForPayments")
+let generateExcel = require("./helper/generateExcelForPayments")
+
+let pdf = async()=>{
+    let pdfData = await generatePdf.generatePDF()
+    console.log(pdfData)
+    let excelData = await generateExcel.generateExcel();
+    console.log(excelData)
+ }
+ pdf()
+

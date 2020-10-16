@@ -5,11 +5,6 @@ const cron = require("node-cron");
 
 
 Router.post("/report",paymentReport.paymentReport)
-cron.schedule("* * * * *", function() {
-    console.log("running a task every minute route");
-    Router.get("/getPaymentDeta",paymentReport.getPaymentData) 
-  });
-
-
-
+Router.get("/getPaymentDeta",paymentReport.getPaymentData);
+Router.post("/insertUpdateLog",paymentReport.insertUpdateLog);
 module.exports = Router;

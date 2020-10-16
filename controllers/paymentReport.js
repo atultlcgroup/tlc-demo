@@ -21,24 +21,35 @@ let paymentReport = (req , res)=>{
     }
 }
 
+
+    
+
 let getPaymentData=(req,res)=>{  
-    cron.schedule("* * * * *", function() {
-        console.log("running a task every minute controller");
-        paymentModel.getPaymentDetailsData().then(data=>{
+    let type =req.query.type || 'EOD';
+
+          
+    paymentModel.getPaymentDetailsData(type).then(data=>{
             res.status(200).json({code: 200, message: data});
     }).catch(err=>{
         res.status(500).json({code: 500, message: `${err}`});
     })
-      });
-    
-   
-    
 }
 
+let insertUpdateLog=(req,res)=>{  
+    let type =req.query.type || 'EOD';
+
+          
+    paymentModel.getPaymentDetailsData(type).then(data=>{
+            res.status(200).json({code: 200, message: data});
+    }).catch(err=>{
+        res.status(500).json({code: 500, message: `${err}`});
+    })
+}
 
 
 
 module.exports={
     paymentReport,
-    getPaymentData
+    getPaymentData,
+    insertUpdateLog
 }

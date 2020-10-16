@@ -34,10 +34,8 @@ app.use("/api/paymentLink",paymentRouters)
 app.use("/api/referral",referralRouters);
  app.use("/api/whatsapp",whatsAppRouters);
 app.use("/api/FandBSummary",FandBSummary);
-cron.schedule("* * * * *", function() {
-    console.log("running a task every minute index");
-    app.use("/api/payment",paymentReport)
-  });
+app.use("/api/payment",paymentReport);
+
 
 
 // const check = require("./check")

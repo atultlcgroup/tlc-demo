@@ -1,4 +1,12 @@
 
+let generatePdf = require("../helper/generatePdfForPayments")
+let generateExcel = require("../helper/generateExcelForPayments")
+let today = new Date();
+let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
+let month= `${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`
+let fs = require('fs')
+
+
 let sendGridMailer = require('../helper/sendGridMail')
 const pool = require("../databases/db").pool;
 let findPaymentRule= async(req)=>{
@@ -10,7 +18,6 @@ let findPaymentRule= async(req)=>{
         qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.propertySFID}' limit 1`;
         if(req.customer_setSFID)
         qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_setSFID}' limit 1`;
-
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -30,10 +37,11 @@ let paymentReport =async (req)=>{
         let subject = `Notification - Payment Confirmation - ${req.hotel}`;
         let replacements={name:`${req.name}`,"membership_number":`${req.membership_number}`,"membership_type":`${req.membership_type}`,"email":`${req.email}`,"amount":`${req.amount}`,"transaction_code":`${req.transaction_code}`,"date_time":`${req.date_time}`,"payment_mode":`${req.payment_mode}`,"source":`${req.source}`};
         if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
-            throw `Please define EMAIL_FOR_PAYMENT_REPORT from hrroku`
+            throw `Please define EMAIL_FOR_PAYMENT_REPORT from heroku`
         }
         let emails = await findPaymentRule(req);
         if(emails.length > 0){
+        // sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
         sendGridMailer.sendgrid(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd').then(data=>{
             console.log(data)
         }).catch(err=>{
@@ -48,15 +56,34 @@ let paymentReport =async (req)=>{
     }
 }
 
-let getPaymentDetailsData = async () => {
+
+let getPaymentDetailsData = async (type) => {
     try {
             console.log("get peyment datails data !");
-           
-            let findProperty =await pool.query(`select firstname,lastname,referral_code__c,member_id__c,gift_referral_benefit__c from tlcsalesforce.account where member_id__c='101623'`);
-             console.log("findProperty",findProperty.rows)
+            var   lastday   =   new   Date(new   Date().getFullYear(),new   Date().getMonth()+1,0).getDate();
+            console.log('lastday',lastday)
+            let subject = ``
+            console.log(`${subject}`)
+            if (type =='EOD'){
+                subject=`Payment report for ${day}`;
+            }else{
+                subject=`Pyament report for ${month}`
+            }
+            console.log(subject)
+            let pdfFile = await generatePdf.generatePDF()
+            let excelFile = await generateExcel.generateExcel();
+            let fileArr = getFileArr(excelFile,pdfFile);
+
+            sendGridMailer.sendgridAttachement('atul.srivastava@tlcgroup.com',process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,{},'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
+                console.log(data)
+            }).catch(err=>{
+                console.log(err)
+            })
+
             
-            return findProperty.rows
+            return `${fileArr}`;
          } catch (e) {
+             console.log(e)
         return e;
     }
 
@@ -64,8 +91,52 @@ let getPaymentDetailsData = async () => {
 
 
 
+let getFileArr = (excelFile,pdfFile)=>{
+    let fileArr= [{
+            filename: `Payment Report.xlsx`,
+            //  content: fs.readFileSync(`./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`).toString("base64")
+            content: fs.readFileSync(`${excelFile}`).toString("base64")    
+    
+            },
+            {
+                filename: `Payment Report.pdf`,
+                // content: fs.readFileSync(`${pdf}`).toString("base64")    
+                content: fs.readFileSync(`${pdfFile}`).toString("base64")    
+                }
+            ]
+            return fileArr;
+    }
 
+
+    let insertUpdateLog=async(transactionId,emailStatus,paymentReportType,toEmail,fromEmail,emailRuleId)=>{
+        try {
+            console.log("insert log data");
+            console.log('transactionId',transactionId);
+          if(transactionId == null || transactionId==undefined || transactionId==''){
+              pool.query(`INSERT INTO tlcsalesforce.payment_report_log(
+                  transaction_id, email_status, payment_report_type, created_date_time, to_email, from_email, email_rule_id)
+                  VALUES ('${transactionId}', '${emailStatus}', '${paymentReportType}', now(), '${toEmail}','${fromEmail}' ,'${emailRuleId}'`);
+          
+              } 
+          else{
+              pool.query(`UPDATE tlcsalesforce.payment_report_log
+              SET  email_status='${emailStatus}', payment_report_type='${paymentReportType}', created_date_time= now(), to_email='${toEmail}', from_email='${fromEmail}', email_rule_id='${emailRuleId}'
+              WHERE log_id=${transactionId}`)
+              
+          }
+          return "hi"
+        }
+        catch(e){
+            console.log('________error______________')
+            console.log(e)
+            return e
+        }
+      
+      }
+      
+    
 module.exports={
     paymentReport,
-    getPaymentDetailsData
+    getPaymentDetailsData,
+    insertUpdateLog
 }
