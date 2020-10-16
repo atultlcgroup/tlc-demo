@@ -15,10 +15,10 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     let index= 1
     sheet2HeaderArr.map(d=>{
         if(index == 19){
-            h+=`<th colspan ="3">${d}</th>`     
+            h+=`<th colspan ="3" >${d}</th>`     
        }
         else{
-        h+=`<th rowspan="2" colspan ="1" border="1">${d}</th>`
+        h+=`<th rowspan="2"  colspan="1" border="1">${d}</th>`
         }
         index++;
 
@@ -114,7 +114,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     cell++;    
     cell+=4;
     index = 1;
-
+   
     let html=`<html>
     <head>
         <meta charset="UTF-8" />
@@ -173,48 +173,51 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
           }
           div {
               
-              margin-top: 10px;
-              margin-bottom: 10px;
-              margin-right: 20px;
+              margin-top: 40px;
+              margin-bottom: 40px;
+              margin-right: 30px;
               margin-left: 40px;
               
             }
         </style>
+       
     </head>
     <div>
-    <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 1px; color:white;">
+    
+    <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 1px; color:white;" >
     <tr>
-        <td>Daily Summary</td>
+        <td style="font-size: 13px;" >Daily Summary</td>
         <td style="text-align: right">
            
         </td>
     </tr>
 </table>
-</div>
-    <div style="float:left;  font-size: 13px; margin-top:0" >
-            <span><p >Level Name:</span><span>       ${membershipName}</p></span>
-            </span><p >Scheme: </span><span>          ${schemeCode}</p></span>
-            </span><p >Transaction Date:</span><span> ${today}</p></span>
+
+ 
+            <span><p style="font-size: 13px;" >Level Name:</span><span>       ${membershipName}</p></span>
+            </span><p style="font-size: 13px;">Scheme: </span><span>          ${schemeCode}</p></span>
+            </span><p style="font-size: 13px;">Transaction Date:</span><span> ${today}</p></span>
 
 
             
-                  </div>
-    <div>
+          
+    
     <body style="font-family:sans-serif;" >  
        
-            <table class="tftable1" align="center" border="1">
+            <table class="tftable1" align="center" border="2">
                ${h}
             </table>
            
         
-      </div>
-      <div style="float:left;  font-size: 13px;">
-            <p >Refund / Cancellations</p>
-        </div>
+   
+    <!--  <div style="float:left;  font-size: 13px;">  -->
+            <p style="font-size: 13px;">Refund / Cancellations</p>
+   <!--     </div>  -->
     </body>
-  
+   </div>
     </html>`
-    let pdfName = `./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
+
+   let pdfName = `./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
     const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${html}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName;

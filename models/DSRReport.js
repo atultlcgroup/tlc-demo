@@ -34,6 +34,8 @@ let findPaymentRule= async(req)=>{
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
+
+            
             let req = {};
             req.property_sfid = 'a0Y1y000000EFBREA4';
             console.log(`hi`)
