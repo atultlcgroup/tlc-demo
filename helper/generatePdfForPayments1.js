@@ -123,7 +123,12 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
           else if(index == 18)
         h+=`<td>${(Math.round(feeTotal * 100) / 100)}</td>`;
         else if(index == 19)
-        h+=`<td>${(Math.round(gstTotal * 100) / 100)}</td>`;
+        h+=`<td colspan="3">${(Math.round(gstTotal * 100) / 100)}</td>`;
+        else if(index == 20){
+
+        }else if(index == 21){
+
+        }
         else if(index == 22)
         h+=`<td>${(Math.round(totalAmount * 100) / 100)}</td>`;
         else
