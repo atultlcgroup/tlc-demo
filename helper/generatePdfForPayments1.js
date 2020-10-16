@@ -11,24 +11,24 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
 
     let sheet2HeaderArr=[
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">SL No </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="7%">Membership Number </td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Membership Number </td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">First Name </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Last Name </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Type</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="5%">Fresh/ Renewal</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Fresh/ Renewal</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Transaction Time</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Transcation Code</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Member GST Details</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="10%">Email</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="6%">Email</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Address</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">City</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">State</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Pin code</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Country</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="5%">Payment Mode</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Payment Mode</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Fee</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">(A) Membership Amount</td> `,
-      `<td colspan ="3" style="background-color: #bfa57d;"  width="12%">(B) GST Amount</td> `,
+      `<td colspan ="3" style="background-color: #bfa57d;"  width="9%">(B) GST Amount</td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">C=(A)+(B)Total Amount</td> `]
     let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
     let h = `<tr>`;
