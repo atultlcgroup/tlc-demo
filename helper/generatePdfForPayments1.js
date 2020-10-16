@@ -11,7 +11,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
 
     let sheet2HeaderArr=[
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">SL No </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Membership Number </td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Number </td> `,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">First Name </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Last Name </td>`,
       `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Type</td> `,
