@@ -9,7 +9,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     let membershipName = (resultArr.length && resultArr[0].membership_type_name) ? resultArr[0].membership_type_name : ''
     let schemeCode = (resultArr.length && resultArr[0].scheme_code) ? resultArr[0].scheme_code : ''
 
-    let sheet2HeaderArr=['SL No','Membership Number','First Name','Last Name','MembershipType','Fresh / Renewal','Transaction Time','TranscationCode','Member GST Details','Email','Address','City','State','Pin code','Country','Payment Mode','Membership Fee','(A) Membership Amount','(B) GST Amount','C=(A)+(B)Total Amount']
+    let sheet2HeaderArr=['SL No','Membership Number','First Name','Last Name','Membership Type','Fresh / Renewal','Transaction Time','Transcation Code','Member GST Details','Email','Address','City','State','Pin code','Country','Payment Mode','Membership Fee','(A) Membership Amount','(B) GST Amount','C=(A)+(B)Total Amount']
     let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
     let h = `<tr>`;
     let index= 1
@@ -150,23 +150,21 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
   
   
             .tftable1 {
-              font-size: 9px;
+              font-size: 8px;
               color: #333333;
               width: 100%;
               border: 1px solid black;
               border-collapse: collapse;
-              word-break: break-all;
-
           }
           .tftable1 th {
-              font-size: 9px;
+              font-size: 8px;
               background-color: #bfa57d;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
           }
           .tftable1 td {
-              font-size: 9px;
+              font-size: 8px;
               border: 1px solid black;
               padding: 6px;
           }
