@@ -10,26 +10,26 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     let schemeCode = (resultArr.length && resultArr[0].scheme_code) ? resultArr[0].scheme_code : ''
 
     let sheet2HeaderArr=[
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">SL No </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Membership Number </td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">First Name </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">Last Name </td>`,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Membership Type</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Fresh/ Renewal</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Transaction Time</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Transcation Code</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Member GST Details</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Email</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Address</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">City</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">State</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">Pin code</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">Country</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">Payment Mode</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">Membership Fee</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">(A) Membership Amount</td> `,
-      `<td colspan ="3" style="background-color: #bfa57d; word-wrap:break-word;"  width="3%">(B) GST Amount</td> `,
-      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">C=(A)+(B)Total Amount</td> `]
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">SL No </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Membership Number </td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">First Name </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Last Name </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Membership Type</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Fresh/ Renewal</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Transaction Time</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Transcation Code</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Member GST Details</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="5%">Email</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="4%">Address</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">City</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">State</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Pin code</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Country</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">Payment Mode</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">Membership Fee</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="3%">(A) Membership Amount</td> `,
+      `<td colspan ="3" style="background-color: #bfa57d;"  width="6%">(B) GST Amount</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d;" width="2%">C=(A)+(B)Total Amount</td> `]
     let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
     let h = `<tr>`;
     let index= 1
@@ -175,6 +175,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
               width: 100%;
               border: 1px solid black;
               border-collapse: collapse;
+              word-break:break-word;
           }
           .tftable1 th {
               font-size: 8px;
@@ -191,6 +192,19 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
           .tftable1 tr:hover {
               background-color: #ffffff;
           }
+          td[rowspan]:before {
+            position: absolute;
+            content: "";
+            top: -1px;
+            left: -1px;
+            background-color: transparent;
+            border: 1px solid black;
+            width: 100%;
+            height: 100%;
+        }
+        td[rowspan] {
+          position: relative;
+      }
           div {
               
               margin-top: 10px;
