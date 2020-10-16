@@ -45,7 +45,7 @@ let DSRReport = async()=>{
                 if(DSRRecords.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
                     console.log(pdfFile)
-                    sendMail.sendDSRReport(`${pdfFile}`,'Daily Report',emails)
+                    sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
                     console.log(`From Model`)
                 }
             ind++;
