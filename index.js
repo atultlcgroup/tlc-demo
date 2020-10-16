@@ -1,6 +1,7 @@
+
+
 const express = require("express");
-const dotenv = require('dotenv');
-const cron = require("node-cron");
+let  dotenv = require('dotenv');
 
 dotenv.config();
 //const scheduler = require('./helper/scheduler');
@@ -8,9 +9,8 @@ const port = process.env.PORT;
 const posRouters= require("./routers/posCheque");
 
 let paymentReport = require("./routers/paymentReport")
+const DSRReport = require("./routers/DSRReport")
 
-
-//const generateExcel = require("./helper/paymentExcel")
 const reservationRouters= require("./routers/reservation");
 const paymentRouters= require("./routers/paymentLink");
 
@@ -19,9 +19,7 @@ const body_parser = require("body-parser");
 const FandBSummary = require("./routers/FandBSummary")
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
-
-
-
+const pdfCheck = require("./helper/pdfCopy")
 const cors = require("cors");
 const app = express();
 app.use(cors());
@@ -37,7 +35,10 @@ app.use("/api/FandBSummary",FandBSummary);
 app.use("/api/payment",paymentReport);
 
 
+app.use("/api/payment",paymentReport)
+app.use("/api/DSR",DSRReport)
 
+// app.use("/")
 // const check = require("./check")
 // app.post("/sendMsg",check.sendMsg)
  app.use("/api/whatsapp",whatsAppRouters)

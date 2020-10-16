@@ -1,11 +1,1 @@
-let generatePdf = require("./helper/generatePdfForPayments")
-let generateExcel = require("./helper/generateExcelForPayments")
-
-let pdf = async()=>{
-    let pdfData = await generatePdf.generatePDF()
-    console.log(pdfData)
-    let excelData = await generateExcel.generateExcel();
-    console.log(excelData)
- }
- pdf()
-
+console.log(`<td>${(Math.round(12762187.1289128 * 100) / 100)}</td>`)
