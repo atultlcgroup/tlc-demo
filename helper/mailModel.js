@@ -197,6 +197,8 @@ let sendDSRReport=(file,fileName,emails)=>{
            let htmlToSend = template(replacements);
             console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
             sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                //  sendmail.smtpAttachmentDSR(['atul.srivstava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
         // res.status(200).send(`email sent from: ${from} to: ${to}`)

@@ -42,6 +42,7 @@ let DSRReport = async()=>{
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
             console.log("getting DSR report");
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
+            // let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
                     console.log(pdfFile)
@@ -49,6 +50,7 @@ let DSRReport = async()=>{
                     console.log(`From Model`)
                 }
             ind++;
+            
           }
         }catch(e){
             console.log(`${e}`)
@@ -98,12 +100,13 @@ let getDSRReport=async(property_sfid)=>{
         authorization_number__c,
         receipt_No__c,Payment_Mode__c,Batch_Number__c,Amount__c,
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
-        Account.GSTIN__c,remarks__c,property__c.name as property_name
+        Account.GSTIN__c,remarks__c,city__c.state_code__c,property__c.name as property_name
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
+        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         where 
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
@@ -111,7 +114,9 @@ let getDSRReport=async(property_sfid)=>{
         and 
         Membership__c is not Null and Membership_Offer__c is null
         and 
-        Property__c.sfid='${property_sfid}'
+        (Property__c.sfid='${property_sfid}'
+        -- or membership__c.customer_set__c IN ('a0J1y000000u9BJEAY')
+        )        
         `)
         let result = query ? query.rows : [];
         return result;
