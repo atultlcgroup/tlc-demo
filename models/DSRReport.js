@@ -41,8 +41,8 @@ let DSRReport = async()=>{
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
             console.log("getting DSR report");
-            //  let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
-            let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
+             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
+            // let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
                     console.log(pdfFile)
