@@ -260,7 +260,7 @@ let queryForEOD=async()=>{
         
         where 
         (
-                (date(payment__c.createddate) = '2020-10-06'--current_date - interval '1 day'
+                (date(payment__c.createddate) = current_date
                 AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
                
                 )
