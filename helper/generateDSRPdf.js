@@ -245,7 +245,7 @@ let htmlStr=`
                   <th width="3%">Membership Number</th>
                   <th width="3%">Type
                       <br/>(N/R)</th>
-                  <th >Expiry Date</th>
+                  <th style='  text-align: left'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
