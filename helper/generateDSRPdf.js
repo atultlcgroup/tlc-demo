@@ -13,7 +13,7 @@ let convertDateFormat= (date1)=>{
         hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
         minutes = minutes < 10 ? '0'+minutes : minutes;
         let strTime = hours1 + ':' + minutes + ' ' + ampm;
-        dateTime = `${String(today1.getDate()).padStart(2, '0')} ${today1.toLocaleString('default', { month: 'short' })} ${today1.getFullYear()} ${strTime}`
+        dateTime = `${String(today1.getDate()).padStart(2, '0')} ${today1.toLocaleString('default', { month: 'short' })} ${today1.getFullYear()}`
       }
       return dateTime
 }
@@ -76,7 +76,7 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.amount__c)}</td>
                     <td>${getEmptyIfNull(obj.total_amount__c-obj.amount__c)}</td>
                     <td>${getEmptyIfNull(obj.total_amount__c)}</td>
-                    <td>${getEmptyIfNull(obj.gstin__c)}</td>
+                    <td>${getEmptyIfNull(obj.GST_details__c)}</td>
                     <td>${getEmptyIfNull(obj.state_code__c)}</td>
                     <td>${getEmptyIfNull(obj.remarks__c)}</td>
                     </tr>
@@ -245,7 +245,7 @@ let htmlStr=`
                   <th width="3%">Membership Number</th>
                   <th width="3%">Type
                       <br/>(N/R)</th>
-                  <th width="2%">Expiry Date</th>
+                  <th width="6%">Expiry Date</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
