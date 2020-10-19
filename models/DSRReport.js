@@ -37,6 +37,7 @@ let DSRReport = async()=>{
             let dataObj = await getEPRSfid();
             console.log(dataObj)
             let ind = 0;
+               
              for(e of dataObj.emailArr){
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
@@ -46,7 +47,7 @@ let DSRReport = async()=>{
                 if(DSRRecords.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
                     console.log(pdfFile)
-                    sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
+                  sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
                     console.log(`From Model`)
                 }
             ind++;
@@ -82,7 +83,7 @@ let DSRReport = async()=>{
 let getEPRSfid = async()=>{
     try{
       let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
-      (hotel_email_status__c = true or tlc_email_status__c = true)`
+      (hotel_email_status__c = true or tlc_email_status__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
@@ -102,7 +103,7 @@ let getEPRSfid = async()=>{
 let getEPRSfidCS = async()=>{
     try{
       let qry = `select distinct customer_set__c customer_set_sfid from tlcsalesforce.payment_email_rule__c where
-      (hotel_email_status__c = true or tlc_email_status__c = true) and (property__c is  NULL or customer_set__c ='')`
+      (hotel_email_status__c = true or tlc_email_status__c = true) and (property__c is  NULL or property__c ='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []

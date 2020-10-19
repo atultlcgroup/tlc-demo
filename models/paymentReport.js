@@ -171,8 +171,7 @@ let paymentReport =async (req)=>{
         )
         AND 
         (payment__c.payment_status__c = 'CONSUMED' OR 
-        payment__c.payment_status__c = 'SUCCESS')
- 
+        payment__c.payment_status__c = 'SUCCESS')  order by payment__c.createddate asc
     `;
  
         let getPaymentsOf15Minutes =await pool.query(`${qry1}`);
@@ -260,7 +259,7 @@ let queryForEOD=async()=>{
         
         where 
         (
-                (date(payment__c.createddate) = current_date
+                (date(payment__c.createddate) = current_date - interval '1 day'
                 AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
                
                 )
@@ -268,7 +267,7 @@ let queryForEOD=async()=>{
                 )
                 AND 
                 (payment__c.payment_status__c = 'CONSUMED' OR 
-                payment__c.payment_status__c = 'SUCCESS')
+                payment__c.payment_status__c = 'SUCCESS')  order by payment__c.createddate asc
         
                 `);
         let result = query ? query.rows : []
@@ -376,7 +375,7 @@ let queryForEOM = async()=>{
                  )
                  AND 
                  (payment__c.payment_status__c = 'CONSUMED' OR 
-                 payment__c.payment_status__c = 'SUCCESS')         
+                 payment__c.payment_status__c = 'SUCCESS')     order by payment__c.createddate asc     
        `)
          
 
