@@ -175,7 +175,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
   
   
             .tftable1 {
-              font-size: 8px;
+              font-size: 6px;
               color: #333333;
               width: 100%;
               border: 1px solid black;
@@ -183,14 +183,14 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
               word-break:break-word;
           }
           .tftable1 th {
-              font-size: 8px;
+              font-size: 6px;
               background-color: #bfa57d;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
           }
           .tftable1 td {
-              font-size: 8px;
+              font-size: 6px;
               border: 1px solid black;
               padding: 6px;
           }
@@ -230,7 +230,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     </tr>
 </table>
 </div>
-    <div style="float:left;  font-size: 13px; margin-top:0" >
+    <div style="float:left;  font-size: 10px; margin-top:0" >
             <span><p >Level Name:</span><span>       ${membershipName}</p></span>
             </span><p >Scheme: </span><span>          ${schemeCode}</p></span>
             </span><p >Transaction Date:</span><span> ${today}</p></span>
