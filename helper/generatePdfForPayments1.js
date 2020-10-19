@@ -9,16 +9,36 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     let membershipName = (resultArr.length && resultArr[0].membership_type_name) ? resultArr[0].membership_type_name : ''
     let schemeCode = (resultArr.length && resultArr[0].scheme_code) ? resultArr[0].scheme_code : ''
 
-    let sheet2HeaderArr=['SL No','Membership Number','First Name','Last Name','MembershipType','Fresh / Renewal','Transaction Time','TranscationCode','Member GST Details','Email','Address','City','State','Pin code','Country','Payment Mode','Membership Fee','(A) Membership Amount','(B) GST Amount','C=(A)+(B)Total Amount']
+    let sheet2HeaderArr=[
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">SL No </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Membership Number </td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">First Name </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">Last Name </td>`,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Membership Type</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Fresh/ Renewal</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Transaction Time</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Transcation Code</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Member GST Details</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Email</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="4%">Address</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">City</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">State</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">Pin code</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="2%">Country</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">Payment Mode</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">Membership Fee</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">(A) Membership Amount</td> `,
+      `<td colspan ="3" style="background-color: #bfa57d; word-wrap:break-word;"  width="3%">(B) GST Amount</td> `,
+      `<td rowspan="2"  colspan="1" border="1" style="background-color:#bfa57d; word-wrap:break-word;" width="3%">C=(A)+(B)Total Amount</td> `]
     let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
     let h = `<tr>`;
     let index= 1
     sheet2HeaderArr.map(d=>{
         if(index == 19){
-            h+=`<th colspan ="3">${d}</th>`     
+            h+=`${d}`     
        }
         else{
-        h+=`<th rowspan="2" colspan ="1" border="1">${d}</th>`
+        h+=`${d}`
         }
         index++;
 
@@ -114,7 +134,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     cell++;    
     cell+=4;
     index = 1;
-
+   
     let html=`<html>
     <head>
         <meta charset="UTF-8" />
@@ -173,46 +193,62 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
           }
           div {
               
-              margin-top: 10px;
-              margin-bottom: 10px;
-              margin-right: 20px;
+              margin-top: 40px;
+              margin-bottom: 40px;
+              margin-right: 100px;
               margin-left: 40px;
               
             }
+            td[rowspan] {
+              position: relative;
+          }
+  
+          td[rowspan]:before {
+              position: absolute;
+              content: "";
+              top: -1px;
+              left: -1px;
+              background-color: transparent;
+              border: 1px solid black;
+              width: 100%;
+              height: 100%;
+          }
         </style>
+       
     </head>
     <div>
-    <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 1px; color:white;">
+    
+    <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 1px; color:white;" >
     <tr>
-        <td>Daily Summary</td>
+        <td style="font-size: 13px;" >Daily Summary</td>
         <td style="text-align: right">
            
         </td>
     </tr>
 </table>
-</div>
-    <div style="float:left;  font-size: 13px; margin-top:0" >
-            <span><p >Level Name:</span><span>       ${membershipName}</p></span>
-            </span><p >Scheme: </span><span>          ${schemeCode}</p></span>
-            </span><p >Transaction Date:</span><span> ${today}</p></span>
+
+ 
+            <span><p style="font-size: 13px;" >Level Name:</span><span>       ${membershipName}</p></span>
+            </span><p style="font-size: 13px;">Scheme: </span><span>          ${schemeCode}</p></span>
+            </span><p style="font-size: 13px;">Transaction Date:</span><span> ${today}</p></span>
 
 
             
-                  </div>
-    <div>
+          
+    
     <body style="font-family:sans-serif;" >  
        
-            <table class="tftable1" align="center" border="1">
+            <table class="tftable1" align="center" border="2">
                ${h}
             </table>
            
         
-      </div>
-      <div style="float:left;  font-size: 13px;">
-            <p >Refund / Cancellations</p>
-        </div>
+   
+    <!--  <div style="float:left;  font-size: 13px;">  -->
+            <p style="font-size: 13px;">Refund / Cancellations</p>
+   <!--     </div>  -->
     </body>
-  
+   </div>
     </html>`
     let pdfName = `./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
     const pdf = Promise.promisifyAll(require('html-pdf'));
