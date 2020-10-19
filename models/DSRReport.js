@@ -41,8 +41,8 @@ let DSRReport = async()=>{
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
             console.log("getting DSR report");
-            //  let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
-             let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
+            let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
+            //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
                     console.log(pdfFile)
@@ -50,7 +50,7 @@ let DSRReport = async()=>{
                     console.log(`From Model`)
                 }
             ind++;
-            break
+            
           }
 
           //For customerset 
@@ -149,9 +149,9 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         where 
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '3 day'
+        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-        or (Membership__c.Membership_Renewal_Date__c = current_date - interval '3 day'))
+        or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
         and 
         Membership__c is not Null and Membership_Offer__c is null
         and 
