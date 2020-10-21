@@ -185,18 +185,20 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
 
 let sendDSRReport=(file,fileName,emails)=>{
     try{
-        readHTMLFile(__dirname + `/Payment_Report_For_EOM.html`, function(err, html) {
+        readHTMLFile(__dirname + `/DSR_Report.html`, function(err, html) {
             console.log('hi')
             if(err)
             console.log(err)
             let dateForDSRReport= new Date();
             dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
-            let subjectForDSRReport = `Daily Summary I DSR Report`
+            let subjectForDSRReport = `Daily Sales Report`
             let template = handlebars.compile(html);
             replacements={};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
-            sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
         // res.status(200).send(`email sent from: ${from} to: ${to}`)

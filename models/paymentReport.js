@@ -413,7 +413,7 @@ let queryForEOM = async()=>{
          
          where 
          (
-                 (payment__c.createddate > current_date - interval '1 month'
+                 (payment__c.createddate >= current_date - interval '1 month'
                  AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
                 
                  )

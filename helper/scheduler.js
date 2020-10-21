@@ -1,13 +1,10 @@
 const schedule = require('node-schedule');
 const paymentReport=require('../models/paymentReport');
-
-const DSRReport = require('../models/DSRReport')
 const FandBSummary = require('../models/FandBSummary')
+const DSRReport = require('../models/DSRReport')
+const getMembershipDetails=require('../models/memberSpentForPOS');
+
 let posModel = require('../models/pos')
-
-
-
-
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
     console.log(`=================   SCHEDULER START POS   ========================`)
     await posModel.getPosData()
@@ -21,19 +18,6 @@ let scheduleTasksForFNB =(scheduledTime)=> schedule.scheduleJob(scheduledTime, a
   console.log(`=================   SCHEDULER END FOR FNB    ========================`)
 });
 
-
-let scheduleTasksForEOD=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
-  console.log(`=================   SCHEDULER START EOD   ========================`)
-  await paymentReport.getPaymentDetailsData('EOD')
-  console.log(`================= payment report for EOD Success=============`)
-});
-
-let scheduleTasksForEOM =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
-  console.log(`=================   SCHEDULER START EOM   ========================`)
-  await paymentReport.getPaymentDetailsData('EOM')
-  console.log(`================= payment report for EOM Success =============`)
-});
-
 if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS == true || process.env.IS_SCHEDULER_ALLOWED_FOR_POS == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_POS == 'TRUE')
 {
   console.log(`POS`)
@@ -41,19 +25,6 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS == true || process.env.IS_SCHEDULER_
 }
 
 if(process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == true || process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == 'TRUE')
-{
-  console.log(`FNB`)
-  scheduleTasksForFNB(process.env.SCHEDULER_TIME_FOR_FNB)
-}
-
-if(process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOD == true || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOD == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOD == 'TRUE')
-{
-  console.log(`payment report for EOD`);
-  scheduleTasksForEOD(process.env.SCHEDULER_TIME_FOR_PAYMENT_REPORT_EOD);
-}
-
-
-if(process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == true || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'TRUE')
 {
   console.log(`FNB`)
   scheduleTasksForFNB(process.env.SCHEDULER_TIME_FOR_FNB)
@@ -102,6 +73,7 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == true || process.en
 }
 
 
+
 //For DSR Report
 
 let scheduleTasksForDSRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
@@ -117,4 +89,16 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == true || process.env.IS_SCH
   scheduleTasksForDSRReport(process.env.SCHEDULER_TIME_FOR_DSR_REPORT);
 }
 
+//For POS membership Totatl spent
+let scheduleTasksForMemberSpentReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR Member Spent Report   ========================`)
+ let data= await getMembershipDetails.getMembershipDetails('')
+ console.log(data) 
+ console.log(`================= Member Spent Report: Success=============`)
+});
 
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == 'TRUE')
+{
+  console.log(`schedule Tasks For Member Spent Report `);
+  scheduleTasksForMemberSpentReport(process.env.SCHEDULER_TIME_FOR_POS_TOTAL_SPENT_REPORT);
+}

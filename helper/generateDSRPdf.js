@@ -1,11 +1,29 @@
 const Promise = require('bluebird');
 
+let today = new Date();
+today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
+
+let convertDateFormat= (date1)=>{
+    if(date1){
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${String(today1.getDate()).padStart(2, '0')} ${today1.toLocaleString('default', { month: 'short' })} ${today1.getFullYear()}`
+      }
+      return dateTime
+}
+
 
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
 let  generateDSRPDF=async(dsrValues)=>{
- propertyName = `JW Marriott Mumbai Juhu`;
+ propertyName = `${dsrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 console.log("DSR values are");
 console.log(dsrValues);
@@ -48,8 +66,8 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.name)}</td>
                     <td>${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
-                    <td>${getEmptyIfNull(obj.expiry_date__c)}</td>
-                    <td>${getEmptyIfNull(obj.membership_enrollment_date__c)}</td>
+                    <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
+                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
@@ -58,8 +76,8 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.amount__c)}</td>
                     <td>${getEmptyIfNull(obj.total_amount__c-obj.amount__c)}</td>
                     <td>${getEmptyIfNull(obj.total_amount__c)}</td>
-                    <td>${getEmptyIfNull(obj.gstin__c)}</td>
-                    <td>${getEmptyIfNull(obj.remarks__c)}</td>
+                    <td>${getEmptyIfNull(obj.GST_details__c)}</td>
+                    <td>${getEmptyIfNull(obj.state_code__c)}</td>
                     <td>${getEmptyIfNull(obj.remarks__c)}</td>
                     </tr>
                     `
@@ -200,8 +218,7 @@ let htmlStr=`
   <div>
       <table style="width: 100%;">
           <tr>
-              <td style="font-size: 25px;color: #bfa57d; border-bottom: 2px solid black; width: 85%">DSR</td>
-              <td style="text-align: right; color:#438282;" rowspan="2"> ${propertyName}</td>
+              <td style="font-size: 25px;color: #438282; border-bottom: 2px solid black; width: 100%">${propertyName}</td>
           </tr>
           <tr>
               <td style="width: 85%; font-size: 11px; padding-bottom: 10px;">
@@ -215,7 +232,7 @@ let htmlStr=`
           <tr>
               <td>Daily Sales Reports</td>
               <td style="text-align: right">
-                 
+              ${today}
               </td>
           </tr>
       </table>
@@ -228,7 +245,7 @@ let htmlStr=`
                   <th width="3%">Membership Number</th>
                   <th width="3%">Type
                       <br/>(N/R)</th>
-                  <th width="2%">Expiry Date</th>
+                  <th width="3%">Expiry&nbsp;&nbsp;&nbsp;&nbsp; Date</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
@@ -252,16 +269,15 @@ let htmlStr=`
           
               <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')}">
                   <td colspan="11">Total Month Sales : ${salesCount}</td>
-                  <td style="text-align:right;">${salesAmount}</td>
-                  <td style="text-align:right;">${salesTax}</td>
-                  <td style="text-align:right;">${salesTotalAmount}</td>
+                  <td>${salesAmount}</td>
+                  <td>${salesTax}</td>
+                  <td>${salesTotalAmount}</td>
                   <td> </td>
                   <td></td>
                   <td></td>
               </tr>
 
           </table>
-          <div style="page-break-after: always;">&nbsp; </div>
 
 
       <table class="tftable" border="1" style="margin-top:10px; float:left;">

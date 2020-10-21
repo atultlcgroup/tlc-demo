@@ -4,7 +4,7 @@ const express = require("express");
 let  dotenv = require('dotenv');
 
 dotenv.config();
-//const scheduler = require('./helper/scheduler');
+const scheduler = require('./helper/scheduler');
 const port = process.env.PORT;
 const posRouters= require("./routers/posCheque");
 
@@ -13,6 +13,7 @@ const DSRReport = require("./routers/DSRReport")
 
 const reservationRouters= require("./routers/reservation");
 const paymentRouters= require("./routers/paymentLink");
+const memberSpentPOS=require("./routers/memberSpentForPOS")
 
 const excelRouters = require("./routers/pos");
 const body_parser = require("body-parser");
@@ -36,7 +37,8 @@ app.use("/api/payment",paymentReport);
 
 
 app.use("/api/payment",paymentReport)
-app.use("/api/DSR",DSRReport)
+app.use("/api/DSR",DSRReport);
+app.use("/api/MemberSpend",memberSpentPOS)
 
 // app.use("/")
 // const check = require("./check")
