@@ -10,6 +10,8 @@ const posRouters= require("./routers/posCheque");
 
 let paymentReport = require("./routers/paymentReport")
 const DSRReport = require("./routers/DSRReport")
+const UTRReport = require("./routers/UTRReport")
+
 
 const reservationRouters= require("./routers/reservation");
 const paymentRouters= require("./routers/paymentLink");
@@ -33,6 +35,8 @@ app.use("/api/referral",referralRouters);
 app.use("/api/FandBSummary",FandBSummary);
 app.use("/api/payment",paymentReport)
 app.use("/api/DSR",DSRReport)
+app.use("/api/UTR",UTRReport)
+
 
 // app.use("/")
 // const check = require("./check")

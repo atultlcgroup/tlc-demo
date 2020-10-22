@@ -1,5 +1,5 @@
 
-let generatePdf = require("../helper/generatePdfForPayments1")
+let generatePdf = require("../helper/generatePdfForPayments")
 let generateExcel = require("../helper/generateExcelForPayments")
 let sendMail= require("../helper/mailModel")
 var dateFormat = require('dateformat');

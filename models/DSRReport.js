@@ -36,18 +36,20 @@ let DSRReport = async()=>{
         try{
             let dataObj = await getEPRSfid();
             console.log(dataObj)
+
             let ind = 0;
                
              for(e of dataObj.emailArr){
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
             console.log("getting DSR report");
+            console.log(`----------------`)
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
                     console.log(pdfFile)
-                  sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
+                 sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
                     console.log(`From Model`)
                 }
             ind++;
@@ -67,7 +69,7 @@ let DSRReport = async()=>{
               if(DSRRecords1.length){
                   let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1);
                   console.log(pdfFile1)
-                  sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
+                 sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
                   console.log(`From Model`)
               }
           ind1++;
@@ -142,29 +144,34 @@ let getDSRReport=async(property_sfid)=>{
         authorization_number__c,
         receipt_No__c,Payment_Mode__c,Batch_Number__c,Amount__c,
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
-        payment__c.GST_details__c,remarks__c,city__c.state_code__c,property__c.name as property_name
+        account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-        where 
+        where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
         or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-        and 
+        and
         Membership__c is not Null and Membership_Offer__c is null
-        and 
+        and
         (Property__c.sfid='${property_sfid}'
-        -- or membership__c.customer_set__c IN ('')
-        )        
-        `)
+        --or membership__c.customer_set__c IN ('')
+        )
+        and
+        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
+      
+        
+         `)
+        console.log(`hiiiSS`)
         let result = query ? query.rows : [];
         return result;
 
     }catch(e){
-        console.log(e);
+        console.log(`${e}`);
 
     }
 }
@@ -192,26 +199,29 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         authorization_number__c,
         receipt_No__c,Payment_Mode__c,Batch_Number__c,Amount__c,
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
-        payment__c.GST_details__c,remarks__c,city__c.state_code__c,membershiptype__c.name property_name
+        account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-        where 
+        where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
         or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-        and 
+        and
         Membership__c is not Null and Membership_Offer__c is null
-        and 
-        --(
-          --Property__c.sfid=''
-         --or 
-         membership__c.customer_set__c = '${customer_set_sfid}'
-        --)        
-        `)
+        and
+        (
+            --Property__c.sfid=''
+        --or 
+        membership__c.customer_set__c IN ('${customer_set_sfid}')
+        )
+        and
+        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
+        
+         `)
         let result = query ? query.rows : [];
         return result;
 
