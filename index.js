@@ -11,6 +11,7 @@ const posRouters= require("./routers/posCheque");
 let paymentReport = require("./routers/paymentReport")
 const DSRReport = require("./routers/DSRReport")
 const UTRReport = require("./routers/UTRReport")
+const helmet = require('helmet')
 
 
 const reservationRouters= require("./routers/reservation");
@@ -21,12 +22,14 @@ const body_parser = require("body-parser");
 const FandBSummary = require("./routers/FandBSummary")
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
-const pdfCheck = require("./helper/pdfCopy")
+
 const cors = require("cors");
 const app = express();
 app.use(cors());
-app.use(body_parser.urlencoded({limit: "50mb", extended: true}))
+app.use(body_parser.urlencoded({limit: "50mb", extended: false}))
 app.use(body_parser.json({limit: '50mb'}));
+
+app.use(helmet())
 app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
 app.use("/api/feedback",reservationRouters)

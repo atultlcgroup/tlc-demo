@@ -1,0 +1,34 @@
+PAYMENT REPORT ON : 19 Oct 2020
+TLC RELATIONSHIP MANAGEMENT PVT LTD
+ 
+ 
+ 
+No. Of Payments,:,11
+Grand Total,:,136818.00
+Submerchant Charges,:,2496.8
+Refund Adjusted,:,0.00
+Chargeback Adjusted,:,0
+Chargeback Reversal,:,0
+Total Net Amount,:,134321
+ 
+ 
+Success Transaction Records : 
+SR No.,Bank Id,Bank Name,TPSL TransactiON id,SM TransactiON Id,Bank TransactiON id,Total Amount,Net Amount,TransactiON Date,TransactiON Time,Payment Date,SRC ITC,Scheme_code,UTR_NO 
+1,82,Visa Master Maestro Credit Card Gateway,1261596422,8522388,202029014464052,10325.0,10325.00,10/16/2020,11:45:06,2020-10-19 00:00:00.000,{email:dynabaps@gmail.com}{mob:919422063042},VMSAL,ICIB202930002426
+2,158,Paytm,1261670355,2729795,20201016111212800110168762153526397,10619.0,10619.00,10/16/2020,12:26:55,2020-10-19 00:00:00.000,{email:naina51046@gmail.com}{mob:917055775515},TLCCM,ICIB202930002424
+3,30,HDFC Bank Retail,1261961603,3543063,202906541978,14750.0,14750.00,10/16/2020,15:32:48,2020-10-19 00:00:00.000,{email:info@noelconstructioncompanypvtltd.com}{mob:919740999060},GSTAAD,ICIB202930002431
+4,82,Visa Master Maestro Credit Card Gateway,1261969281,3397858,202029078547251,13570.0,13570.00,10/16/2020,15:38:00,2020-10-19 00:00:00.000,{email:tanvee.bhatt@gmail.com}{mob:9579810200},CHLR,ICIB202930002429
+5,118,Visa Master Maestro Debit Card Gateway,1261970975,5118751,202029078509371,11328.0,11328.00,10/16/2020,15:39:08,2020-10-19 00:00:00.000,{email:arun961974@gmail.com}{mob:919886727195},SHERATON,ICIB202930002428
+6,82,Visa Master Maestro Credit Card Gateway,1262033785,4068243,202029077236809,15339.0,15339.00,10/16/2020,16:21:23,2020-10-19 00:00:00.000,{email:101@101.com}{mob:8779621178},CHPL,TPSL-19/10/2020-PG L358369-TLC
+7,118,Visa Master Maestro Debit Card Gateway,1262039220,3293046,202029077135813,11210.0,11210.00,10/16/2020,16:25:03,2020-10-19 00:00:00.000,{email:nishakiransharma75@gmail.com}{mob:919981600181},TLCCM,ICIB202930002424
+8,82,Visa Master Maestro Credit Card Gateway,1262081252,4692797,202029076222218,14868.0,14868.00,10/16/2020,16:55:23,2020-10-19 00:00:00.000,{email:nirmalkhatri77@gmail.com}{mob:919819991644},WESTINMUM,ICIB202930002432
+9,107,Amex,1262084021,5104106,201016570602,10619.0,10619.00,10/16/2020,16:57:25,2020-10-19 00:00:00.000,{email:vivek@otl-india.com}{mob:919837051950},TLCCM,ICIB202930002424
+10,118,Visa Master Maestro Debit Card Gateway,1262115225,5113388,202029024532167,10620.0,10620.00,10/16/2020,17:20:25,2020-10-19 00:00:00.000,{email:akankshalodha90@gmail.com}{mob:919179414660},TLCCM,ICIB202930002424
+11,118,Visa Master Maestro Debit Card Gateway,1262204531,8626030,202029073623627,13570.0,13570.00,10/16/2020,18:21:49,2020-10-19 00:00:00.000,{email:eclairs_glacierfoods@yahoo.com}{mob:919867629126},CHLR,ICIB202930002429
+ 
+ 
+ 
+Refund Transaction Record Details : 
+SR No.,Merchant TXN ID,TPSL TXN ID,TXN Date,Date of Refund Request,Bank Name,Actual TXN AMT,Refund Amount,Refund Processed Date,Rejection Date,Type of Refund,Status,UTR NO  
+ 
+For any kind of queries pleASe cONtact our customer service executive ON (022)67664402 or email your queries ON instantpay@techprocess.co.in' 
