@@ -36,7 +36,7 @@ let UTRReport =async(req,res)=>{
          }
          let fineNameWithoutFileExt = (req.body.fileName).replace(`.${extension}`,``)
         let UTRData =await UTRModel.UTRReport(req.headers.userid,createFileName(fineNameWithoutFileExt,req.headers.userid,extension),file)
-        res.status(200).send({code :200 , message:'Success', data : `${UTRData}`})
+        res.status(200).send({code :200 , message:'Success'})
     }catch(e){
         console.log(e)
         console.log(`${e}`)

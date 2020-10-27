@@ -3,24 +3,79 @@ const { writeFileSync } = require("fs");
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
 const csv=require('csvtojson')
-const ftp = require('../databases/ftp')
+const ftp = require('../databases/ftp');
+let pool = require("../databases/db").pool
+let generateExcel = require("../helper/generateUTRExcel")
+let sendMail= require("../helper/mailModel");
 
-const readCsv=async(fileName)=>{
+
+let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
+    try{
+        let isInsert = await pool.query(`select "fileName" from tlcsalesforce.utr_tracking where "fileName" = '${fileName}'`)
+        if(isInsert.rows.length){
+            console.log(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`)
+            await pool.query(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`);  
+        }else{
+               pool.query(`INSERT INTO tlcsalesforce.utr_tracking(
+                "fileName", "fileStatus", "isEmailSent", "UploadedBy", "CreatedDate","ErrorDescription")
+                VALUES ('${fileName}', '${fileStatus}', ${isEmailSent}, '${uploadedBy}', now(),'')`);    
+        }
+       return "Success"
+        }catch(e){
+            console.log(e);
+            return e
+        }
+}
+
+
+
+let findPaymentRule= async(req)=>{
+    try{
+        console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
+        let qry = ``;
+        if(req.property_sfid && req.customer_set_sfid)
+        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        if(req.property_sfid)
+        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        if(req.customer_set_sfid)
+        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        let emailData = await pool.query(`${qry}`)
+        let result = emailData ? emailData.rows : []
+        let resultArray=[];
+        if(result){
+            for(let d of result){
+            if(d.hotel_email_status__c == true)
+            resultArray= resultArray.concat(d.hotel_emails__c.split(','));
+            if(d.tlc_email_status__c == true)
+            resultArray=resultArray.concat(d.manager_email__c.split(','));
+           }
+        }
+        return resultArray
+    }catch(e){
+        await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+        console.log(e)
+        return [];
+    }
+}
+
+const readCsv=async(fileName,fileNameInLog)=>{
 try{
  let valuesArr=[]
  const headerArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
- const exceHeaderArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
+ const exceHeaderArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','Member','Membership','Customer Set','Property_Id','Property','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
 
- console.log(fileName)
+ console.log(fileName,fileNameInLog)
+
  const converter= await csv().fromFile(`${fileName}`)
  let button ='off' 
  for(d of converter){
-    console.log(button)
     let ind=0;
     let cnt =0;
     let cntIfButtonOn= 0;
     let valueArr=[]
+    let excelHeaderIndex = 0;
     for(let [key,value] of Object.entries(d)){
+        excelHeaderIndex++;
        if(button == 'on')
        valueArr.push(value)
        if((value.toLowerCase()).trim()==headerArr[ind++].toLowerCase())
@@ -44,22 +99,54 @@ try{
     }
     return {values: valuesArr, header:headerArr }
     }catch(e){
+        await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
+
         console.log(e)
     return {values: [], header:[] }
     }
  }
 
 
+     
+let unlinkFiles = (file)=>{
+    fs.unlink(`${file}`, (err, da) => {
+        if (err)
+            return(`${err}`);
+    })
+}
+ 
 let UTRReport = async(userid,fileName,file)=>{
     return new Promise(async(resolve, reject)=>{
         try{            
+            await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
-            // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
-            let csvData = await readCsv(`UTRReport/${fileName}`)
-            console.log(csvData)
-            resolve({userid:userid,filename:`result`})
-    
+           let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+            await createLogForUTRReport(fileName,'UPLOADED',false,'')
+            let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
+            unlinkFiles(`UTRReport/${fileName}`)
+            
+            let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(csvData.values,csvData.header,fileName)
+            let errorArr = [];
+            for(let [key,value] of Object.entries(dataSchemeCodeWise)){
+                console.log(`---------propertyId =${value[0].property_id}----------`)
+                let obj = {property_sfid: value[0].property_id}
+                let emails = await findPaymentRule(obj,fileName)
+                if(emails.length){
+                    let excelFile = await generateExcel.generateExcel(value,'UTR Report');
+                    await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+                    console.log(excelFile)
+                }else{
+                    errorArr.push({scheme_code:key,message:'Email Not Found !'})
+                    console.log(`Email Not Found !`)
+                }
+            }
+            if(errorArr.length)
+            await createLogForUTRReport(fileName,'UPLOADED',false,`${JSON.stringify(errorArr)}`)
+            else
+            await createLogForUTRReport(fileName,'UPLOADED',true,'')
+            resolve({userid:userid,fileName:`result`})
         }catch(e){
+            await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
             console.log(`${e}`)
             reject(`${e}`)
         }
@@ -68,6 +155,71 @@ let UTRReport = async(userid,fileName,file)=>{
 }
  
 
+let createJsonObj = async(value,header)=>{
+    let dataObj = {}
+    index = 1;
+    for(let i =0 ;i<header.length;i++){
+      dataObj[header[i]] = value[i]
+    }
+    let data = await getPCMM(dataObj['Scheme_code'],dataObj['TPSL TransactiON id'],dataObj['SM TransactiON Id'])
+    if(data.length)
+     {
+        dataObj['propert_name'] = data[0].property_name
+        dataObj['property_id'] = data[0].property_id
+        dataObj['Membership Name'] = data[0].membership_name
+        dataObj['Member'] = data[0].member_id
+        dataObj['Customer_Set']=data[0].customerset
+    }else{
+        dataObj['propert_name'] = ''
+        dataObj['property_id'] = ''
+        dataObj['Membership Name'] = ''
+        dataObj['Member'] = ''
+        dataObj['Customer_Set']= ''   
+    }
+      return dataObj;
+}
+
+let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
+    try{
+        // let qry = await pool.query(`select property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
+        // ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
+        //  tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
+        //   ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
+        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)   
+        let qry = await pool.query(`select property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
+         customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
+         from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
+         tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
+         ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
+         and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
+        let data = qry?qry.rows: []
+           return data
+    }catch{
+        return [];
+    }
+}
+
+let arrangeDataSchemeCodeWise= async(values,header,fileName)=>{
+    try{
+    
+    let schemeObj = {}
+    for(let  a of values){
+        //  console.log(schemeObj.hasOwnProperty(a[header.indexOf('Scheme_code')]))
+     if(schemeObj[a[header.indexOf('Scheme_code')]]){
+        schemeObj[a[header.indexOf('Scheme_code')]].push(await createJsonObj(a,header))
+     }else{
+        schemeObj[a[header.indexOf('Scheme_code')]] = [await createJsonObj(a,header)];
+     }
+    }
+    return schemeObj
+        
+    }catch(e){
+        await createLogForUTRReport(fileName,'ERROR' , false,`${e}`)
+        console.log(e)
+        return e;
+    }
+
+}
 
 
 
@@ -78,19 +230,15 @@ let uploadExcelToFTP = async (fileName, userId) => {
             ftpConnection = await ftp.connect();
             // // console.log(await ftpConnection.list())
             // console.log(data)
-
               await ftpConnection.uploadFrom(`UTRReport/${fileName}`, `UTRReport/${fileName}`)
             ftpConnection.close();
+            resolve('Success')
+        } catch (e) {
+            await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
             fs.unlink(`UTRReport/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
-            resolve('Success')
-        } catch (e) {
-            // fs.unlink(`UTRReport/${fileName}`, (err, da) => {
-            //     if (err)
-            //         reject(`${err}`);
-            // })
             reject(`${e}`);
         }
     })
