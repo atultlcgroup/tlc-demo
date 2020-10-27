@@ -120,7 +120,7 @@ let UTRReport = async(userid,fileName,file)=>{
         try{            
             await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
-           let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+        //    let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
             await createLogForUTRReport(fileName,'UPLOADED',false,'')
             let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
             unlinkFiles(`UTRReport/${fileName}`)
