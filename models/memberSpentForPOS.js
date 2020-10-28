@@ -1,8 +1,6 @@
-// let sendMail= require("../helper/mailModel")
 
-const { resolve, reject } = require("bluebird");
 
-// let generatePdf = require("../helper/generateDSRPdf")
+
 const pool = require("../databases/db").pool;
 
 let getMembershipDetails = async()=>{

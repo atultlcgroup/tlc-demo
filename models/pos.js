@@ -86,6 +86,19 @@ let deleteErrorExcelRecords=(tracking_id)=>{
 }
 
 
+let getMemberId = async(memberShipNumber)=>{
+    try{
+        let qry = await pool.query(`select member__r__member_id__c member_id from tlcsalesforce.membership__c where membership_number__c = '${memberShipNumber}'`)
+       
+        console.log((qry && qry.rows)  ? qry.rows[0].member_id : '')
+        return (qry && qry.rows)  ? qry.rows[0].member_id : ''
+    }catch(e){
+        return ''
+    }
+    
+
+}
+
 let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) => {
         try {
             let checkDuplicateExcel = 1;
@@ -98,26 +111,42 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
             let arr = []
             let query = `INSERT INTO tlcsalesforce.pos_log(outlet,pos_source,status,pos_tracking_id,`;
             for (d of result['Sheet1']) {
+                // insert  in pos_log1 and take inserted id 
+                
                 let query2 = ``;
-                let len = Object.entries(d).length
+                let len = Object.entries(d).length  
+                let indexForMember = 0;
+                let lockIndex = 0;
                 if (cnt == 1) {
                     let n = 0;
                     for (e of Object.entries(d)) {
+                       
                         let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                     //    // console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
-                        len - 1 == n ? query += `"${e[1]}") values('${outlet}','${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
+                        // len - 1 == n ? query += `"${e[1]}") values('${outlet}','${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
+                        resultObj.rows[0]['table_field_name__c'] == 'Card_No' ? lockIndex = indexForMember  : ``
+                        indexForMember++
+                        query += `"${e[1]}",`
                         arr.push(e[1])
                         n++
                     }
+                    query += `"member_id") values('${outlet}','${posSource}','NEW','${posTrackingId}',`
                 
                 } else {
+                    indexForMember = 0
+                    let cardNo = ''
                     let n = 0;
                     let obj = {};
+              
                     Object.entries(d).map(e => {
-                        len - 1 == n ? query2 += `'${e[1]}');` : query2 += `'${e[1]}',`
+                        lockIndex == indexForMember ? cardNo = `${e[1]}` : ``
+                        indexForMember++;
+                        // len - 1 == n ? query2 += `'${e[1]}');` : query2 += `'${e[1]}',`
+                        query2 += `'${e[1]}',`
                         obj[arr[n++]] = e[1]
                     })
+                    query2 += `'${(await getMemberId(cardNo))}');`
                     resultArr.push(obj)
                     try{
                         if(findErr == 0)
@@ -133,7 +162,6 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                         })
                         deleteErrorExcelRecords(posTrackingId)
                         await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e1}' where file_name__c = '${fileName}'`)
-                        console.log(e1);
                         if(bodyFileName)
                          return {code:1,err:`${e1}`};
                       }else{
@@ -211,7 +239,7 @@ let getFileFromFTP = async (fileArr , fileName) => {
             ftpConnection.close();
             resolve(`SUCCESS`)
         } catch (err) {
-            // console.log(`${err}`)    
+            // console.log(`${err}`)
             if(fileName)
             reject( `${err}`)
         }
@@ -249,27 +277,41 @@ let postLogDataToPosChequeDetails = async (data,propertObj) => {
     try {
        
 
-        for (n of data) {            
+        for (n of data) {    
+            console.log("n",n)        
             ConvertedBillDate = convert(n.BillDate);
             console.log('+++++++++++++++++++++++++++++++');
             console.log('mapping ID', n.mapping_id)
             console.log(ConvertedBillDate);
             console.log('+++++++++++++++++++++++++++++++')
             let billDiscount=parseInt(n.Disc_Food) + parseInt(n.Disc_Soft_Bev) + parseInt(n.Disc_Misc) + parseInt(n.Disc_Dom_Liq) + parseInt(n.Disc_Imp_Liq) + parseInt(n.Disc_Tobacco);
-            let billTotal=parseInt(n.Grossbilltotal) - parseInt(n.Tax) + billDiscount;
+            let verifyBillTotal=parseInt(n.Food) +  parseInt(n.Soft_Bev) + parseInt(n.Misc) + parseInt(n.Dom_Liq) + parseInt(n.Imp_Liq) + parseInt(n.Tobacco);
+            
+            let billTotal=parseInt(n.Grossbilltotal);
+            let grossbilltotal=billTotal - billDiscount + parseInt(n.Tax)
             console.log('type');
             console.log(typeof billDiscount);
             console.log('billDiscount',billDiscount);
             console.log('billTotal',billTotal);
-            console.log("uploading POS log data to POS cheque details");
+            if(verifyBillTotal == billTotal ){
+                console.log("uploading POS log data to POS cheque details");
             let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
-            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c)
-          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${n.Grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now()) RETURNING id`);
+            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c,member_id)
+          VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now(),'${n.member_id}') RETURNING id`);
 
             console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
             console.log('n', n)
-            let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n,billDiscount,billTotal);
+            let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n,billDiscount,grossbilltotal);
 
+            }
+            else{ 
+                status="SYNC_ERROR"
+                errorDiscription="ToTAL value mismatch,please check total"
+                console.log(`Please check total bill for card number ${n.Card_No} `);
+                let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
+
+            }
+            
 
         }
 
