@@ -47,48 +47,69 @@ let ws2 = wb.addWorksheet(`${summaryName}`);
   ws2.cell(1, 1).string(`${summaryName}`).style(style);
  
    ws2.cell(4, 1).string(`Hotel Name:`).style(style);
-  ws2.cell(4, 2).string(`${resultArr[0]['propert_name']}`).style(style);
+  ws2.cell(4, 2).string(`${resultArr[0]['property_name']}`).style(style);
 
-  ws2.cell(6, 1).string(`Transaction Date`).style(style);
-  ws2.cell(6, 2).string(`${resultArr[0]['TransactiON Date']}`).style(style);
+  ws2.cell(6, 1).string(`Transaction Date:`).style(style);
+  ws2.cell(6, 2).string(`${resultArr[0]['Transaction Date']}`).style(style);
 
-  ws2.cell(5, 1).string(`Scheme`).style(style);
-  ws2.cell(5, 2).string(`${resultArr[0]['Scheme_code']}`).style(style);
+  ws2.cell(5, 1).string(`Scheme:`).style(style);
+  ws2.cell(5, 2).string(`${resultArr[0]['Scheme']}`).style(style);
    let row = 9;
    let column = 1;
-         
+         ws2.cell(row,column++).string('SR No.').style(style)
         for(let [key,value] of Object.entries(resultArr[0])){
+          if(key == 'property_name' || key == 'property_id' || key == 'SR No.'){
+
+          }
+          else{
             ws2.cell(row,column++).string(key).style(style)
+          }
         }
-        let index = 1;
-        let totalAmount =0;
-        let netAmount = 0;
-        let columnArr = [1,2,4,5,6,7,8,17,18]
-        for(let data of resultArr){
-            row++
-            column = 1
-            for(let [key,value] of Object.entries(data)){
-                if(column== 7)
-                totalAmount += parseInt(value)
-                if(column == 8)
-                netAmount += parseInt(value)
+        let index =1;
+        let TA =0;
+        let CH=0;
+        let ST=0;
+        let NA=0;
+        let isIntArr=[4,5,7,8,9,10,11,12,13,19]
+        console.log(`column = ${column} and row = ${row}`)
+        for(let d of resultArr){
+          column = 1;
+          row++;
+          console.log(`column = ${column} and row = ${row}`)
+          ws2.cell(row,column++).number(index++).style(style)
+          cellIndex = 2
+          for(let [key,value] of Object.entries(d)){
+            if(column == 10)
+            TA += parseFloat(value)
+            if(column == 11)
+            CH+=parseFloat(value)
+            if(column == 12)
+            ST+=parseFloat(value)
+            if(column == 13)
+            NA+=parseFloat(value)
+          if(key == 'property_name' || key == 'property_id' || key == 'SR No.'){
 
-                if(column == 1) {
-                ws2.cell(row,column++).number(index).style(style)
-                }else{
-                    (columnArr.indexOf(column) > -1)?
-                ws2.cell(row,column++).number(parseInt(value)).style(style)
-                :ws2.cell(row,column++).string(`${value}`).style(style)
-                
-                }
+          }else{
+        
+            if(isIntArr.indexOf(cellIndex) > -1){
+             ws2.cell(row,column++).number(parseFloat(value)).style(style)
+            }else{
+              ws2.cell(row,column++).string(value).style(style)
             }
-            index++
+             cellIndex++;
+          }
+         }
         }
+        row++
+        ws2.cell(row,1).string('Total').style(style)
+        ws2.cell(row,10).number(TA).style(style)
+        ws2.cell(row,11).number(CH).style(style)
+        ws2.cell(row,12).number(ST).style(style)
+        ws2.cell(row,13).number(NA).style(style)
 
-    row++
-    ws2.cell(row,1).string(`Total`).style(style);
-    ws2.cell(row,7).number(totalAmount).style(style);
-    ws2.cell(row,8).number(netAmount).style(style);
+
+
+
     
   
 

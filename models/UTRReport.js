@@ -61,10 +61,8 @@ let findPaymentRule= async(req)=>{
 const readCsv=async(fileName,fileNameInLog)=>{
 try{
  let valuesArr=[]
- const headerArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
+ const headerArr = ['SR No.','Bank Id','Bank Name','TPSL Transaction id','SM Transaction Id','Bank Transaction id','Total Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount']
  const exceHeaderArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','Member','Membership','Customer Set','Property_Id','Property','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
-
- console.log(fileName,fileNameInLog)
 
  const converter= await csv().fromFile(`${fileName}`)
  let button ='off' 
@@ -78,14 +76,15 @@ try{
         excelHeaderIndex++;
        if(button == 'on')
        valueArr.push(value)
-       if((value.toLowerCase()).trim()==headerArr[ind++].toLowerCase())
-          cnt++;
+       if((value.toLowerCase()).trim()==headerArr[ind++].toLowerCase()){
+        //    console.log(d)
+        //    console.log(headerArr)
+        cnt++;
+       }
        if(button == 'on' && (!value || value == null)){
         cntIfButtonOn++;
-       console.log(cntIfButtonOn)
        }
      }
-     console.log(ind)
     if((button == 'on' && headerArr.length == cntIfButtonOn) || (button == 'on' && headerArr.length != ind)){
         button='off'
        console.log(cntIfButtonOn)
@@ -120,12 +119,13 @@ let UTRReport = async(userid,fileName,file)=>{
         try{            
             await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
-           let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+            let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
             await createLogForUTRReport(fileName,'UPLOADED',false,'')
             let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
             unlinkFiles(`UTRReport/${fileName}`)
-            
+           
             let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(csvData.values,csvData.header,fileName)
+            
             let errorArr = [];
             for(let [key,value] of Object.entries(dataSchemeCodeWise)){
                 console.log(`---------propertyId =${value[0].property_id}----------`)
@@ -158,40 +158,44 @@ let UTRReport = async(userid,fileName,file)=>{
 let createJsonObj = async(value,header)=>{
     let dataObj = {}
     index = 1;
+    // console.log(header)
+    // console.log(value[header.indexOf('Scheme')],value[header.indexOf('SM Transaction Id')],value[header.indexOf('TPSL Transaction id')])
+ let data = await getPCMM(value[header.indexOf('Scheme')],value[header.indexOf('SM Transaction Id')],value[header.indexOf('TPSL Transaction id')])
+    if(data.length)
+     {
+        dataObj['property_name'] = data[0].property_name
+        dataObj['property_id'] = data[0].property_id
+        dataObj['Member'] = `${data[0].first_name__c ? data[0].first_name__c : ''} ${data[0].last_name__c ? data[0].last_name__c : ''}` 
+        dataObj['Membership Type']=data[0].customerset
+        dataObj['Membership Number'] = data[0].membership_name
+    }else{
+        dataObj['property_name'] = ''
+        dataObj['property_id'] = ''
+        dataObj['Member'] = ''
+        dataObj['Membership Number'] = ''
+        dataObj['Membership Type']= ''   
+    }
     for(let i =0 ;i<header.length;i++){
       dataObj[header[i]] = value[i]
     }
-    let data = await getPCMM(dataObj['Scheme_code'],dataObj['TPSL TransactiON id'],dataObj['SM TransactiON Id'])
-    if(data.length)
-     {
-        dataObj['propert_name'] = data[0].property_name
-        dataObj['property_id'] = data[0].property_id
-        dataObj['Membership Name'] = data[0].membership_name
-        dataObj['Member'] = data[0].member_id
-        dataObj['Customer_Set']=data[0].customerset
-    }else{
-        dataObj['propert_name'] = ''
-        dataObj['property_id'] = ''
-        dataObj['Membership Name'] = ''
-        dataObj['Member'] = ''
-        dataObj['Customer_Set']= ''   
-    }
+ 
       return dataObj;
 }
 
 let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
     try{
-        // let qry = await pool.query(`select property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
-        // ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
-        //  tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
-        //   ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
-        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)   
-        let qry = await pool.query(`select property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
-         customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
-         from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
-         tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
-         ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
-         and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
+        console.log(schmeCode,SMTransactionId,TPLSTransactionId)
+        let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
+        ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
+         tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
+          ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
+           and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)   
+        // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
+        //  customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
+        //  from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
+        //  tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
+        //  ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
+        //  and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
         let data = qry?qry.rows: []
            return data
     }catch{
@@ -205,10 +209,10 @@ let arrangeDataSchemeCodeWise= async(values,header,fileName)=>{
     let schemeObj = {}
     for(let  a of values){
         //  console.log(schemeObj.hasOwnProperty(a[header.indexOf('Scheme_code')]))
-     if(schemeObj[a[header.indexOf('Scheme_code')]]){
-        schemeObj[a[header.indexOf('Scheme_code')]].push(await createJsonObj(a,header))
+     if(schemeObj[a[header.indexOf('Scheme')]]){
+        schemeObj[a[header.indexOf('Scheme')]].push(await createJsonObj(a,header))
      }else{
-        schemeObj[a[header.indexOf('Scheme_code')]] = [await createJsonObj(a,header)];
+        schemeObj[a[header.indexOf('Scheme')]] = [await createJsonObj(a,header)];
      }
     }
     return schemeObj
