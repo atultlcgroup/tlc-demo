@@ -7,7 +7,6 @@ const ftp = require('../databases/ftp');
 let pool = require("../databases/db").pool
 let generateExcel = require("../helper/generateUTRExcel")
 let sendMail= require("../helper/mailModel");
-const { resolve, reject } = require("bluebird");
 
 
 let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
@@ -231,11 +230,13 @@ let UTRReport2=async(UTRTrackingId,fileName)=>{
             let obj = {property_sfid: value[0].property_id}
             let emails = await findPaymentRule(obj,fileName)
             if(emails.length){
-
-                let excelFile = await generateExcel.generateExcel(value,'UTR Report');
-                 await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
-                await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
-
+                try{
+                    let excelFile = await generateExcel.generateExcel(value,'UTR Report');
+                    await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+                   await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
+                }catch(e){
+                    await updateUTRLogStatus(key,UTRTrackingId, false,'Error',`${e}`)
+                }
             }else{
                 await updateUTRLogStatus(key,UTRTrackingId, false,'Error','Email Not Found !')
                 errorArr.push({scheme_code:key,message:'Email Not Found !'})
