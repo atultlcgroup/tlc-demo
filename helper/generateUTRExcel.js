@@ -58,7 +58,7 @@ let ws2 = wb.addWorksheet(`${summaryName}`);
    let column = 1;
          ws2.cell(row,column++).string('SR No.').style(style)
         for(let [key,value] of Object.entries(resultArr[0])){
-          if(key == 'property_name' || key == 'property_id' || key == 'SR No.'){
+          if(key == 'property_name' || key == 'property_id' || key == 'UTR Log Id' || key == 'SR No.'){
 
           }
           else{
@@ -87,7 +87,7 @@ let ws2 = wb.addWorksheet(`${summaryName}`);
             ST+=parseFloat(value)
             if(column == 13)
             NA+=parseFloat(value)
-          if(key == 'property_name' || key == 'property_id' || key == 'SR No.'){
+          if(key == 'property_name' || key == 'property_id' || key == 'UTR Log Id' || key == 'SR No.'){
 
           }else{
         

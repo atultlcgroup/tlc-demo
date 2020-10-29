@@ -7,6 +7,7 @@ const ftp = require('../databases/ftp');
 let pool = require("../databases/db").pool
 let generateExcel = require("../helper/generateUTRExcel")
 let sendMail= require("../helper/mailModel");
+const { resolve, reject } = require("bluebird");
 
 
 let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
@@ -25,6 +26,7 @@ let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription
             }
        return lastInsertedId
         }catch(e){
+            unlinkFiles(`UTRReport/${fileName}`)
             console.log(e);
             return e
         }
@@ -107,6 +109,7 @@ try{
     }
     return {values: valuesArr, header:headerArr }
     }catch(e){
+        unlinkFiles(`UTRReport/${fileName}`)
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
     return {values: [], header:[] }
     }
@@ -128,23 +131,38 @@ let moveFileToArchiveFolder = async(fileName)=>{
 
 }
 
-let insertDataToLogTable = async(csvData, lastInsertedId)=>{
+
+let checkDuplicate= async(SMTransactionId,TPLSTransactionId)=>{
+    let sqlQry = await pool.query(`select * from tlcsalesforce."UTR_Log" where "SM Transaction Id"='${SMTransactionId}' and "TPSL Transaction Id"='${TPLSTransactionId}' and "Status"  in ('Completed','New')`)
+    return sqlQry.rows ?  sqlQry.rows.length : 0  
+}
+
+let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
     try{
+
        let insertLog = `insert into tlcsalesforce."UTR_Log"("UTR Tracking Id","Status","isEmailSent","ErrorDescription","property_name","property_id","Member","Membership Number","Membership Type"`
        for(let d of csvData.header){
         insertLog+=`,"${d}"`
        }
-       insertLog+=`) values(${lastInsertedId},'NEW',false,''`
        for(let d of csvData.values){
+         let isDuplicate = await checkDuplicate(d[csvData.header.indexOf('SM Transaction Id')],d[csvData.header.indexOf('TPSL Transaction Id')])
+        let status = 'New';
+        let syncDescription = ''
+        isDuplicate > 0 ? status = 'Error' : status = 'New';
+        isDuplicate > 0 ? syncDescription = 'Deplicate Record' : syncDescription = ''
         let insertLog1 =``
+        insertLog1+=`) values(${lastInsertedId},'${status}',false,'${syncDescription}'`
+
+        
         let data = await getPCMM(d[csvData.header.indexOf('Scheme')],d[csvData.header.indexOf('SM Transaction Id')],d[csvData.header.indexOf('TPSL Transaction Id')])
         if(data.length)
          {
             insertLog1+=`,'${data[0].property_name}'`
             insertLog1+=`,'${data[0].property_id}'`
-            insertLog1+=`,${data[0].first_name__c ? data[0].first_name__c : ''} ${data[0].last_name__c ? data[0].last_name__c : ''}` 
-            insertLog1+=`,${data[0].customerset}`
-            insertLog1+=`,${data[0].membership_name}`
+            let memberName =`${data[0].first_name__c ? data[0].first_name__c : ''} ${data[0].last_name__c ? data[0].last_name__c : ''}`
+            insertLog1+=`,'${memberName}'` 
+            insertLog1+=`,'${data[0].customerset}'`
+            insertLog1+=`,'${data[0].membership_name}'`
         }else{
             insertLog1+=`,''`
             insertLog1+=`,''`
@@ -160,6 +178,7 @@ let insertDataToLogTable = async(csvData, lastInsertedId)=>{
        }
 
     }catch(e){
+        unlinkFiles(`UTRReport/${fileName}`)
         console.log(e)
     }
 
@@ -173,33 +192,15 @@ let UTRReport = async(userid,fileName,file)=>{
             let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
             await createLogForUTRReport(fileName,'UPLOADED',false,'')
             let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
-            await insertDataToLogTable(csvData,lastInsertedId)
-            
+            await insertDataToLogTable(csvData,lastInsertedId , fileName)
             await moveFileToArchiveFolder(fileName)
             if(csvData == 'Format Issue')
             throw `CSV Format Issue!`
             unlinkFiles(`UTRReport/${fileName}`)
-           
-            let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(csvData.values,csvData.header,fileName)
-            
-            let errorArr = [];
-            for(let [key,value] of Object.entries(dataSchemeCodeWise)){
-                // console.log(`---------propertyId =${value[0].property_id}----------`)
-                // let obj = {property_sfid: value[0].property_id}
-                // let emails = await findPaymentRule(obj,fileName)
-                // if(emails.length){
-                //     // let excelFile = await generateExcel.generateExcel(value,'UTR Report');
-                //     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
-                //     // console.log(excelFile)
-                // }else{
-                //     errorArr.push({scheme_code:key,message:'Email Not Found !'})
-                //     console.log(`Email Not Found !`)
-                // }
-            }
-            if(errorArr.length)
-            await createLogForUTRReport(fileName,'UPLOADED',false,`${JSON.stringify(errorArr)}`)
-            else
-            await createLogForUTRReport(fileName,'UPLOADED',true,'')
+            console.log(lastInsertedId)
+            await UTRReport2(lastInsertedId, fileName)
+
+
             resolve({userid:userid,fileName:`result`})
         }catch(e){
             await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
@@ -208,6 +209,69 @@ let UTRReport = async(userid,fileName,file)=>{
         }
     
     })
+}
+
+
+let updateUTRLogStatus = async(scheme,UTRTrackingId, isEmailSent,status,errorDescription)=>{
+    if(scheme)
+    await pool.query(`update tlcsalesforce."UTR_Log" set "Status"='${status}',"ErrorDescription"='${errorDescription}',"isEmailSent"=${isEmailSent} where "UTR Tracking Id"='${UTRTrackingId}' and "Scheme"='${scheme}'`)
+    else
+    await pool.query(`update tlcsalesforce."UTR_Log" set "Status"='${status}',"ErrorDescription"='${errorDescription}',"isEmailSent"=${isEmailSent} where "UTR Tracking Id"='${UTRTrackingId}'`)
+
+}
+
+let UTRReport2=async(UTRTrackingId,fileName)=>{
+    return new Promise(async(resolve, reject)=>{
+        try{
+      let selData = await pool.query(`Select "property_name","property_id","Member","Membership Number","Membership Type","SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
+      let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(selData.rows? selData.rows : [],fileName) 
+      let errorArr = [];  
+      for(let [key,value] of Object.entries(dataSchemeCodeWise)){
+            console.log(`---------propertyId =${value[0].property_id}----------`)
+            let obj = {property_sfid: value[0].property_id}
+            let emails = await findPaymentRule(obj,fileName)
+            if(emails.length){
+                let excelFile = await generateExcel.generateExcel(value,'UTR Report');
+                // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+                await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
+
+            }else{
+                await updateUTRLogStatus(key,UTRTrackingId, false,'Error','Email Not Found !')
+                errorArr.push({scheme_code:key,message:'Email Not Found !'})
+                console.log(`Email Not Found !`) 
+            }
+        }
+        if(errorArr.length)
+        await createLogForUTRReport(fileName,'UPLOADED',false,`${JSON.stringify(errorArr)}`)
+        else
+        await createLogForUTRReport(fileName,'UPLOADED',true,'')
+        resolve("Success")
+        }catch(e){
+       await updateUTRLogStatus('',UTRTrackingId, false,'Error',`${e}`)   
+         reject(e)
+        }
+    })
+  
+    // let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(csvData.values,csvData.header,fileName) 
+    // let errorArr = [];
+    // for(let [key,value] of Object.entries(dataSchemeCodeWise)){
+        // console.log(`---------propertyId =${value[0].property_id}----------`)
+        // let obj = {property_sfid: value[0].property_id}
+        // let emails = await findPaymentRule(obj,fileName)
+        // if(emails.length){
+        //     // let excelFile = await generateExcel.generateExcel(value,'UTR Report');
+        //     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+        //     // console.log(excelFile)
+        // }else{
+        //     errorArr.push({scheme_code:key,message:'Email Not Found !'})
+        //     console.log(`Email Not Found !`)
+        // }
+    // }
+    // if(errorArr.length)
+    // await createLogForUTRReport(fileName,'UPLOADED',false,`${JSON.stringify(errorArr)}`)
+    // else
+    // await createLogForUTRReport(fileName,'UPLOADED',true,'')
+   
 }
  
 
@@ -259,17 +323,23 @@ let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
     }
 }
 
-let arrangeDataSchemeCodeWise= async(values,header,fileName)=>{
+let arrangeDataSchemeCodeWise= async(data,fileName)=>{
     try{
     
     let schemeObj = {}
-    for(let  a of values){
-        //  console.log(schemeObj.hasOwnProperty(a[header.indexOf('Scheme_code')]))
-     if(schemeObj[a[header.indexOf('Scheme')]]){
-        schemeObj[a[header.indexOf('Scheme')]].push(await createJsonObj(a,header))
-     }else{
-        schemeObj[a[header.indexOf('Scheme')]] = [await createJsonObj(a,header)];
-     }
+    
+    for(let  a of data){
+        if(schemeObj[a['Scheme']]){
+            schemeObj[a['Scheme']].push(a)
+        }else{
+            schemeObj[a['Scheme']]=[a] 
+        }
+    //     //  console.log(schemeObj.hasOwnProperty(a[header.indexOf('Scheme_code')]))
+    //  if(schemeObj[a[header.indexOf('Scheme')]]){
+    //     schemeObj[a[header.indexOf('Scheme')]].push(await createJsonObj(a,header))
+    //  }else{
+    //     schemeObj[a[header.indexOf('Scheme')]] = [await createJsonObj(a,header)];
+    //  }
     }
     return schemeObj
         

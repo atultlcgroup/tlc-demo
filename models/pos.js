@@ -14,10 +14,15 @@ let Card_No=arr2[arr1.indexOf('"Card_No"')];
 let Bill_No = arr2[arr1.indexOf('"Bill_No"')];
 let BillDate = arr2[arr1.indexOf('"BillDate"')];
 let BillTime=arr2[arr1.indexOf('"BillTime"')]
-    let result= await pool.query(`select "Card_No" from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status not in('SYNC_ERROR','NEW')`)
-    console.log(`row count`)
-    console.log(result.rows)
-    return result.rows ? result.rows.length : 0;
+let duplicateData =0;
+    let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status in('NEW')`)
+    if(selNewCnt.rows[0].cnt == 1){
+        let result= await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_CPMPLETED')`)
+        if(result.rows[0].cnt > 0)
+        duplicateData=1
+    }
+    
+    return duplicateData;
 }
 
 
