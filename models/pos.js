@@ -118,7 +118,6 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                 if (cnt == 1) {
                     let n = 0;
                     for (e of Object.entries(d)) {
-                       
                         let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                     //    // console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
@@ -147,8 +146,10 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                     query2 += `'${(await getMemberId(cardNo))}');`
                     resultArr.push(obj)
                     try{
-                        if(findErr == 0)
-                        await pool.query(`${query} ${query2}`)
+                        if(findErr == 0){
+                            console.log(`${query} ${query2}`)
+                            await pool.query(`${query} ${query2}`)
+                        }
                     }catch(e1){
                         console.log(`==========+++++++++++++=========++++++++++=========+++++++++`)
                         console.log(`${e1}`)

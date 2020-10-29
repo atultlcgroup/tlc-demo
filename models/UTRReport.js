@@ -11,16 +11,19 @@ let sendMail= require("../helper/mailModel");
 
 let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
     try{
+        let lastInsertedId =0;
         let isInsert = await pool.query(`select "fileName" from tlcsalesforce.utr_tracking where "fileName" = '${fileName}'`)
         if(isInsert.rows.length){
             console.log(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`)
-            await pool.query(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`);  
+             pool.query(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`);  
+            
         }else{
-               pool.query(`INSERT INTO tlcsalesforce.utr_tracking(
+            let result =await pool.query(`INSERT INTO tlcsalesforce.utr_tracking(
                 "fileName", "fileStatus", "isEmailSent", "UploadedBy", "CreatedDate","ErrorDescription")
-                VALUES ('${fileName}', '${fileStatus}', ${isEmailSent}, '${uploadedBy}', now(),'')`);    
-        }
-       return "Success"
+                VALUES ('${fileName}', '${fileStatus}', ${isEmailSent}, '${uploadedBy}', now(),'') RETURNING id`);    
+                lastInsertedId = result.rows[0].id;
+            }
+       return lastInsertedId
         }catch(e){
             console.log(e);
             return e
@@ -61,7 +64,8 @@ let findPaymentRule= async(req)=>{
 const readCsv=async(fileName,fileNameInLog)=>{
 try{
  let valuesArr=[]
- const headerArr = ['SR No.','Bank Id','Bank Name','TPSL Transaction id','SM Transaction Id','Bank Transaction id','Total Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount']
+ let formatCheck = 0
+ const headerArr = ['SR No.','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Total Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount']
  const exceHeaderArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','Member','Membership','Customer Set','Property_Id','Property','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
 
  const converter= await csv().fromFile(`${fileName}`)
@@ -92,15 +96,18 @@ try{
         if(button == 'on')
         valuesArr.push(valueArr)
         if(headerArr.length == cnt){
+         formatCheck=1;
           button = 'on'
           console.log(`Excel format matched`)
       }
     }
+    if(formatCheck == 0){
+        await createLogForUTRReport(fileNameInLog,'ERROR',false,`CSV Format Issue!`)
+        return `Format Issue`
+    }
     return {values: valuesArr, header:headerArr }
     }catch(e){
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
-
-        console.log(e)
     return {values: [], header:[] }
     }
  }
@@ -114,31 +121,80 @@ let unlinkFiles = (file)=>{
     })
 }
  
+let moveFileToArchiveFolder = async(fileName)=>{
+    ftpConnection = await ftp.connect();
+    await ftpConnection.rename(`UTRReport/${fileName}`, `UTRReport/UTR_ARCHIVE/${fileName}`)
+    ftpConnection.close();
+
+}
+
+let insertDataToLogTable = async(csvData, lastInsertedId)=>{
+    try{
+       let insertLog = `insert into tlcsalesforce."UTR_Log"("UTR Tracking Id","Status","isEmailSent","ErrorDescription","property_name","property_id","Member","Membership Number","Membership Type"`
+       for(let d of csvData.header){
+        insertLog+=`,"${d}"`
+       }
+       insertLog+=`) values(${lastInsertedId},'NEW',false,''`
+       for(let d of csvData.values){
+        let insertLog1 =``
+        let data = await getPCMM(d[csvData.header.indexOf('Scheme')],d[csvData.header.indexOf('SM Transaction Id')],d[csvData.header.indexOf('TPSL Transaction Id')])
+        if(data.length)
+         {
+            insertLog1+=`,'${data[0].property_name}'`
+            insertLog1+=`,'${data[0].property_id}'`
+            insertLog1+=`,${data[0].first_name__c ? data[0].first_name__c : ''} ${data[0].last_name__c ? data[0].last_name__c : ''}` 
+            insertLog1+=`,${data[0].customerset}`
+            insertLog1+=`,${data[0].membership_name}`
+        }else{
+            insertLog1+=`,''`
+            insertLog1+=`,''`
+            insertLog1+=`,''`
+            insertLog1+=`,''`
+            insertLog1+=`,''`  
+        }
+            for(d1 of d){
+                insertLog1+=`,'${d1}'` 
+            }
+            insertLog1+=`)`
+        await pool.query(`${insertLog} ${insertLog1}`)
+       }
+
+    }catch(e){
+        console.log(e)
+    }
+
+}
+
 let UTRReport = async(userid,fileName,file)=>{
     return new Promise(async(resolve, reject)=>{
         try{            
-            await createLogForUTRReport(fileName,'STARTED',false,'',userid)
+            let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
             let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
             await createLogForUTRReport(fileName,'UPLOADED',false,'')
             let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
+            await insertDataToLogTable(csvData,lastInsertedId)
+            
+            await moveFileToArchiveFolder(fileName)
+            if(csvData == 'Format Issue')
+            throw `CSV Format Issue!`
             unlinkFiles(`UTRReport/${fileName}`)
            
             let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(csvData.values,csvData.header,fileName)
             
             let errorArr = [];
             for(let [key,value] of Object.entries(dataSchemeCodeWise)){
-                console.log(`---------propertyId =${value[0].property_id}----------`)
-                let obj = {property_sfid: value[0].property_id}
-                let emails = await findPaymentRule(obj,fileName)
-                if(emails.length){
-                    let excelFile = await generateExcel.generateExcel(value,'UTR Report');
-                    await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
-                    console.log(excelFile)
-                }else{
-                    errorArr.push({scheme_code:key,message:'Email Not Found !'})
-                    console.log(`Email Not Found !`)
-                }
+                // console.log(`---------propertyId =${value[0].property_id}----------`)
+                // let obj = {property_sfid: value[0].property_id}
+                // let emails = await findPaymentRule(obj,fileName)
+                // if(emails.length){
+                //     // let excelFile = await generateExcel.generateExcel(value,'UTR Report');
+                //     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+                //     // console.log(excelFile)
+                // }else{
+                //     errorArr.push({scheme_code:key,message:'Email Not Found !'})
+                //     console.log(`Email Not Found !`)
+                // }
             }
             if(errorArr.length)
             await createLogForUTRReport(fileName,'UPLOADED',false,`${JSON.stringify(errorArr)}`)
@@ -160,7 +216,7 @@ let createJsonObj = async(value,header)=>{
     index = 1;
     // console.log(header)
     // console.log(value[header.indexOf('Scheme')],value[header.indexOf('SM Transaction Id')],value[header.indexOf('TPSL Transaction id')])
- let data = await getPCMM(value[header.indexOf('Scheme')],value[header.indexOf('SM Transaction Id')],value[header.indexOf('TPSL Transaction id')])
+ let data = await getPCMM(value[header.indexOf('Scheme')],value[header.indexOf('SM Transaction Id')],value[header.indexOf('TPSL Transaction Id')])
     if(data.length)
      {
         dataObj['property_name'] = data[0].property_name
