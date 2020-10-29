@@ -231,8 +231,9 @@ let UTRReport2=async(UTRTrackingId,fileName)=>{
             let obj = {property_sfid: value[0].property_id}
             let emails = await findPaymentRule(obj,fileName)
             if(emails.length){
+
                 let excelFile = await generateExcel.generateExcel(value,'UTR Report');
-                // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+                 await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
                 await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
 
             }else{
@@ -243,8 +244,11 @@ let UTRReport2=async(UTRTrackingId,fileName)=>{
         }
         if(errorArr.length)
         await createLogForUTRReport(fileName,'UPLOADED',false,`${JSON.stringify(errorArr)}`)
-        else
-        await createLogForUTRReport(fileName,'UPLOADED',true,'')
+        else{
+            selData.rows.length ? 
+            await createLogForUTRReport(fileName,'UPLOADED',true,''):
+            ``
+        }
         resolve("Success")
         }catch(e){
        await updateUTRLogStatus('',UTRTrackingId, false,'Error',`${e}`)   
