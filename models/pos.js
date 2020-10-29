@@ -5,10 +5,23 @@ const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
 
 
-let findDuplicate =async (Card_No,Bill_No,BillDate,BillTime)=>{
-    let result= await pool.query(`select Card_No from tlcsalesforce.pos_log where Card_No='${Card_No}' and Bill_No='${Bill_No}' and BillDate='${BillDate}' and BillTime = '${BillTime}'`)
-    return result ? result.rows.length : 0;
+let findDuplicate =async (str)=>{
+let str1 = str.substring(str.indexOf('pos_log(') + 8 , str.indexOf(') values'))
+let str2 = str.substring(str.indexOf('values(') + 7 , str.lastIndexOf(')'))
+let arr1 = str1.split(",")
+let arr2 = str2.split(",")
+let Card_No=arr2[arr1.indexOf('"Card_No"')];
+let Bill_No = arr2[arr1.indexOf('"Bill_No"')];
+let BillDate = arr2[arr1.indexOf('"BillDate"')];
+let BillTime=arr2[arr1.indexOf('"BillTime"')]
+    let result= await pool.query(`select "Card_No" from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status not in('SYNC_ERROR','NEW')`)
+    console.log(`row count`)
+    console.log(result.rows)
+    return result.rows ? result.rows.length : 0;
 }
+
+
+
 let uploadExcelToFTP = async (fileName, file) => {
     return new Promise(async(resolve,reject)=>{
         try {
@@ -115,15 +128,18 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                 let len = Object.entries(d).length
                 let indexForMember = 0;
                 let lockIndex = 0;
+                let duplicateCheckArr = [];
                 if (cnt == 1) {
                     let n = 0;
                     for (e of Object.entries(d)) {
+                        
                         let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                     //    // console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                         e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
                         // len - 1 == n ? query += `"${e[1]}") values('${outlet}','${posSource}','NEW','${posTrackingId}',` : query += `"${e[1]}",`
                         resultObj.rows[0]['table_field_name__c'] == 'Card_No' ? lockIndex = indexForMember  : ``
                         indexForMember++
+
                         query += `"${e[1]}",`
                         arr.push(e[1])
                         n++
@@ -143,12 +159,18 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                         query2 += `'${e[1]}',`
                         obj[arr[n++]] = e[1]
                     })
-                    query2 += `'${(await getMemberId(cardNo))}');`
+                    query2 += `'${(await getMemberId(cardNo))}')`
                     resultArr.push(obj)
                     try{
                         if(findErr == 0){
-                            console.log(`${query} ${query2}`)
-                            await pool.query(`${query} ${query2}`)
+                            let insertDataToLog = await pool.query(`${query} ${query2} RETURNING mapping_id`)
+                            let insertedlogId = insertDataToLog.rows[0].mapping_id ? insertDataToLog.rows[0].mapping_id : 0
+                            let checkDuplicate = await findDuplicate(`${query} ${query2}`)
+                            console.log(`------check duplicate=${checkDuplicate}---------`)
+                            if(checkDuplicate > 0){
+                                checkDuplicateExcel++;
+                                let updatelog = await pool.query(`update tlcsalesforce.pos_log set status='SYNC_ERROR',error_description='duplicate record' where mapping_id = '${insertedlogId}'`)
+                            }
                         }
                     }catch(e1){
                         console.log(`==========+++++++++++++=========++++++++++=========+++++++++`)
@@ -159,12 +181,12 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
                             if (err)
                                 throw err;
                         })
-                        deleteErrorExcelRecords(posTrackingId)
+                        // deleteErrorExcelRecords(posTrackingId)
                         await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e1}' where file_name__c = '${fileName}'`)
                         if(bodyFileName)
                          return {code:1,err:`${e1}`};
                       }else{
-                        checkDuplicateExcel++;
+                        // checkDuplicateExcel++;
                       }
                      
                     }
@@ -197,7 +219,7 @@ let readExcel = async (fileName, posSource,posTrackingId,bodyFileName,outlet ) =
             // resolve(`SUCCESS`)
         } catch (e) {
    
-            deleteErrorExcelRecords(posTrackingId)
+            // deleteErrorExcelRecords(posTrackingId)
             await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
             fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
