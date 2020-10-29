@@ -415,7 +415,7 @@ let convert = (str) => {
 
 let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
     try {
-        // console.log("changing the sync status");
+        console.log("changing the sync status");
         // console.log('with mapping id', mappingId)
         let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}' where mapping_id='${mappingId}' RETURNING status`);
         updateStatusPostrackingTable('SYNC_COMPLETED', posTrackingId);
@@ -431,7 +431,7 @@ let updateStatusPostrackingTable = (status, posTrackingId) => {
     try {
         // console.log("updating pos_tracikng table status ");
         pool.query(`update tlcsalesforce.pos_tracking__c set status__c='${status}' where id='${posTrackingId}'`);
-
+        
     } catch (e) {
         return e
     }
@@ -452,6 +452,9 @@ let getRefferalData2 = (data) => {
         }
     })
 }
+
+
+
 
 
 

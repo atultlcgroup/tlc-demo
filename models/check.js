@@ -30,23 +30,39 @@ const express = require('express');
 
 // insertInUTRLog("XYZ.txt","newFile",true,"Shubham")
 
-let  validateHhMm=async (inputField)=> {
-    var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(inputField);
+// let  validateHhMm=async (inputField)=> {
+//     var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(inputField);
 
-    if (isValid) {
-        return isValid;
+//     if (isValid) {
+//         return isValid;
         
       
-    } else {
-        return isValid;
+//     } else {
+//         return isValid;
       
-    }
+//     }
    
    
-  }
+//   }
 
-  validateHhMm("24:59").then(data=>{
-      console.log("data is",data)
-  }).catch(e=>{
-      console.log("error is",e)
-  })
+//   validateHhMm("24:59").then(data=>{
+//       console.log("data is",data)
+//   }).catch(e=>{
+//       console.log("error is",e)
+//   })
+
+
+
+var json2xls = require('json2xls');
+const fs=require('fs');
+
+var json = {
+    foo: 'bar',
+    qux: 'moo',
+    poo: 123,
+    stux: new Date()
+}
+
+var xls = json2xls(json);
+
+fs.writeFileSync('data.xlsx', xls, 'binary');
