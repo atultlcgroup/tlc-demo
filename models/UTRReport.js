@@ -1,5 +1,6 @@
 
 const { writeFileSync } = require("fs");
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
 const csv=require('csvtojson')
@@ -139,7 +140,7 @@ let checkDuplicate= async(SMTransactionId,TPLSTransactionId)=>{
 let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
     try{
 
-       let insertLog = `insert into tlcsalesforce."UTR_Log"("UTR Tracking Id","Status","isEmailSent","ErrorDescription","property_name","property_id","Member","Membership Number","Membership Type"`
+       let insertLog = `insert into tlcsalesforce."UTR_Log"("UTR Tracking Id","isEmailSent","property_name","property_id","Member","Membership Number","Membership Type"`
        for(let d of csvData.header){
         insertLog+=`,"${d}"`
        }
@@ -150,7 +151,7 @@ let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
         isDuplicate > 0 ? status = 'Error' : status = 'New';
         isDuplicate > 0 ? syncDescription = 'Deplicate Record' : syncDescription = ''
         let insertLog1 =``
-        insertLog1+=`) values(${lastInsertedId},'${status}',false,'${syncDescription}'`
+        insertLog1+=`,"Status","ErrorDescription") values(${lastInsertedId},false`
 
         
         let data = await getPCMM(d[csvData.header.indexOf('Scheme')],d[csvData.header.indexOf('SM Transaction Id')],d[csvData.header.indexOf('TPSL Transaction Id')])
@@ -163,6 +164,8 @@ let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
             insertLog1+=`,'${data[0].customerset}'`
             insertLog1+=`,'${data[0].membership_name}'`
         }else{
+            status='Error'
+            syncDescription=`Scheme, SM Transaction Id, TPSL Transaction Id do not match in database!`
             insertLog1+=`,''`
             insertLog1+=`,''`
             insertLog1+=`,''`
@@ -172,7 +175,7 @@ let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
             for(d1 of d){
                 insertLog1+=`,'${d1}'` 
             }
-            insertLog1+=`)`
+            insertLog1+=`,'${status}','${syncDescription}')`
         await pool.query(`${insertLog} ${insertLog1}`)
        }
 
@@ -197,7 +200,7 @@ let UTRReport = async(userid,fileName,file)=>{
             throw `CSV Format Issue!`
             unlinkFiles(`UTRReport/${fileName}`)
             console.log(lastInsertedId)
-            await UTRReport2(lastInsertedId, fileName)
+            await UTRReport2(lastInsertedId, fileName, userid)
 
 
             resolve({userid:userid,fileName:`result`})
@@ -219,7 +222,7 @@ let updateUTRLogStatus = async(scheme,UTRTrackingId, isEmailSent,status,errorDes
 
 }
 
-let UTRReport2=async(UTRTrackingId,fileName)=>{
+let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
     return new Promise(async(resolve, reject)=>{
         try{
       let selData = await pool.query(`Select "property_name","property_id","Member","Membership Number","Membership Type","SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
@@ -250,6 +253,7 @@ let UTRReport2=async(UTRTrackingId,fileName)=>{
             await createLogForUTRReport(fileName,'UPLOADED',true,''):
             ``
         }
+        await getErrorRecordandCreateCSV(UTRTrackingId,userid)
         resolve("Success")
         }catch(e){
        await updateUTRLogStatus('',UTRTrackingId, false,'Error',`${e}`)   
@@ -279,6 +283,84 @@ let UTRReport2=async(UTRTrackingId,fileName)=>{
    
 }
  
+
+
+
+
+let uploadErrorFileToFTP = async (fileName) => {
+    return new Promise(async(resolve,reject)=>{
+        try {
+            let path = `UTRReport/Error/${fileName}`
+            ftpConnection = await ftp.connect();
+              await ftpConnection.uploadFrom(`UTRReport/${fileName}`, `${path}`)
+            ftpConnection.close();
+            fs.unlink(`UTRReport/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
+            resolve(path)
+        } catch (e) {
+            // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
+            fs.unlink(`UTRReport/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
+            reject(`${e}`);
+        }
+    })
+}
+
+
+
+let getErrorRecordandCreateCSV = async(UTRTrackingId, userId)=>{
+    try{
+    let selectQry = await pool.query(`Select "property_name"  "Property Name","Member","Membership Number","Membership Type","SR No." "CSV Serial Number","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","ErrorDescription" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'Error'`)
+    let data=selectQry.rows ? selectQry.rows:[]
+    if(data.length){
+        let fileName = await generateCSV(data,userId)
+        console.log(`hi`)
+        let fullPath = await uploadErrorFileToFTP(fileName)
+        let updateErrorFileInUTRTracking = await pool.query(`UPDATE tlcsalesforce.utr_tracking SET "Error File URL"='${fileName}' where id = '${UTRTrackingId}'`)
+    }else{
+        console.log(`No Error`)
+    }
+
+  }catch(e){
+      console.log(e)
+
+  }
+
+}
+
+let generateCSV=async(data,userId)=>{
+    let headerArr = [{id:"SR No.",title:"SR No."}]
+    for(let [key,value] of Object.entries(data[0])){
+        headerArr.push({id: `${key}`, title:`${key}`})
+    }
+
+    let fileName = `UTR_Error_${userId}_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
+    let path = `./UTRReport/${fileName}`
+    const csvWriter = createCsvWriter({
+        path: path,
+        header: headerArr
+    });
+    let bodyArr = [];
+    let index = 1;
+    for(let d of data){
+        let bodyObj = {'SR No.':index++}
+        
+        for(let [key,value] of Object.entries(d)){
+            bodyObj[`${key}`] = `${value}`
+        }   
+        bodyArr.push(bodyObj)
+    }
+    const records = bodyArr;
+     
+   let result= await csvWriter.writeRecords(records)  
+    return  fileName;  
+} // returns a promise
+
+
 
 let createJsonObj = async(value,header)=>{
     let dataObj = {}
@@ -314,7 +396,7 @@ let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
         // ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
         //  tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
         //   ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
-        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)   
+        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
         let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
          customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
          from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
