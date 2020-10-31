@@ -3,6 +3,7 @@ const pool = require("../databases/db").pool
 const ftp = require('../databases/ftp')
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 
 let validateHhMm = async (inputField) => {
@@ -29,7 +30,9 @@ let findDuplicate = async (str) => {
     let duplicateData = 0;
     let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status in('NEW')`)
     if (selNewCnt.rows[0].cnt == 1) {
-        let result = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_CPMPLETED')`)
+        console.log(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_COMPLETED')`);
+        let result = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_COMPLETED')`)
+        console.log("result",result.rows[0].cnt);
         if (result.rows[0].cnt > 0)
             duplicateData = 1
     }
@@ -300,16 +303,44 @@ let getPosLogData = async (fileName) => {
         console.log(`${JSON.stringify(propertObj)}`)
         let qry = ``
         if (fileName)
-            qry = `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
+            qry = `select *,pt.id posTrackingId,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED' and pt.file_name__c = '${fileName}'`;
         else
-            qry = `select *,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
+            qry = `select *,pt.id posTrackingId,pl.outlet  outlet_id from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='NEW' and pt.status__c = 'SYNC_STARTED'`;
         console.log("before query call");
+        console.log(qry);
         const result = await pool.query(qry);
+        
         console.log("after query call");
-        await postLogDataToPosChequeDetails(result.rows, propertObj);
+        console.log(result.rows);
+        let queryForErrorFind=``
+        console.log("+++++++++++++++++++++ before calling postLogDataToPosChequeDetails ++++++++++++")
+         await postLogDataToPosChequeDetails(result.rows, propertObj);
+         console.log("+++++++++++++++++++++ after  calling postLogDataToPosChequeDetails ++++++++++++")
+        if (fileName){
+            console.log("inside file name");
+            
+            queryForErrorFind=await pool.query(`select distinct pt.id "posTrackingId" from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c pt on pl.pos_tracking_id = pt.id  where pl.status='SYNC_ERROR' and  pt.file_name__c = '${fileName}' and error_file_url__c is NULL`) 
+           
+        }else{
+            console.log("inside file name else");
 
+            
+            queryForErrorFind=await pool.query(`select distinct pt.id "posTrackingId",pl.status,error_file_url__c from tlcsalesforce.pos_log pl left join tlcsalesforce.pos_tracking__c
+            pt on pl.pos_tracking_id = pt.id  where pl.status='SYNC_ERROR'  and error_file_url__c is NULL`) 
+            
+        }
+        for(let n of queryForErrorFind.rows){
+            console.log("nnnnn",n)
+            let getFileURL= await getErrorDataFromPOSLog(n.posTrackingId);
+            console.log("getFileURL",getFileURL);
+            await pool.query(`update tlcsalesforce.pos_tracking__c set error_file_url__c='${getFileURL}' where id='${n.posTrackingId}'`)
+            
+        }
+        
+   
         return result.rows;
     } catch (e) {
+        console.log(e);
         return 'SYNC_ERROR';
     }
 
@@ -318,10 +349,9 @@ let getPosLogData = async (fileName) => {
 let postLogDataToPosChequeDetails = async (data, propertObj) => {
     try {
         console.log("inside postLogDataToPosChequeDetails ");
-
-        console.log(data);
+          
+       console.log("data",data);
         for (n of data) {
-            console.log("n", n)
             ConvertedBillDate = convert(n.BillDate);
             console.log('+++++++++++++++++++++++++++++++');
             console.log('mapping ID', n.mapping_id)
@@ -348,7 +378,7 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
                     VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now(),'${n.member_id}') RETURNING id`);
     
                     console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
-                    console.log('n', n)
+                   
                     let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n, billDiscount, grossbilltotal);
     
                 }
@@ -365,13 +395,13 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
                 errorDiscription = "error:time and should be in HH:MM and dd-mon-yyyy"
                 console.log("error:time and should be in HH:MM and dd-mon-yyyy");
                 let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
-    
+                
 
             }
-           
-
 
         }
+
+            return;
 
     } catch (e) {
         updateStatusPostrackingTable('SYNC_ERROR', n.pos_tracking_id);
@@ -392,12 +422,13 @@ let insertInPosChequeDetailsItemCategory = async (foreignKey, data, billDiscount
         console.log('data.pos_tracking_id', data.pos_tracking_id);
         updatePosLogTableNewToSYnc('SYNC_COMPLETED', data.mapping_id, data.pos_tracking_id);
 
-
+        
 
 
     } catch (e) {
         updatePosLogTableNewToSYnc('SYNC_ERROR', data.mapping_id);
         updateStatusPostrackingTable('SYNC_ERROR', data.pos_tracking_id);
+        return
     }
 
 
@@ -419,6 +450,7 @@ let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
         // console.log('with mapping id', mappingId)
         let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}' where mapping_id='${mappingId}' RETURNING status`);
         updateStatusPostrackingTable('SYNC_COMPLETED', posTrackingId);
+        
     } catch (e) {
         updateStatusPostrackingTable('SYNC_ERROR', posTrackingId);
 
@@ -427,16 +459,103 @@ let updatePosLogTableNewToSYnc = (status, mappingId, posTrackingId) => {
 }
 
 
-let updateStatusPostrackingTable = (status, posTrackingId) => {
+let updateStatusPostrackingTable = async(status, posTrackingId) => {
     try {
         // console.log("updating pos_tracikng table status ");
-        pool.query(`update tlcsalesforce.pos_tracking__c set status__c='${status}' where id='${posTrackingId}'`);
-        
+       await pool.query(`update tlcsalesforce.pos_tracking__c set status__c='${status}' where id='${posTrackingId}'`);
+       return;
     } catch (e) {
         return e
     }
 
 };
+
+
+
+let getErrorDataFromPOSLog=async (posTrackingId)=>{
+    try{
+        console.log("++++Get POS log data with Error status+++++");
+       
+         let result=await pool.query(`select "Card_No","Bill_No","BillDate","BillTime","Actual_Pax", "Pos_Code" , "Food", "Disc_Food"
+        ,"Soft_Bev","Disc_Soft_Bev","Dom_Liq","Disc_Dom_Liq","Imp_Liq","Disc_Imp_Liq","Tobacco","Disc_Tobacco","Misc","Grossbilltotal","Disc_Misc","Tax",status,error_description
+         from tlcsalesforce.pos_log where pos_tracking_id='${posTrackingId}' and status='SYNC_ERROR'`);
+         if( result.rows)
+     result ? result.rows : null
+     
+     if( result.rows.length > 0){
+        console.log("Error data is",result.rows);
+        let fileURL= await generateCSV(result.rows);
+        return fileURL
+     }else{
+        console.log("Error data is",result.rows);
+        console.log("no error data found");
+        return
+
+     }
+     
+
+
+    }catch(e){
+        console.log("cannot find pos tracking ID");
+        return e
+    }
+   
+}
+
+
+let generateCSV=async(data)=>{
+    let headerArr = [{id:"SR No.",title:"SR No."}]
+    for(let [key,value] of Object.entries(data[0])){
+        headerArr.push({id: `${key}`, title:`${key}`})
+    }
+
+    let fileName = `POS_Error_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
+    let path = `./POSReport/${fileName}`
+    const csvWriter = createCsvWriter({
+        path: path,
+        header: headerArr
+    });
+    let bodyArr = [];
+    let index = 1;
+    for(let d of data){
+        let bodyObj = {'SR No.':index++}
+        
+        for(let [key,value] of Object.entries(d)){
+            bodyObj[`${key}`] = `${value}`
+        }   
+        bodyArr.push(bodyObj)
+    }
+    const records = bodyArr;
+     
+   let result= await csvWriter.writeRecords(records)  
+   let fileUrl=await uploadErrorFileToFTP (fileName)
+   console.log("path",fileUrl);
+   return  fileUrl;  
+} // returns a promise
+
+
+let uploadErrorFileToFTP = async (fileName) => {
+    return new Promise(async(resolve,reject)=>{
+        try {
+            let path = `POS/error/${fileName}`
+            ftpConnection = await ftp.connect();
+              await ftpConnection.uploadFrom(`POSReport/${fileName}`, `${path}`)
+            ftpConnection.close();
+            fs.unlink(`POSReport/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
+            resolve(path)
+        } catch (e) {
+            // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
+            fs.unlink(`POSReport/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
+            reject(`${e}`);
+        }
+    })
+}
 
 
 let getRefferalData2 = (data) => {
