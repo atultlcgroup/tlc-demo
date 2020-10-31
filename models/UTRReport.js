@@ -82,7 +82,7 @@ try{
         excelHeaderIndex++;
        if(button == 'on')
        valueArr.push(value)
-       if((value.toLowerCase()).trim()==headerArr[ind++].toLowerCase()){
+       if(headerArr[ind] && (value.toLowerCase()).trim()==headerArr[ind++].toLowerCase()){
         //    console.log(d)
         //    console.log(headerArr)
         cnt++;
@@ -104,12 +104,13 @@ try{
       }
     }
     if(formatCheck == 0){
+        console.log(`----Format Issue----`)
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`CSV Format Issue!`)
         return `Format Issue`
     }
     return {values: valuesArr, header:headerArr }
     }catch(e){
-        unlinkFiles(`UTRReport/${fileName}`)
+        unlinkFiles(`UTRReport/${fileName}`)        
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
     return {values: [], header:[] }
     }
@@ -392,17 +393,17 @@ let createJsonObj = async(value,header)=>{
 let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
     try{
         console.log(schmeCode,SMTransactionId,TPLSTransactionId)
-        // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
-        // ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
-        //  tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
-        //   ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
-        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
-        let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
-         customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
-         from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
-         tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
-         ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
-         and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
+        let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
+        ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
+         tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
+          ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
+           and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
+        // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
+        //  customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
+        //  from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
+        //  tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
+        //  ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
+        //  and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
         let data = qry?qry.rows: []
            return data
     }catch{

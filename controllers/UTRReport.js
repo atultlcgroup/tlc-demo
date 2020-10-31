@@ -24,7 +24,7 @@ let UTRReport =async(req,res)=>{
         }
         let extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase()
         if(!extensions.includes(extension)){
-            res.status(401).send({code: 401, message: `Please provide excel among ${extensions.join(",")} format!`})
+            res.status(401).send({code: 401, message: `Please provide ${extensions.join(",")} file!`})
             return
         }
 
