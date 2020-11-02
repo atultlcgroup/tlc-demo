@@ -5,7 +5,7 @@ const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
-
+//Time validation
 let validateHhMm = async (inputField) => {
     var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(inputField);
 
@@ -18,31 +18,65 @@ let validateHhMm = async (inputField) => {
     }
 }
 
-let findDuplicate = async (str) => {
-    let str1 = str.substring(str.indexOf('pos_log(') + 8, str.indexOf(') values'))
-    let str2 = str.substring(str.indexOf('values(') + 7, str.lastIndexOf(')'))
-    let arr1 = str1.split(",")
-    let arr2 = str2.split(",")
-    let Card_No = arr2[arr1.indexOf('"Card_No"')];
-    let Bill_No = arr2[arr1.indexOf('"Bill_No"')];
-    let BillDate = arr2[arr1.indexOf('"BillDate"')];
-    let BillTime = arr2[arr1.indexOf('"BillTime"')]
-    let duplicateData = 0;
-    let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status in('NEW')`)
-    if (selNewCnt.rows[0].cnt == 1) {
-        console.log(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_COMPLETED')`);
-        let result = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_COMPLETED')`)
-        console.log("result",result.rows[0].cnt);
-        if (result.rows[0].cnt > 0)
-            duplicateData = 1
-    }
-    else {
-        duplicateData = 1;
+//
+let dateValidation=async(currVal) =>{
+
+    if (currVal == '') return false;
+
+    //Declare Regex  
+    var rxDatePattern = /^(\d{1,2})(\/|-)(?:(\d{1,2})|(jan)|(feb)|(mar)|(apr)|(may)|(jun)|(jul)|(aug)|(sep)|(oct)|(nov)|(dec))(\/|-)(\d{4})$/i;
+
+    var dtArray = currVal.match(rxDatePattern);
+
+    if (dtArray == null) return false;
+
+    var dtDay =await parseInt(dtArray[1]);
+    var dtMonth =await parseInt(dtArray[3]);
+    var dtYear =await parseInt(dtArray[17]);
+
+    if (isNaN(dtMonth)) {
+        for (var i = 4; i <= 15; i++) {
+            if ((dtArray[i])) {
+                dtMonth = i - 3;
+                break;
+            }
+        }
     }
 
-    return duplicateData;
+    if (dtMonth < 1 || dtMonth > 12) return false;
+    else if (dtDay < 1 || dtDay > 31) return false;
+    else if ((dtMonth == 4 || dtMonth == 6 || dtMonth == 9 || dtMonth == 11) && dtDay == 31) return false;
+    else if (dtMonth == 2) {
+        var isleap = (dtYear % 4 == 0 && (dtYear % 100 != 0 || dtYear % 400 == 0));
+        if (dtDay > 29 || (dtDay == 29 && !isleap)) return false;
+    }
+
+    return true;
 }
 
+//Find duplicate
+let findDuplicate =async (str)=>{
+    console.log("str",str);
+    let str1 = str.substring(str.indexOf('pos_log(') + 8 , str.indexOf(') values'))
+    let str2 = str.substring(str.indexOf('values(') + 7 , str.lastIndexOf(')'))
+    let arr1 = str1.split(",")
+    let arr2 = str2.split(",")
+    let Card_No=arr2[arr1.indexOf('"Card_No"')];
+    let Bill_No = arr2[arr1.indexOf('"Bill_No"')];
+    let BillDate = arr2[arr1.indexOf('"BillDate"')];
+    let BillTime=arr2[arr1.indexOf('"BillTime"')]
+    let duplicateData =0;
+        let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status in('NEW')`)
+        if(selNewCnt.rows[0].cnt == 1){
+            let result= await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status  in('SYNC_CPMPLETED')`)
+            if(result.rows[0].cnt > 0)
+            duplicateData=1
+        }else{
+            duplicateData=1
+        }
+        
+        return duplicateData;
+    }
 
 let uploadExcelToFTP = async (fileName, file) => {
     return new Promise(async (resolve, reject) => {
@@ -352,10 +386,11 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
           
        console.log("data",data);
         for (n of data) {
+            console.log("n.BillDate",n.BillDate)
             ConvertedBillDate = convert(n.BillDate);
             console.log('+++++++++++++++++++++++++++++++');
             console.log('mapping ID', n.mapping_id)
-            console.log(ConvertedBillDate);
+            console.log("ConvertedBillDate",ConvertedBillDate);
             console.log('+++++++++++++++++++++++++++++++')
             let billDiscount = parseInt(n.Disc_Food) + parseInt(n.Disc_Soft_Bev) + parseInt(n.Disc_Misc) + parseInt(n.Disc_Dom_Liq) + parseInt(n.Disc_Imp_Liq) + parseInt(n.Disc_Tobacco);
             let verifyBillTotal = parseInt(n.Food) + parseInt(n.Soft_Bev) + parseInt(n.Misc) + parseInt(n.Dom_Liq) + parseInt(n.Imp_Liq) + parseInt(n.Tobacco);
@@ -368,36 +403,49 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
             console.log('billTotal', billTotal);
             console.log("+++++++++++++validation of HHMM++++++++++++++++++++");
             let validateTime = await validateHhMm(n.BillTime);
-            console.log("validateTime", validateTime);
-            if(validateTime){
-                console.log("time validation ");
-                if (verifyBillTotal == billTotal ) {
-                    console.log("uploading POS log data to POS cheque details");
-                    let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
-                    membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c,member_id)
-                    VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now(),'${n.member_id}') RETURNING id`);
+            let validateDate = await dateValidation(n.BillDate)
+            console.log("validateTime,dateValidation", validateTime,dateValidation);
+
+            if(validateDate){
+                if(validateTime){
+                    console.log("time validation ");
+                    if (verifyBillTotal == billTotal ) {
+                        console.log("uploading POS log data to POS cheque details");
+                        let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
+                        membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c,member_id)
+                        VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now(),'${n.member_id}') RETURNING id`);
+        
+                        console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
+                       
+                        let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n, billDiscount, grossbilltotal);
+        
+                    }
+                    else {
+                        status = "SYNC_ERROR"
+                        errorDiscription = "ToTAL value mismatch,please check total"
+                        console.log(`Please check total bill for card number ${n.Card_No} `);
+                        let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
+        
+                    }
     
-                    console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
-                   
-                    let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n, billDiscount, grossbilltotal);
-    
-                }
-                else {
+                }else{
                     status = "SYNC_ERROR"
-                    errorDiscription = "ToTAL value mismatch,please check total"
-                    console.log(`Please check total bill for card number ${n.Card_No} `);
+                    errorDiscription = "error:time and should be in HH:MM and dd-mon-yyyy"
+                    console.log("error:time and should be in HH:MM and dd-mon-yyyy");
                     let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
+                    
     
                 }
 
             }else{
-                status = "SYNC_ERROR"
-                errorDiscription = "error:time and should be in HH:MM and dd-mon-yyyy"
-                console.log("error:time and should be in HH:MM and dd-mon-yyyy");
-                let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
-                
+                   status = "SYNC_ERROR"
+                   errorDiscription = "error:date should be in  dd-mon-yyyy"
+                   console.log("error:date should be in dd-mon-yyyy");
+                   let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
+
 
             }
+            
 
         }
 
