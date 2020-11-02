@@ -13,15 +13,15 @@ let sendMail= require("../helper/mailModel");
 let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
     try{
         let lastInsertedId =0;
-        let isInsert = await pool.query(`select "fileName" from tlcsalesforce.utr_tracking where "fileName" = '${fileName}'`)
+        let isInsert = await pool.query(`select file_name__c from tlcsalesforce.utr_tracking__c where file_name__c = '${fileName}'`)
         if(isInsert.rows.length){
-            console.log(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`)
-             pool.query(`update tlcsalesforce.utr_tracking set "isEmailSent" = ${isEmailSent} ,"fileStatus"= '${fileStatus}',"ErrorDescription"='${errorDescription}' where "fileName"='${fileName}'`);  
+            console.log(`update tlcsalesforce.utr_tracking__c set isemailsent__c = ${isEmailSent} ,status__c= '${fileStatus}',error_description__c='${errorDescription}' where file_name__c='${fileName}'`)
+             pool.query(`update tlcsalesforce.utr_tracking__c set isemailsent__c = ${isEmailSent} ,status__c= '${fileStatus}',error_description__c='${errorDescription}' where file_name__c='${fileName}'`);  
             
         }else{
-            let result =await pool.query(`INSERT INTO tlcsalesforce.utr_tracking(
-                "fileName", "fileStatus", "isEmailSent", "UploadedBy", "CreatedDate","ErrorDescription")
-                VALUES ('${fileName}', '${fileStatus}', ${isEmailSent}, '${uploadedBy}', now(),'') RETURNING id`);    
+            let result =await pool.query(`INSERT INTO tlcsalesforce.utr_tracking__c(external_id__c,
+                file_name__c, status__c, isemailsent__c, uploaded_by__c, createddate,error_description__c)
+                VALUES (gen_random_uuid(),'${fileName}', '${fileStatus}', ${isEmailSent}, '${uploadedBy}', now(),'') RETURNING id`);    
                 lastInsertedId = result.rows[0].id;
             }
        return lastInsertedId
@@ -321,7 +321,7 @@ let getErrorRecordandCreateCSV = async(UTRTrackingId, userId)=>{
         let fileName = await generateCSV(data,userId)
         console.log(`hi`)
         let fullPath = await uploadErrorFileToFTP(fileName)
-        let updateErrorFileInUTRTracking = await pool.query(`UPDATE tlcsalesforce.utr_tracking SET "Error File URL"='UTRReport/Error/${fileName}' where id = '${UTRTrackingId}'`)
+        let updateErrorFileInUTRTracking = await pool.query(`UPDATE tlcsalesforce.utr_tracking__c SET  status__c= 'ERROR',error_file_url__c='UTRReport/Error/${fileName}' where id = '${UTRTrackingId}'`)
     }else{
         console.log(`No Error`)
     }
@@ -393,17 +393,17 @@ let createJsonObj = async(value,header)=>{
 let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
     try{
         console.log(schmeCode,SMTransactionId,TPLSTransactionId)
-        // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
-        // ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
-        //  tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
-        //   ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
-        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
-        let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
-         customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
-         from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
-         tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
-         ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
-         and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
+        let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
+        ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
+         tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
+          ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
+           and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
+        // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
+        //  customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
+        //  from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
+        //  tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
+        //  ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
+        //  and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
         let data = qry?qry.rows: []
            return data
     }catch{
