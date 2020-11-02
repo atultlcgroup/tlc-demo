@@ -15,9 +15,9 @@ let Bill_No = arr2[arr1.indexOf('"Bill_No"')];
 let BillDate = arr2[arr1.indexOf('"BillDate"')];
 let BillTime=arr2[arr1.indexOf('"BillTime"')]
 let duplicateData =0;
-    let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status in('NEW')`)
+    let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status in('NEW')`)
     if(selNewCnt.rows[0].cnt == 1){
-        let result= await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where "Card_No"=${Card_No} and "Bill_No"=${Bill_No} and "BillDate"=${BillDate} and "BillTime" = ${BillTime} and status  in('SYNC_CPMPLETED')`)
+        let result= await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status  in('SYNC_CPMPLETED')`)
         if(result.rows[0].cnt > 0)
         duplicateData=1
     }
