@@ -13,7 +13,7 @@ const extensions = ['csv'];
 let UTRReport =async(req,res)=>{
     try{
        if(!req.headers.userid){
-        res.status(500).send({code :500 , message:'Please provide userid'})
+        res.status(401).send({code :401 , message:'Please provide userid'})
            return
        } 
         let file =  req.body.fileContent;
