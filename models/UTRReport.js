@@ -235,8 +235,8 @@ let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
             let emails = await findPaymentRule(obj,fileName)
             if(emails.length){
                 try{
-                    let excelFile = await generateExcel.generateExcel(value,'UTR Report');
-                   await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',emails)
+                    let excelFile = await generateExcel.generateExcel(value,'PG Settlement Report');
+                   await sendMail.sendUTRReport(`${excelFile}`,'PG Settlement Report',emails)
                     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',['atul.srivastava@tlcgroup.com'])
                    await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
                 }catch(e){
