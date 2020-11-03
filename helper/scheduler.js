@@ -4,6 +4,8 @@ const paymentReport=require('../models/paymentReport');
 const DSRReport = require('../models/DSRReport')
 const FandBSummary = require('../models/FandBSummary')
 let posModel = require('../models/pos')
+
+
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
     console.log(`=================   SCHEDULER START POS   ========================`)
     await posModel.getPosData()
@@ -28,6 +30,9 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_FNB == true || process.env.IS_SCHEDULER_
   console.log(`FNB`)
   scheduleTasksForFNB(process.env.SCHEDULER_TIME_FOR_FNB)
 }
+
+
+
 
 //Scheduler for Payment report
 
