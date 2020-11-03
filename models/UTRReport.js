@@ -316,7 +316,7 @@ let uploadErrorFileToFTP = async (fileName) => {
 
 let getErrorRecordandCreateCSV = async(UTRTrackingId, userId)=>{
     try{
-    let selectQry = await pool.query(`Select "property_name"  "Property Name","Member" "Member ","Membership Number","Membership Type","SR No." "CSV Serial Number","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges" "Charges ","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme" "Scheme ","Schemeamount" "Schemeamount ","ErrorDescription" "ErrorDescription " from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'Error'`)
+    let selectQry = await pool.query(`Select "property_name"  "Property Name","Member","Membership Number","Membership Type","SR No." "CSV Serial Number","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","ErrorDescription" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'Error'`)
     let data=selectQry.rows ? selectQry.rows:[]
     if(data.length){
         let fileName = await generateCSV(data,userId)
@@ -339,22 +339,22 @@ let generateCSV=async(data,userId)=>{
     for(let [key,value] of Object.entries(data[0])){
         headerArr.push({id: `${key}`, title:`${key}`})
     }
-    console.log(`headerARr`)
+
     let fileName = `UTR_Error_${userId}_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
     let path = `./UTRReport/${fileName}`
     const csvWriter = createCsvWriter({
         path: path,
         header: headerArr
     });
- 
     let bodyArr = [];
     let index = 1;
     for(let d of data){
-        let bodyObj = {"SR No.":index++}
+        let bodyObj = {'SR No.':index++}
         
         for(let [key,value] of Object.entries(d)){
             bodyObj[`${key}`] = `${value}`
         }   
+        bodyArr.push(bodyObj)
     }
     const records = bodyArr;
      
