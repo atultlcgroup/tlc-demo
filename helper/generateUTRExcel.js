@@ -113,7 +113,7 @@ let ws2 = wb.addWorksheet(`${summaryName}`);
     
   
 
-let fileName = `./UTRReport/UTR_${propertyId}_${Date().now()}.xlsx`
+let fileName = `./UTRReport/UTR_${propertyId}_${Date.now()}.xlsx`
  
 await wb.write(`${fileName}`);
 return new Promise(async(resolve,reject)=>{

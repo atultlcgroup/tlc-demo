@@ -20,7 +20,6 @@ let today = new Date();
 let day = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 let month= `${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`
 let fs = require('fs');
-const { colorScheme } = require("excel4node/distribution/lib/types");
 // let sendGridMailer = require('../helper/sendGridMail');
 // let idenLastRunTime = 1;
 const pool = require("../databases/db").pool;
