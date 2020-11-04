@@ -47,9 +47,9 @@ let DSRReport = async()=>{
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
-                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords);
+                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(pdfFile)
-                 sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
+                  sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
                     console.log(`From Model`)
                 }
             ind++;
@@ -67,7 +67,7 @@ let DSRReport = async()=>{
            let DSRRecords1=await getDSRReportCS(dataObj1.customer_set_sfid[ind1]);
         //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
               if(DSRRecords1.length){
-                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1);
+                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customer_set_sfid[ind1]);
                   console.log(pdfFile1)
                  sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
                   console.log(`From Model`)

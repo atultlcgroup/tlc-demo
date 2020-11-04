@@ -18,7 +18,7 @@ let formatDate1=(date)=>{
 
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
-let generateExcel = async(resultArr,summaryName)=>{
+let generateExcel = async(resultArr,summaryName,propertyId)=>{
 //date format 
 
 
@@ -113,7 +113,7 @@ let ws2 = wb.addWorksheet(`${summaryName}`);
     
   
 
-let fileName = `./UTRReport/UTR_${require('dateformat')(new Date(), "yyyymmddhMMss")}.xlsx`
+let fileName = `./UTRReport/UTR_${propertyId}_${Date().now()}.xlsx`
  
 await wb.write(`${fileName}`);
 return new Promise(async(resolve,reject)=>{
