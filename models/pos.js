@@ -68,7 +68,7 @@ let findDuplicate =async (str)=>{
     let duplicateData =0;
         let selNewCnt = await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status in('NEW')`)
         if(selNewCnt.rows[0].cnt == 1){
-            let result= await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status  in('SYNC_CPMPLETED')`)
+            let result= await pool.query(`select count(*) cnt from tlcsalesforce.pos_log where  "Bill_No"=${Bill_No} and "BillDate"=${BillDate}  and status  in('SYNC_COMPLETED')`)
             if(result.rows[0].cnt > 0)
             duplicateData=1
         }else{
