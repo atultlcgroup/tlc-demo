@@ -22,7 +22,7 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateDSRPDF=async(dsrValues)=>{
+let  generateDSRPDF=async(dsrValues,propertyId)=>{
     let pyamnetObj={}
     let summaryTotalSale =0
     let summaryTotalAmount=0
@@ -346,7 +346,7 @@ let htmlStr=`
 
   </html>
 `
-let pdfName = `./DSRReport/DSR_Repoprt_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
+let pdfName = `./DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })

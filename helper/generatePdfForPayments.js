@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
-let generatePDF =async(resultArr,hotelName,summaryName)=>{
+let generatePDF =async(resultArr,hotelName,summaryName,propertyId)=>{
   try{
     let membershipName = (resultArr.length && resultArr[0].membership_type_name) ? resultArr[0].membership_type_name : ''
     let schemeCode = (resultArr.length && resultArr[0].scheme_code) ? resultArr[0].scheme_code : ''
@@ -253,7 +253,7 @@ let generatePDF =async(resultArr,hotelName,summaryName)=>{
     </body>
   
     </html>`
-    let pdfName = `./paymentReport/Payment_Report_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
+    let pdfName = `./paymentReport/Payment_Report_${propertyId}_${Date.now()}.pdf`
     const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${html}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName;

@@ -1,6 +1,24 @@
-console.log(10203.165 +
-10276.266+
-10087.42175+
-10276.266+
-10276.266+
-10276.266)
+var randomstring = require("randomstring");
+
+let random=()=>{
+    return randomstring.generate(10);
+}
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+console.log(random())
+

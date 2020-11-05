@@ -229,7 +229,7 @@ let sendUTRReport=(file,fileName,emails)=>{
             console.log(err)
             let dateForDSRReport= new Date();
             dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
-            let subjectForUTRReport = `UTR Report`
+            let subjectForUTRReport = `Club Marriott | PG Settlement Report`
             let template = handlebars.compile(html);
             replacements={};
            let htmlToSend = template(replacements);

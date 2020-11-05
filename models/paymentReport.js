@@ -433,8 +433,8 @@ let reportForEODandEOM = async (req) => {
                         //to generate excel 
                         let hotelName = req.type == 'EOD'  ? '':""
                         let summaryName = req.type == 'EOD' ? 'Daily Summary' : 'Monthly Summary'
-                        let excelFile = await generateExcel.generateExcel(value,hotelName,summaryName);
-                        let pdfFile = await generatePdf.generatePDF(value,hotelName,summaryName)
+                        let excelFile = await generateExcel.generateExcel(value,hotelName,summaryName, req.customer_set_sfid);
+                        let pdfFile = await generatePdf.generatePDF(value,hotelName,summaryName, req.customer_set_sfid)
 
                         //end generate excel
                         // // console.log(excelFile)

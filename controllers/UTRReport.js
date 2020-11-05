@@ -1,19 +1,11 @@
 let UTRModel = require('../models/UTRReport')
 // const extensions = ['xls','xlsx','xlsm','xlt','xltx','xltm','xla','xlam','csv'];
-
 const extensions = ['csv'];
-
-
-
-
-
-  
-
 
 let UTRReport =async(req,res)=>{
     try{
        if(!req.headers.userid){
-        res.status(500).send({code :500 , message:'Please provide userid'})
+        res.status(401).send({code :401 , message:'Please provide userid'})
            return
        } 
         let file =  req.body.fileContent;
@@ -24,7 +16,7 @@ let UTRReport =async(req,res)=>{
         }
         let extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase()
         if(!extensions.includes(extension)){
-            res.status(401).send({code: 401, message: `Please provide excel among ${extensions.join(",")} format!`})
+            res.status(401).send({code: 401, message: `Please provide ${extensions.join(",")} file!`})
             return
         }
 

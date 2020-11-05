@@ -1,9 +1,57 @@
-let str = `INSERT INTO tlcsalesforce.pos_log(outlet,pos_source,status,pos_tracking_id,"Card_No","Bill_No","BillDate","BillTime","Actual_Pax","Pos_Code","Food","Disc_Food","Soft_Bev","Disc_Soft_Bev","Dom_Liq","Disc_Dom_Liq","Imp_Liq","Disc_Imp_Liq","Tobacco","Disc_Tobacco","Misc","Grossbilltotal","Disc_Misc","Tax","member_id") values('a0L0k000002Ubo2EAC','POS','NEW','585', '290000001','41519','4-Jul-2023','19:12','2','0003','1900','570','0','0','3250','1625','0','0','0','0','0','5150','0','0','')`
 
-let str1 = str.substring(str.indexOf('pos_log(') + 8 , str.indexOf(') values'))
-let str2 = str.substring(str.indexOf('values(') + 7 , str.lastIndexOf(')'))
-let arr1 = str1.split(",")
-let arr2 = str2.split(",")
-console.log(arr1)
-console.log(arr2)
-console.log(arr2[arr1.indexOf('"Card_No"')],arr2[arr1.indexOf('"Bill_No"')],arr2[arr1.indexOf('"BillDate"')],arr2[arr1.indexOf('"BillTime"')])
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+let  dotenv = require('dotenv');
+
+dotenv.config();
+let pool = require("./databases/db").pool
+
+let getErrorRecordandCreateCSV = async(UTRTrackingId)=>{
+    try{
+    let selectQry = await pool.query(`Select "property_name"  "Property Name","Member","Membership Number","Membership Type","SR No." "CSV Serial Number","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","ErrorDescription" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'Error'`)
+    let data=selectQry.rows ? selectQry.rows:[]
+    if(data.length){
+        let fileName = await generateCSV(data)
+        console.log(fileName)
+    }else{
+        console.log(`No Error`)
+    }
+
+  }catch(e){
+      console.log(e)
+
+  }
+
+}
+
+let generateCSV=async(data)=>{
+    let headerArr = [{id:"SR No.",title:"SR No."}]
+    for(let [key,value] of Object.entries(data[0])){
+        headerArr.push({id: `${key}`, title:`${key}`})
+    }
+    let fileName = `./UTRReport/UTR_Error_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
+    const csvWriter = createCsvWriter({
+        path: fileName,
+        header: headerArr
+    });
+    let bodyArr = [];
+    let index = 1;
+    for(let d of data){
+        let bodyObj = {'SR No.':index++}
+        
+        for(let [key,value] of Object.entries(d)){
+            bodyObj[`${key}`] = `${value}`
+        }   
+        bodyArr.push(bodyObj)
+    }
+    const records = bodyArr;
+     
+   let result= await csvWriter.writeRecords(records)  
+    return  fileName;  
+} // returns a promise
+ 
+
+getErrorRecordandCreateCSV(132).then(d=>{
+    // console.log(d)
+}).catch(e=>{
+    console.log(e)
+})
