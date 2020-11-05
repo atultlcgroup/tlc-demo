@@ -102,3 +102,6 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == true || proces
   console.log(`schedule Tasks For Member Spent Report `);
   scheduleTasksForMemberSpentReport(process.env.SCHEDULER_TIME_FOR_POS_TOTAL_SPENT_REPORT);
 }
+
+
+// Member spent for POS
