@@ -1,4 +1,4 @@
-let pool = require("../databases/uatDb").pool
+let pool = require("../databases/db").pool
 let feedbackUrl= process.env.FEEDBACK_URL;
 let getFeedbackUrl=async(reservationId)=>{
     return new Promise(async(resolve, reject)=>{

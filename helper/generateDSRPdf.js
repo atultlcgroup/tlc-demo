@@ -22,7 +22,10 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateDSRPDF=async(dsrValues)=>{
+let  generateDSRPDF=async(dsrValues,propertyId)=>{
+    let pyamnetObj={}
+    let summaryTotalSale =0
+    let summaryTotalAmount=0
  propertyName = `${dsrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 console.log("DSR values are");
@@ -71,12 +74,12 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
-                    <td>${getEmptyIfNull(obj.payment_mode__c)}</td>
+                    <td>${getEmptyIfNull((obj.payment_mode__c=='Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c?obj.credit_card__c : '')}`: `${obj.payment_mode__c}`))}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
                     <td>${getEmptyIfNull(obj.amount__c)}</td>
                     <td>${getEmptyIfNull(obj.total_amount__c-obj.amount__c)}</td>
                     <td>${getEmptyIfNull(obj.total_amount__c)}</td>
-                    <td>${getEmptyIfNull(obj.GST_details__c)}</td>
+                    <td>${getEmptyIfNull(obj.gstin__c)}</td>
                     <td>${getEmptyIfNull(obj.state_code__c)}</td>
                     <td>${getEmptyIfNull(obj.remarks__c)}</td>
                     </tr>
@@ -90,60 +93,78 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     salesTotalAmount += obj.total_amount__c
                    // salesTotalAmount += (obj.amount__c ? obj.amount__c : 0 ) + (obj.tax ? obj.tax : 0);
                 }
-                if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
-                {
-                    summaryData[0].amount +=  obj.total_amount__c;
-                    summaryData[0].noOfSale += 1;
-                }
-                if((obj.payment_mode__c).indexOf('Credit Card') >= 0){
-                    summaryData[1].amount +=  obj.total_amount__c;
-                    summaryData[1].noOfSale += 1;
-                }
-                if((obj.payment_mode__c).indexOf('Hotel Transfer') >= 0){
-                    summaryData[2].amount +=  obj.total_amount__c;
-                    summaryData[2].noOfSale += 1;
-                }
-                if((obj.payment_mode__c).indexOf('Cash') >= 0){
-                    summaryData[3].amount +=  obj.total_amount__c;
-                    summaryData[3].noOfSale += 1;
-                }
-                if((obj.payment_mode__c).indexOf('Online') >= 0){
-                    summaryData[4].amount +=  obj.total_amount__c;
-                    summaryData[4].noOfSale += 1;
-                }
+                summaryTotalSale+=1
+                summaryTotalAmount += obj.total_amount__c
+                    if(pyamnetObj[obj.payment_mode__c]){
+                   
+                       pyamnetObj[obj.payment_mode__c]={amount:obj.total_amount__c+pyamnetObj[obj.payment_mode__c].amount,noOfSale:pyamnetObj[obj.payment_mode__c].noOfSale+1}
+                    }else{
+                       pyamnetObj[obj.payment_mode__c]= {amount:obj.total_amount__c,noOfSale:1}
+                    }
+                   console.log(pyamnetObj)
+                // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
+                // {
+                //     summaryData[0].amount +=  obj.total_amount__c;
+                //     summaryData[0].noOfSale += 1;
+                // }
+                // if((obj.payment_mode__c).indexOf('Credit Card') >= 0){
+                //     summaryData[1].amount +=  obj.total_amount__c;
+                //     summaryData[1].noOfSale += 1;
+                // }
+                // if((obj.payment_mode__c).indexOf('Hotel Transfer') >= 0){
+                //     summaryData[2].amount +=  obj.total_amount__c;
+                //     summaryData[2].noOfSale += 1;
+                // }
+                // if((obj.payment_mode__c).indexOf('Cash') >= 0){
+                //     summaryData[3].amount +=  obj.total_amount__c;
+                //     summaryData[3].noOfSale += 1;
+                // }
+                // if((obj.payment_mode__c).indexOf('Online') >= 0){
+                //     summaryData[4].amount +=  obj.total_amount__c;
+                //     summaryData[4].noOfSale += 1;
+                // }
                     
 
 }
 
-let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale + summaryData[3].noOfSale + summaryData[4].noOfSale
-let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount + summaryData[3].amount + summaryData[4].amount
+// let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale + summaryData[3].noOfSale + summaryData[4].noOfSale
+// let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount + summaryData[3].amount + summaryData[4].amount
 
-let summaryHtml = ` <tr>
-<td>${summaryData[0].key}</td>
-<td style="text-align: right;">${summaryData[0].noOfSale}</td>
-<td style="text-align: right;">${summaryData[0].amount}</td>
-</tr>
-<tr>
-<td>${summaryData[1].key}</td>
-<td style="text-align: right;">${summaryData[1].noOfSale}</td>
-<td style="text-align: right;">${summaryData[1].amount}</td>
-</tr>
-<tr>
-<td>${summaryData[2].key}</td>
-<td style="text-align: right;">${summaryData[2].noOfSale}</td>
-<td style="text-align: right;">${summaryData[2].amount}</td>
-</tr>
-<tr>
-<td>${summaryData[3].key}</td>
-<td style="text-align: right;">${summaryData[3].noOfSale}</td>
-<td style="text-align: right;">${summaryData[3].amount}</td>
-</tr>
-<tr>
-<td>${summaryData[4].key}</td>
-<td style="text-align: right;">${summaryData[4].noOfSale}</td>
-<td style="text-align: right;">${summaryData[4].amount}</td>
-</tr>
-`
+let summaryHtml = ` <tr>`
+
+for(let [key,value] of Object.entries(pyamnetObj)){
+    summaryHtml += ` <tr>`
+    summaryHtml +=`<td>${key}</td>`
+    summaryHtml +=`<td style="text-align: right;">${value.noOfSale}</td>`
+    summaryHtml +=`<td style="text-align: right;">${value.amount}</td>`
+    summaryHtml+=`</tr>`
+}
+
+// <td>${summaryData[0].key}</td>
+// <td style="text-align: right;">${summaryData[0].noOfSale}</td>
+// <td style="text-align: right;">${summaryData[0].amount}</td>
+// </tr>
+// <tr>
+// <td>${summaryData[1].key}</td>
+// <td style="text-align: right;">${summaryData[1].noOfSale}</td>
+// <td style="text-align: right;">${summaryData[1].amount}</td>
+// </tr>
+// <tr>
+// <td>${summaryData[2].key}</td>
+// <td style="text-align: right;">${summaryData[2].noOfSale}</td>
+// <td style="text-align: right;">${summaryData[2].amount}</td>
+// </tr>
+// <tr>
+// <td>${summaryData[3].key}</td>
+// <td style="text-align: right;">${summaryData[3].noOfSale}</td>
+// <td style="text-align: right;">${summaryData[3].amount}</td>
+// </tr>
+// <tr>
+// <td>${summaryData[4].key}</td>
+// <td style="text-align: right;">${summaryData[4].noOfSale}</td>
+// <td style="text-align: right;">${summaryData[4].amount}</td>
+
+
 
 let htmlStr=`
  <html>
@@ -245,7 +266,7 @@ let htmlStr=`
                   <th width="3%">Membership Number</th>
                   <th width="3%">Type
                       <br/>(N/R)</th>
-                  <th width="3%">Expiry&nbsp;&nbsp;&nbsp;&nbsp; Date</th>
+                  <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
@@ -325,7 +346,7 @@ let htmlStr=`
 
   </html>
 `
-let pdfName = `./DSRReport/DSR_Repoprt_${require('dateformat')(new Date(), "yyyymmddhMMss")}.pdf`
+let pdfName = `./DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })

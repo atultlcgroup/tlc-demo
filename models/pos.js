@@ -122,9 +122,9 @@ let updatePOSTracking = (body, fileName) => {
         // console.log(`INSERT INTO tlcsalesforce.pos_tracking__c(
         //     brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c, "branduniqueidentifier__c","programuniqueidentifier__c","propertyuniqueidentifier__c","outletuniqueidentifier__c",outlet__c)
         //    VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select sfid  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'))`)
-        pool.query(`INSERT INTO tlcsalesforce.pos_tracking__c(
+        pool.query(`INSERT INTO tlcsalesforce.pos_tracking__c(external_id__c,
              brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c, "banduniqueidentifier__c","programuniqueidentifier__c","propertyuniqueidentifier__c","outletuniqueidentifier__c",outlet__c)
-            VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select sfid  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'))`)
+            VALUES (gen_random_uuid(),'${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select sfid  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'))`)
     } catch (e) {
         return e;
     }
@@ -188,7 +188,6 @@ let readExcel = async (fileName, posSource, posTrackingId, bodyFileName, outlet)
             if (cnt == 1) {
                 let n = 0;
                 for (e of Object.entries(d)) {
-
                     let resultObj = await pool.query(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                     //    // console.log(`select  table_field_name__c from tlcsalesforce.pos_mapping__c where pos_source__c='${posSource}' and excel_field_name__c='${e[1]}'`)
                     e[1] = (resultObj) ? resultObj.rows[0]['table_field_name__c'] : ''
@@ -221,6 +220,7 @@ let readExcel = async (fileName, posSource, posTrackingId, bodyFileName, outlet)
                     if (findErr == 0) {
                         let insertDataToLog = await pool.query(`${query} ${query2} RETURNING mapping_id`)
                         let insertedlogId = insertDataToLog.rows[0].mapping_id ? insertDataToLog.rows[0].mapping_id : 0
+                       console.log(`${query} ${query2}`)
                         let checkDuplicate = await findDuplicate(`${query} ${query2}`)
                         console.log(`------check duplicate=${checkDuplicate}---------`)
                         if (checkDuplicate > 0) {
@@ -274,6 +274,7 @@ let readExcel = async (fileName, posSource, posTrackingId, bodyFileName, outlet)
         }
         // resolve(`SUCCESS`)
     } catch (e) {
+        console.log(e)
 
         // deleteErrorExcelRecords(posTrackingId)
         await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e}' where file_name__c = '${fileName}'`)
@@ -308,6 +309,7 @@ let getFileFromFTP = async (fileArr, fileName) => {
                     if (checkErr && checkErr.code == 1)
                         reject(`${checkErr.err}`)
                 } catch (e) {
+                    console.log(e)
                     if (fileName)
                         reject(e)
                     await pool.query(`update tlcsalesforce.pos_tracking__c set status__c = 'SYNC_ERROR',error_description__c='${e}' where file_name__c = '${file['file_name']}'`)
@@ -316,7 +318,7 @@ let getFileFromFTP = async (fileArr, fileName) => {
             ftpConnection.close();
             resolve(`SUCCESS`)
         } catch (err) {
-            // console.log(`${err}`)
+            console.log(`${err}`)
             if (fileName)
                 reject(`${err}`)
         }
@@ -443,13 +445,13 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
                    console.log("error:date should be in dd-mon-yyyy");
                    let getStatus = pool.query(`update tlcsalesforce.pos_log set status='${status}', error_description='${errorDiscription}' where mapping_id='${n.mapping_id}' RETURNING status`);
 
-
             }
             
 
-        }
-
+            }
+            
             return;
+                   
 
     } catch (e) {
         updateStatusPostrackingTable('SYNC_ERROR', n.pos_tracking_id);
@@ -558,7 +560,7 @@ let generateCSV=async(data)=>{
     }
 
     let fileName = `POS_Error_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
-    let path = `./POSReport/${fileName}`
+    let path = `./uploads/${fileName}`
     const csvWriter = createCsvWriter({
         path: path,
         header: headerArr
@@ -587,16 +589,16 @@ let uploadErrorFileToFTP = async (fileName) => {
         try {
             let path = `POS/error/${fileName}`
             ftpConnection = await ftp.connect();
-              await ftpConnection.uploadFrom(`POSReport/${fileName}`, `${path}`)
+              await ftpConnection.uploadFrom(`uploads/${fileName}`, `${path}`)
             ftpConnection.close();
-            fs.unlink(`POSReport/${fileName}`, (err, da) => {
+            fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
             resolve(path)
         } catch (e) {
             // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
-            fs.unlink(`POSReport/${fileName}`, (err, da) => {
+            fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
@@ -630,5 +632,4 @@ module.exports = {
     getPosData,
     getPosLogData,
     getRefferalData2
-
 }
