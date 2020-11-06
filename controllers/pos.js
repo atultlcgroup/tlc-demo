@@ -8,6 +8,7 @@ let createFileName= (body)=>{
     return fileName;
 }
 let uploadExcel=(req,res)=>{
+    console.time("dbsave");
     try{
         console.log(`uploadExcel api called in controller`)
         if(!req.body.fileName|| !req.body.fileContent || !req.body.brandName
@@ -30,28 +31,36 @@ let uploadExcel=(req,res)=>{
                    let error=valudateFileNameSpecialChar(req.body)
                    console.log(error);
                    res.status(401).send({code: 401, message: error})
-                   return    
+                   return       
         }
         excelModel.uploadExcel(file,createFileName(req.body),req.body).then(data=>{
+            console.timeEnd("dbsave");
             res.status(200).send({code: 200, message: data})
         }).catch(e=>{
+            console.timeEnd("dbsave");
             res.status(500).send({code: 500, message: e})
+            
         })
+        
     }catch( e ){
+        console.timeEnd("dbsave");
         res.status(500).json({code : 500 , message : e})
     }
-   
+    
 }
 
 
 
 let getPosData=async(req,res)=>{
+    console.time("dbsave");
     console.log("Get POS api called");
     let fileName = req.body.fileName || "";
     excelModel.getPosData(fileName).then(data=>{
+        console.timeEnd("dbsave");
         res.status(200).json({code: 200, message: data});
     }).catch(err=>{
-        res.status(500).json({code: 500, message: err});
+        console.timeEnd("dbsave");
+        res.status(200).json({code: 500, message: err});
     })
 }
 
@@ -62,11 +71,14 @@ let readExcelInDirectory=async(result)=>{
 
 
 let getPosLogData=async(req,res)=>{
+    console.time("dbsave");
     console.log("get pos log data");
     let fileName = ``
     excelModel.getPosLogData(fileName).then(data=>{
-        res.status(200).json({code: 200, message: 'success' , data : data});
+        console.timeEnd("dbsave");
+        res.status(200).json({code: 200, message: 'success' });
     }).catch(err=>{
+        console.timeEnd("dbsave");
         res.status(200).json({code:500,message:err});
     })
     
@@ -137,9 +149,31 @@ let valudateFileNameSpecialChar=(data)=>{
 }
 
 
+let getRefferalData2=(req,res)=>{
+    let  refferalData={
+     membershipNumber:req.body.membershipNumber,
+     referralCode:req.body.referralCode,
+     membershipTypeId:req.body.membershipTypeId,
+     transactionType:req.body.transactionType
+     }
+     
+ 
+     console.log("by promise getting the data");
+     refferalModel.getRefferalData2(refferalData).then(data=>{
+         console.log("under the promise",data);  
+         res.status(200).json({code: 200, message: data});
+ 
+     }).catch(err=>{
+         res.status(200).json({code: 500, message: err});
+     })
+     
+ }
+
+
 module.exports={
     uploadExcel,
     getPosData,
     getPosLogData,
-    GETURL
+    GETURL,
+    getRefferalData2
 }
