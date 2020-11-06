@@ -340,7 +340,7 @@ let generateCSV=async(data,userId)=>{
         headerArr.push({id: `${key}`, title:`${key}`})
     }
 
-    let fileName = `UTR_Error_${userId}_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
+    let fileName = `UTR_Error_${userId}_${Date.now()}.csv`
     let path = `./UTRReport/${fileName}`
     const csvWriter = createCsvWriter({
         path: path,
