@@ -4,6 +4,12 @@ const paymentReport=require('../models/paymentReport');
 const DSRReport = require('../models/DSRReport')
 const FandBSummary = require('../models/FandBSummary')
 let posModel = require('../models/pos')
+const DRReport = require('../models/DRReport')
+const FReport = require('../models/FReport')
+const RReport = require('../models/RReport')
+
+
+
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
     console.log(`=================   SCHEDULER START POS   ========================`)
     await posModel.getPosData()
@@ -81,10 +87,58 @@ let scheduleTasksForDSRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTi
  console.log(`================= DSR REPORT: Success=============`)
 });
 
-if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'TRUE')
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'TRUE')
 {
   console.log(`DSR Report`);
   scheduleTasksForDSRReport(process.env.SCHEDULER_TIME_FOR_DSR_REPORT);
 }
 
 
+
+
+//For DR Report
+
+let scheduleTasksForDRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR DRR REPORT   ========================`)
+ let data= await DRReport.DRReport('')
+ console.log(data) 
+ console.log(`================= DRR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DRR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DRR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_DRR_REPORT == 'TRUE')
+{
+  console.log(`DRR Report`);
+  scheduleTasksForDRReport(process.env.SCHEDULER_TIME_FOR_DRR_REPORT);
+}
+
+
+
+//For FR Report
+
+let scheduleTasksForFReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR FR REPORT   ========================`)
+ let data= await FReport.FReport('')
+ console.log(data) 
+ console.log(`================= FR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_FR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_FR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_FR_REPORT == 'TRUE')
+{
+  console.log(`FR Report`);
+  scheduleTasksForFReport(process.env.SCHEDULER_TIME_FOR_FR_REPORT);
+}
+
+//For RR Report
+
+let scheduleTasksForRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR RR REPORT   ========================`)
+ let data= await RReport.RReport('')
+ console.log(data) 
+ console.log(`================= RR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == 'TRUE')
+{
+  console.log(`RR Report`);
+  scheduleTasksForRReport(process.env.SCHEDULER_TIME_FOR_RR_REPORT);
+}
