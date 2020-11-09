@@ -1,6 +1,8 @@
-
 const excelModel= require("../models/pos")
 const extensions = ['xls','xlsx','xlsm','xlt','xltx','xltm','xla','xlam','csv'];
+let  dotenv = require('dotenv');
+
+dotenv.config();
 
 let createFileName= (body)=>{
     let fileName =``;
@@ -9,6 +11,7 @@ let createFileName= (body)=>{
 }
 let uploadExcel=(req,res)=>{
     console.time("dbsave");
+    console.log(req.headers.token)
     try{
         console.log(`uploadExcel api called in controller`)
         if(!req.body.fileName|| !req.body.fileContent || !req.body.brandName
@@ -16,8 +19,12 @@ let uploadExcel=(req,res)=>{
             || !req.body.brandUniqueIdentifier || !req.body.programUniqueIdentifier
             || !req.body.propertyUniqueIdentifier
             || !req.body.outletUniqueIdentifier
-            || !req.body.userId || !req.body.posSource){
+            || !req.body.userId || !req.body.posSource || !req.body.userEmail || !req.headers.token){
             res.status(401).send({code: 401, message: 'Invalid Inputs'})
+            return
+        }
+        if(req.headers.token != process.env.POS_VARIFICATION_KEY ){      
+            res.status(401).send({code: 401, message: 'Invalid Token'})
             return
         }
         let file =  req.body.fileContent;
@@ -54,6 +61,10 @@ let uploadExcel=(req,res)=>{
 let getPosData=async(req,res)=>{
     console.time("dbsave");
     console.log("Get POS api called");
+    if(req.headers.token != process.env.POS_VARIFICATION_KEY ){      
+        res.status(401).send({code: 401, message: 'Invalid Token'})
+        return
+    }
     let fileName = req.body.fileName || "";
     excelModel.getPosData(fileName).then(data=>{
         console.timeEnd("dbsave");

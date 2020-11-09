@@ -3,7 +3,10 @@ const pool = require("../databases/db").pool
 const ftp = require('../databases/ftp')
 const excelToJson = require('convert-excel-to-json');
 const fs = require('fs');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+// const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const ObjectsToCsv = require('objects-to-csv')
+
+let sendMail= require("../helper/mailModel");
 
 //Time validation
 let validateHhMm = async (inputField) => {
@@ -123,8 +126,8 @@ let updatePOSTracking = (body, fileName) => {
         //     brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c, "branduniqueidentifier__c","programuniqueidentifier__c","propertyuniqueidentifier__c","outletuniqueidentifier__c",outlet__c)
         //    VALUES ('${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select sfid  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'))`)
         pool.query(`INSERT INTO tlcsalesforce.pos_tracking__c(external_id__c,
-             brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c, "banduniqueidentifier__c","programuniqueidentifier__c","propertyuniqueidentifier__c","outletuniqueidentifier__c",outlet__c)
-            VALUES (gen_random_uuid(),'${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select sfid  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'))`)
+             brand_name__c, property_name__c, program_name__c, outlet_name__c, status__c, file_name__c, error_description__c, file_uploaded_by__c ,createddate, pos_source__c, "banduniqueidentifier__c","programuniqueidentifier__c","propertyuniqueidentifier__c","outletuniqueidentifier__c",outlet__c,user_email_id__c)
+            VALUES (gen_random_uuid(),'${body.brandName}', '${body.propertyName}', '${body.programName}', '${body.outletName}','UPLOADED', '${fileName}',  '','${body.userId}',now(),'${body.posSource}','${body.brandUniqueIdentifier}','${body.programUniqueIdentifier}','${body.propertyUniqueIdentifier}','${body.outletUniqueIdentifier}',(select sfid  from tlcsalesforce.outlet__c where unique_identifier__c = '${body.outletUniqueIdentifier}'),'${body.userEmail}')`)
     } catch (e) {
         return e;
     }
@@ -531,10 +534,11 @@ let getErrorDataFromPOSLog=async (posTrackingId)=>{
          from tlcsalesforce.pos_log where pos_tracking_id='${posTrackingId}' and status='SYNC_ERROR'`);
          if( result.rows)
      result ? result.rows : null
-     
-     if( result.rows.length > 0){
+         let email=await pool.query(`select user_email_id__c from tlcsalesforce.pos_tracking__c  where id='${posTrackingId}'`) 
+         email ? email.rows : null
+         if( result.rows.length > 0){
         console.log("Error data is",result.rows);
-        let fileURL= await generateCSV(result.rows);
+        let fileURL= await generateCSV(result.rows, email.rows[0].user_email_id__c);
         return fileURL
      }else{
         console.log("Error data is",result.rows);
@@ -553,32 +557,37 @@ let getErrorDataFromPOSLog=async (posTrackingId)=>{
 }
 
 
-let generateCSV=async(data)=>{
-    let headerArr = [{id:"SR No.",title:"SR No."}]
-    for(let [key,value] of Object.entries(data[0])){
-        headerArr.push({id: `${key}`, title:`${key}`})
-    }
+let generateCSV=async(data,email)=>{
+    // let headerArr = [{id:"SR No.",title:"SR No."}]
+    // for(let [key,value] of Object.entries(data[0])){
+    //     headerArr.push({id: `${key}`, title:`${key}`})
+    // }
 
     let fileName = `POS_Error_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
     let path = `./uploads/${fileName}`
-    const csvWriter = createCsvWriter({
-        path: path,
-        header: headerArr
-    });
+    // const csvWriter = createCsvWriter({
+    //     path: path,
+    //     header: headerArr
+    // });
     let bodyArr = [];
     let index = 1;
     for(let d of data){
-        let bodyObj = {'SR No.':index++}
+        let bodyObj = {"SR No.":index++}
         
         for(let [key,value] of Object.entries(d)){
             bodyObj[`${key}`] = `${value}`
         }   
         bodyArr.push(bodyObj)
     }
-    const records = bodyArr;
-     
-   let result= await csvWriter.writeRecords(records)  
+    const csv = new ObjectsToCsv(bodyArr)
+    await csv.toDisk(`${path}`)    
+    // const records = bodyArr;
+    // console.log(headerArr)
+     console.log("email",email);
+
+//    let result= await csvWriter.writeRecords(records) 
    let fileUrl=await uploadErrorFileToFTP (fileName)
+   await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email)
    console.log("path",fileUrl);
    return  fileUrl;  
 } // returns a promise
@@ -591,10 +600,10 @@ let uploadErrorFileToFTP = async (fileName) => {
             ftpConnection = await ftp.connect();
               await ftpConnection.uploadFrom(`uploads/${fileName}`, `${path}`)
             ftpConnection.close();
-            fs.unlink(`uploads/${fileName}`, (err, da) => {
-                if (err)
-                    reject(`${err}`);
-            })
+            // fs.unlink(`uploads/${fileName}`, (err, da) => {
+            //     if (err)
+            //         reject(`${err}`);
+            // })
             resolve(path)
         } catch (e) {
             // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)

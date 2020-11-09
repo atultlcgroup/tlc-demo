@@ -2,6 +2,8 @@ let  dotenv = require('dotenv');
 dotenv.config();
 const sendmail = require('./sendMail')
 const pool = require("../databases/db").pool;
+const fromEmailForPOSError=process.env.FROM_EMAIL_FOR_POS_ERROR || ''; 
+
 
 // const config = require('../config').ENV_OBJ
 
@@ -255,13 +257,51 @@ let sendUTRReport=(file,fileName,emails)=>{
 }   
 
 
+
+// POS error report 
+let sendPOSErrorReport=(file,fileName,emails)=>{
+    try{
+        readHTMLFile(__dirname + `/posError.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForPOSErrorReport= new Date();
+            dateforEOMReport = `${dateForPOSErrorReport.toLocaleString('default', { month: 'short' })} ${dateForPOSErrorReport.getFullYear()}`
+            let subjectForPOSErrorReport = `POS Error Report`
+            let template = handlebars.compile(html);
+            replacements={};
+           let htmlToSend = template(replacements);
+            console.log(`fromEmailForPOSError : ${fromEmailForPOSError} to ${emails} subject ${subjectForPOSErrorReport} File:${file} fileName:${fileName}`)
+             sendmail.smtpAttachmentPOSError(emails, `Club Marriott <${fromEmailForPOSError}>` , subjectForPOSErrorReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}   
+
+// End POS report error
+
             module.exports={
                 sendMail,
                 sendEODPaymentReport,
                 sendEOMPaymentReport,
                 sendMailForEachPayment,
                 sendDSRReport,
-                sendUTRReport
+                sendUTRReport,
+                sendPOSErrorReport
             }
 
         
