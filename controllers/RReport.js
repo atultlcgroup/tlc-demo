@@ -2,8 +2,8 @@
 
 let RReport = async(req,res)=>{
     try{
-        let RRData =RRModel.RReport(req,res)
-        res.status(200).send({code :200 , message:'Success'})
+        let RRData =await RRModel.RReport(req,res)
+        res.status(200).send({code :200 , message:'Success',data: RRData})
 
     }catch(e){
         console.log(`${e}`)
