@@ -5,6 +5,7 @@ const pool = require("../databases/db").pool;
 const fromEmailForPOSError=process.env.FROM_EMAIL_FOR_POS_ERROR || ''; 
 
 
+
 // const config = require('../config').ENV_OBJ
 
 const from=process.env.FROM_MAIL || "";
@@ -13,6 +14,12 @@ const subject =process.env.MAIL_SUBJECT || "";
 let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
 const fromEmailForDSR = process.env.FROM_EMAIL_FOR_DSR || "";
 const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
+const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
+const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
+const fromEmailForDRR = process.env.FROM_EMAIL_FOR_DRR || "";
+
+
+
 
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
@@ -195,7 +202,7 @@ let sendDSRReport=(file,fileName,emails)=>{
             console.log(err)
             let dateForDSRReport= new Date();
             dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
-            let subjectForDSRReport = `Daily Sales Report`
+            let subjectForDSRReport = `Club Marriott | Daily Sales Report`
             let template = handlebars.compile(html);
             replacements={};
            let htmlToSend = template(replacements);
@@ -221,6 +228,104 @@ let sendDSRReport=(file,fileName,emails)=>{
 }      
 
 
+
+let sendFReport=(file,fileName,emails)=>{
+    try{
+        readHTMLFile(__dirname + `/FR_Report.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForFReport= new Date();
+            let subjectForFReport = `Club Marriott | Feedback Report`
+            let template = handlebars.compile(html);
+            replacements={};
+           let htmlToSend = template(replacements);
+            console.log(`fromEmailForFR : ${fromEmailForFR} to ${emails} subject ${subjectForFReport} File:${file} fileName:${fileName}`)
+             sendmail.smtpAttachmentFR(emails, `Club Marriott <${fromEmailForFR}>` , subjectForFReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}  
+
+
+let sendDRReport=(file,fileName,emails)=>{
+    try{
+        readHTMLFile(__dirname + `/DRR_Report.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForDRReport= new Date();
+            let subjectForDRReport = `Club Marriott | Daily Redemption Report`
+            let template = handlebars.compile(html);
+            replacements={};
+           let htmlToSend = template(replacements);
+            console.log(`fromEmailForRR : ${fromEmailForDRR} to ${emails} subject ${subjectForDRReport} File:${file} fileName:${fileName}`)
+             sendmail.smtpAttachmentDRR(emails, `Club Marriott <${fromEmailForDRR}>` , subjectForDRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}  
+
+
+let sendRReport=(file,fileName,emails)=>{
+    try{
+        readHTMLFile(__dirname + `/RR_Report.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForRReport= new Date();
+            let subjectForRReport = `Club Marriott | Todays Reservation Report`
+            let template = handlebars.compile(html);
+            replacements={};
+           let htmlToSend = template(replacements);
+            console.log(`fromEmailForRR : ${fromEmailForRR} to ${emails} subject ${subjectForRReport} File:${file} fileName:${fileName}`)
+             sendmail.smtpAttachmentRR(emails, `Club Marriott <${fromEmailForRR}>` , subjectForRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}  
 
 
 let sendUTRReport=(file,fileName,emails)=>{
@@ -301,7 +406,10 @@ let sendPOSErrorReport=(file,fileName,emails)=>{
                 sendMailForEachPayment,
                 sendDSRReport,
                 sendUTRReport,
-                sendPOSErrorReport
+                sendPOSErrorReport,
+                sendFReport,
+                sendRReport,
+                sendDRReport
             }
 
         

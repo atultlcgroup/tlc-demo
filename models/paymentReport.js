@@ -78,9 +78,9 @@ let formatDate=(date)=>{
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
         qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' limit 1`;
-        if(req.property_sfid)
+        else if(req.property_sfid)
         qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' limit 1`;
-        if(req.customer_set_sfid)
+        else if(req.customer_set_sfid)
         qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' limit 1`;
         console.log(qry)
         let emailData = await pool.query(`${qry}`)

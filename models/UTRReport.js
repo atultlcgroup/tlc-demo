@@ -40,9 +40,9 @@ let findPaymentRule= async(req)=>{
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
         qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
-        if(req.property_sfid)
+        else if(req.property_sfid)
         qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
-        if(req.customer_set_sfid)
+        else if(req.customer_set_sfid)
         qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
