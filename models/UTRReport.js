@@ -39,20 +39,20 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
         if(req.property_sfid)
-        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
         if(req.customer_set_sfid)
-        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
         if(result){
             for(let d of result){
-            if(d.hotel_email_status__c == true)
-            resultArray= resultArray.concat(d.hotel_emails__c.split(','));
-            if(d.tlc_email_status__c == true)
-            resultArray=resultArray.concat(d.manager_email__c.split(','));
+            if(d.hotel_email_send_utr__c == true)
+            resultArray= resultArray.concat(d.hotel_email_id_utr__c.split(','));
+            if(d.tlc_send_email_utr__c == true)
+            resultArray=resultArray.concat(d.tlc_email_id_utr__c.split(','));
            }
         }
         return resultArray
@@ -340,7 +340,7 @@ let generateCSV=async(data,userId)=>{
         headerArr.push({id: `${key}`, title:`${key}`})
     }
 
-    let fileName = `UTR_Error_${userId}_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
+    let fileName = `UTR_Error_${userId}_${Date.now()}.csv`
     let path = `./UTRReport/${fileName}`
     const csvWriter = createCsvWriter({
         path: path,

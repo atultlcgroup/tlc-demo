@@ -7,21 +7,21 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
         if(req.property_sfid)
-        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
         if(req.customer_set_sfid)
-        qry = `select hotel_email_status__c,hotel_emails__c,manager_email__c,tlc_email_status__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
         console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
         if(result){
             for(let d of result){
-            if(d.hotel_email_status__c == true)
-            resultArray= resultArray.concat(d.hotel_emails__c.split(','));
-            if(d.tlc_email_status__c == true)
-            resultArray=resultArray.concat(d.manager_email__c.split(','));
+            if(d.hotel_email_send_dsr__c == true)
+            resultArray= resultArray.concat(d.hotel_email_id_dsr__c.split(','));
+            if(d.tlc_send_email_dsr__c == true)
+            resultArray=resultArray.concat(d.tlc_email_id_dsr__c.split(','));
            }
         }
         return resultArray
@@ -105,7 +105,7 @@ let getEPRSfid = async()=>{
 let getEPRSfidCS = async()=>{
     try{
       let qry = `select distinct customer_set__c customer_set_sfid from tlcsalesforce.payment_email_rule__c where
-      (hotel_email_status__c = true or tlc_email_status__c = true) and (property__c is  NULL or property__c ='')`
+      (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and (property__c is  NULL or property__c ='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
