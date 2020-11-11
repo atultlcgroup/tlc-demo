@@ -42,14 +42,11 @@ app.use("/api/payment",paymentReport);
 
 
 app.use("/api/payment",paymentReport)
-<<<<<<< HEAD
 app.use("/api/DSR",DSRReport);
 app.use("/api/MemberSpend",memberSpentPOS)
-=======
 app.use("/api/DSR",DSRReport)
 app.use("/api/UTR",UTRReport)
 
->>>>>>> development
 
 // app.use("/")
 // const check = require("./check")

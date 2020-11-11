@@ -304,11 +304,7 @@ let queryForEOD=async()=>{
         
         where 
         (
-<<<<<<< HEAD
-                (date(payment__c.createddate) = '2020-10-06' --current_date
-=======
                 (date(payment__c.createddate) = current_date - interval '1 day'
->>>>>>> development
                 AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
                
                 )
@@ -482,14 +478,8 @@ let reportForEODandEOM = async (req) => {
                         //to generate excel 
                         let hotelName = req.type == 'EOD'  ? '':""
                         let summaryName = req.type == 'EOD' ? 'Daily Summary' : 'Monthly Summary'
-<<<<<<< HEAD
-                        let excelFile = await generateExcel.generateExcel(value,hotelName,summaryName);
-                        let pdfFile = await generatePdf.generatePDF(value,hotelName,summaryName)
-                        return;
-=======
                         let excelFile = await generateExcel.generateExcel(value,hotelName,summaryName, req.customer_set_sfid);
                         let pdfFile = await generatePdf.generatePDF(value,hotelName,summaryName, req.customer_set_sfid)
->>>>>>> development
 
                         //end generate excel
                         // // console.log(excelFile)

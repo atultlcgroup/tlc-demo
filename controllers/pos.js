@@ -1,6 +1,9 @@
 
 const excelModel= require("../models/pos")
 const extensions = ['xls','xlsx','xlsm','xlt','xltx','xltm','xla','xlam','csv'];
+let  dotenv = require('dotenv');
+
+dotenv.config();
 
 let createFileName= (body)=>{
     let fileName =``;
@@ -10,15 +13,21 @@ let createFileName= (body)=>{
 let uploadExcel=(req,res)=>{
     console.time("dbsave");
     try{
+        if(req.body.token == process.env.POS_VARIFICATION_KEY ){      
         console.log(`uploadExcel api called in controller`)
         if(!req.body.fileName|| !req.body.fileContent || !req.body.brandName
             || !req.body.programName || !req.body.propertyName || !req.body.outletName
             || !req.body.brandUniqueIdentifier || !req.body.programUniqueIdentifier
             || !req.body.propertyUniqueIdentifier
             || !req.body.outletUniqueIdentifier
-            || !req.body.userId || !req.body.posSource){
+            || !req.body.userId || !req.body.posSource || !req.body.userEmail ){
             res.status(401).send({code: 401, message: 'Invalid Inputs'})
             return
+        }}
+        else{
+            res.status(401).send({code: 401, message: 'Invalid Token'})
+            return
+
         }
         let file =  req.body.fileContent;
         let fileName = req.body.fileName;
