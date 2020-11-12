@@ -1,6 +1,8 @@
 
 const pool = require("../databases/db").pool;
-let sendMail= require("../helper/mailModel")
+const sendMail= require("../helper/mailModel");
+const generatePdf = require("../helper/generateRRPdf")
+
 
 let findPaymentRule= async(req)=>{
     try{
@@ -12,7 +14,7 @@ let findPaymentRule= async(req)=>{
         qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
         else if(req.customer_set_sfid)
         qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
-        console.log(qry)
+        // console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -82,10 +84,10 @@ let getDRRData =async()=>{
 
 let getRRData = async(property_id)=>{
 try{
-let qry = `select  Distinct reservation__c.name,account.name,reservation__c.reservation_status__c,membership_offers__c.name,
-reservation__c.reservation_date__c,reservation__c.reservation_time__c,reservation__c.number_of_guests__c,
-reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,outlet__c.name,
-membership__c.membership_number__c,reservation__c.celebration_remark__c,reservation__c.celebration_type__c,
+let qry = `select  Distinct property__c.name h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
+outlet__c.name outlet_name,
+membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
+reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
 reservation__c.specialrequest__c
 from tlcsalesforce.reservation__c
 inner join tlcsalesforce.account
@@ -106,7 +108,7 @@ and (outlet__c.property__c='${property_id}'
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
 )`
-console.log(qry)
+// console.log(qry)
 let data = await pool.query(qry)
 return data.rows ? data.rows : []
 }catch(e){
@@ -116,10 +118,10 @@ return []
 
 let getRRDataCS=async(customer_set__c)=>{
     try{
- let qry = `select  Distinct reservation__c.name,account.name,reservation__c.reservation_status__c,membership_offers__c.name,
- reservation__c.reservation_date__c,reservation__c.reservation_time__c,reservation__c.number_of_guests__c,
- reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,outlet__c.name,
- membership__c.membership_number__c,reservation__c.celebration_remark__c,reservation__c.celebration_type__c,
+ let qry = `select  Distinct membershiptype__c.name  h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
+ outlet__c.name outlet_name,
+ membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
+ reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
  reservation__c.specialrequest__c
  from tlcsalesforce.reservation__c
  inner join tlcsalesforce.account
@@ -141,7 +143,7 @@ let getRRDataCS=async(customer_set__c)=>{
      membershiptype__c.sfid='${customer_set__c}'
      --membershiptype__c.sfid='a0f0k000002bjhGAAQ'
  )`
- console.log(qry)
+//  console.log(qry)
  let data = await pool.query(qry)
 return data.rows ? data.rows : []
 }catch(e){
@@ -158,9 +160,9 @@ let RReport= ()=>{
             for(let e of getEmailandPropertyArr.emailArr){
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind++];
                 let dataPropertyWise = await getRRData(propertyId)
-                console.log(dataPropertyWise)
+                // console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
-                    let pdfFile = ``//await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
+                    let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
                     console.log(pdfFile)
                     sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
                     console.log(`From Model`)
@@ -171,9 +173,9 @@ let RReport= ()=>{
             for(let e of getEmailandCSArr.emailArr){
                 let csId = getEmailandCSArr.customerSetArr[ind1++];
                 let dataCSWise = await getRRDataCS(csId)
-                console.log(dataCSWise)
+                // console.log(dataCSWise)
                 if(dataCSWise.length){
-                let pdfFile = ``//await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
+                let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
                 console.log(pdfFile)
                 sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
                 console.log(`From Model`)

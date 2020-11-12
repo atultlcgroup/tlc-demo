@@ -74,9 +74,35 @@ let getDRRSfidCS = async()=>{
 
 
 
-let getDRRData =async()=>{
+let getDRRData =async(property_id)=>{
     try{
-        let qry = ``;
+        let qry = `select membershiptypeoffer__c.name,redemption_log__c.redemption_date_time__c,account.name,
+        membership__c.membership_number__c,membership_offers__c.certifcate_number__c,
+        reservation__c.redemption_transaction_code__c,reservation__c.assigned_staff_member__c,
+        pos_cheque_details__c.net_amount__c
+        from tlcsalesforce.redemption_log__c
+        inner join tlcsalesforce.membership_offers__c
+        on membership_offers__c.sfid=redemption_log__c.membership_offer__c
+        inner join tlcsalesforce.membershiptypeoffer__c
+        on membershiptypeoffer__c.sfid=membership_offers__c.customer_set_offer__c
+        inner join tlcsalesforce.membership__c
+        on membership_offers__c.membership2__c=membership__c.sfid
+        inner join tlcsalesforce.membershiptype__c
+        on membership__c.customer_set__c=membershiptype__c.sfid
+        inner join tlcsalesforce.account
+        on account.sfid=redemption_log__c.redeemed_by__c
+        Left join tlcsalesforce.reservation__c
+        on reservation__c.sfid=redemption_log__c.reservation__c
+        Left JOIN tlcsalesforce.pos_cheque_details__c ON
+        pos_cheque_details__c.redemption_code__c=reservation__c.redemption_transaction_code__c 
+        where 
+        (
+            membershiptype__c.property__c='${property_id}' 
+       -- membershiptype__c.property__c='a0D0k000009PPsEEAW' 
+        --or membershiptype__c.sfid='a0f0k000003FSKyAAO'
+        )
+        and 
+        date(redemption_log__c.redemption_date_time__c) = '2020-08-25'--(current_date-1)`;
         let data = await pool.query(qry)
         return data.rows ? data.rows : []
     }catch(e){
@@ -84,9 +110,34 @@ let getDRRData =async()=>{
     }
 }
 
-let getDRRDataCS =async()=>{
+let getDRRDataCS =async(customer_set__c)=>{
     try{
-        let qry = ``;
+        let qry = `select membershiptypeoffer__c.name,redemption_log__c.redemption_date_time__c,account.name,
+        membership__c.membership_number__c,membership_offers__c.certifcate_number__c,
+        reservation__c.redemption_transaction_code__c,reservation__c.assigned_staff_member__c,
+        pos_cheque_details__c.net_amount__c
+        from tlcsalesforce.redemption_log__c
+        inner join tlcsalesforce.membership_offers__c
+        on membership_offers__c.sfid=redemption_log__c.membership_offer__c
+        inner join tlcsalesforce.membershiptypeoffer__c
+        on membershiptypeoffer__c.sfid=membership_offers__c.customer_set_offer__c
+        inner join tlcsalesforce.membership__c
+        on membership_offers__c.membership2__c=membership__c.sfid
+        inner join tlcsalesforce.membershiptype__c
+        on membership__c.customer_set__c=membershiptype__c.sfid
+        inner join tlcsalesforce.account
+        on account.sfid=redemption_log__c.redeemed_by__c
+        Left join tlcsalesforce.reservation__c
+        on reservation__c.sfid=redemption_log__c.reservation__c
+        Left JOIN tlcsalesforce.pos_cheque_details__c ON
+        pos_cheque_details__c.redemption_code__c=reservation__c.redemption_transaction_code__c 
+        where 
+        (
+        --membershiptype__c.property__c='a0D0k000009PPsEEAW' or 
+        membershiptype__c.sfid='${customer_set__c}')
+        --membershiptype__c.sfid='a0f0k000003FSKyAAO')
+        and 
+        date(redemption_log__c.redemption_date_time__c) = '2020-08-25'--(current_date-1)`;
         let data = await pool.query(qry)
         return data.rows ? data.rows : []
     }catch(e){
