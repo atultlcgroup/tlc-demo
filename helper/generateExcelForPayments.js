@@ -216,7 +216,7 @@ cell++;
 cell+=4;
 index = 1;
 ws2.cell(cell, index++).string('Refund / Cancellations').style(style);
-let fileName = `./paymentReport/Payment_Report_${propertyId}_${Date.now()}.xlsx`
+let fileName = `./reports/paymentReport/Payment_Report_${propertyId}_${Date.now()}.xlsx`
 const buffer = await wb.writeToBuffer();
  
 await wb.write(`${fileName}`);

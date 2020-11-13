@@ -253,7 +253,7 @@ let generatePDF =async(resultArr,hotelName,summaryName,propertyId)=>{
     </body>
   
     </html>`
-    let pdfName = `./paymentReport/Payment_Report_${propertyId}_${Date.now()}.pdf`
+    let pdfName = `./reports/paymentReport/Payment_Report_${propertyId}_${Date.now()}.pdf`
     const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${html}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName;

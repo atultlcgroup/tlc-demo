@@ -3,6 +3,7 @@ const pool = require("../databases/db").pool;
 let sendMail= require("../helper/mailModel")
 let generateFRPdf = require("../helper/generateFRPdf");
 
+
 let findPaymentRule= async(req)=>{
     try{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
