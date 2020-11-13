@@ -6,7 +6,8 @@ const fs = require('fs');
 const csv=require('csvtojson')
 const ftp = require('../databases/ftp');
 let pool = require("../databases/db").pool
-let generateExcel = require("../helper/generateUTRExcel")
+// let generateExcel = require("../helper/generateUTRExcel")
+let generateExcel = require("../helper/generateExcelForUTRandCommision")
 let sendMail= require("../helper/mailModel");
 
 
@@ -34,7 +35,7 @@ let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription
 
 
 
-let findPaymentRule= async(req)=>{
+let findPaymentRule= async(req,fileName)=>{
     try{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
@@ -139,9 +140,8 @@ let checkDuplicate= async(SMTransactionId,TPLSTransactionId)=>{
 }
 
 let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
-    try{
-
-       let insertLog = `insert into tlcsalesforce."UTR_Log"("UTR Tracking Id","isEmailSent","property_name","property_id","Member","Membership Number","Membership Type"`
+    try{    
+       let insertLog = `insert into tlcsalesforce."UTR_Log"("UTR Tracking Id","isEmailSent"`
        for(let d of csvData.header){
         insertLog+=`,"${d}"`
        }
@@ -155,24 +155,27 @@ let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
         insertLog1+=`,"Status","ErrorDescription") values(${lastInsertedId},false`
 
         
-        let data = await getPCMM(d[csvData.header.indexOf('Scheme')],d[csvData.header.indexOf('SM Transaction Id')],d[csvData.header.indexOf('TPSL Transaction Id')])
-        if(data.length)
-         {
-            insertLog1+=`,'${data[0].property_name}'`
-            insertLog1+=`,'${data[0].property_id}'`
-            let memberName =`${data[0].first_name__c ? data[0].first_name__c : ''} ${data[0].last_name__c ? data[0].last_name__c : ''}`
-            insertLog1+=`,'${memberName}'` 
-            insertLog1+=`,'${data[0].customerset}'`
-            insertLog1+=`,'${data[0].membership_name}'`
-        }else{
-            status='Error'
-            syncDescription=`Scheme, SM Transaction Id, TPSL Transaction Id do not match in database!`
-            insertLog1+=`,''`
-            insertLog1+=`,''`
-            insertLog1+=`,''`
-            insertLog1+=`,''`
-            insertLog1+=`,''`  
-        }
+        // let data = await getPCMM(d[csvData.header.indexOf('Scheme')],d[csvData.header.indexOf('SM Transaction Id')],d[csvData.header.indexOf('TPSL Transaction Id')])
+        // console.log(data)
+        // console.log(csvData)
+        // return
+        // if(data.length)
+        //  {
+        //     insertLog1+=`,'${data[0].property_name}'`
+        //     insertLog1+=`,'${data[0].property_id}'`
+        //     let memberName =`${data[0].first_name__c ? data[0].first_name__c : ''} ${data[0].last_name__c ? data[0].last_name__c : ''}`
+        //     insertLog1+=`,'${memberName}'` 
+        //     insertLog1+=`,'${data[0].customerset}'`
+        //     insertLog1+=`,'${data[0].membership_name}'`
+        // }else{
+        //     status='Error'
+        //     syncDescription=`Scheme, SM Transaction Id, TPSL Transaction Id do not match in database!`
+        //     insertLog1+=`,''`
+        //     insertLog1+=`,''`
+        //     insertLog1+=`,''`
+        //     insertLog1+=`,''`
+        //     insertLog1+=`,''`  
+        // }
             for(d1 of d){
                 insertLog1+=`,'${d1}'` 
             }
@@ -192,18 +195,16 @@ let UTRReport = async(userid,fileName,file)=>{
         try{            
             let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
-            let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+            // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
             await createLogForUTRReport(fileName,'UPLOADED',false,'')
             let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
             await insertDataToLogTable(csvData,lastInsertedId , fileName)
-            await moveFileToArchiveFolder(fileName)
+            // await moveFileToArchiveFolder(fileName)
             if(csvData == 'Format Issue')
             throw `CSV Format Issue!`
             unlinkFiles(`UTRReport/${fileName}`)
             console.log(lastInsertedId)
             await UTRReport2(lastInsertedId, fileName, userid)
-
-
             resolve({userid:userid,fileName:`result`})
         }catch(e){
             await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
@@ -226,17 +227,19 @@ let updateUTRLogStatus = async(scheme,UTRTrackingId, isEmailSent,status,errorDes
 let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
     return new Promise(async(resolve, reject)=>{
         try{
-      let selData = await pool.query(`Select "property_name","property_id","Member","Membership Number","Membership Type","SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
+      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
       let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(selData.rows? selData.rows : [],fileName) 
       let errorArr = [];  
       for(let [key,value] of Object.entries(dataSchemeCodeWise)){
+          console.log(`++++++++++++++++++++++++++++-----------++++++++++++`)
             console.log(`---------propertyId =${value[0].property_id}----------`)
             let obj = {property_sfid: value[0].property_id}
             let emails = await findPaymentRule(obj,fileName)
             if(emails.length){
                 try{
-                    let excelFile = await generateExcel.generateExcel(value,'PG Settlement Report',value[0].property_id);
-                   await sendMail.sendUTRReport(`${excelFile}`,'PG Settlement Report',emails)
+
+                    let excelFile = await generateExcel.generateExcel(value,'PG Settlement Report');
+                    await sendMail.sendUTRReport(`${excelFile}`,'PG Settlement Report',emails)
                     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',['atul.srivastava@tlcgroup.com'])
                    await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
                 }catch(e){
@@ -258,6 +261,7 @@ let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
         await getErrorRecordandCreateCSV(UTRTrackingId,userid)
         resolve("Success")
         }catch(e){
+            console.log(e)
        await updateUTRLogStatus('',UTRTrackingId, false,'Error',`${e}`)   
          reject(e)
         }
@@ -394,34 +398,101 @@ let createJsonObj = async(value,header)=>{
 let getPCMM=async(schmeCode,SMTransactionId,TPLSTransactionId)=>{
     try{
         console.log(schmeCode,SMTransactionId,TPLSTransactionId)
-        let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
-        ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
-         tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
-          ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
-           and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
+        let qry = `Select  distinct property__c.name as property_name,property__c.sfid property_id,payment__c.membership__r__membership_number__c, payment__c.email__c, firstname, lastname, membershiptype__c.name membership_type_name,
+        membershiptype__c.sfid membership_type_id, 
+        Case when payment_for__c = 'New Membership' OR payment_for__c = 'Add-On'
+        Then 'Fresh'
+        when  payment_for__c = 'Renewal'
+        THEN 'Renewal'
+        Else
+            'Other'
+        END as FreshRenewal, payment__c.createddate,transcationCode__c, payment__c.transaction_id__c,
+        GST_details__c, payment_email_rule__c.manager_email__c, payment__c.country__c billingcountry,payment__c.state__c billingstate, payment__c.city__c billingcity,payment__c.address_line_1__c billingstreet,
+        payment__c.pin_code__c billingpostalcode, payment_mode__c, payment_bifurcation__c.share_percent__c* grand_total__c/100 as membership_fee, net_amount__c membership_amount , grand_total__c membership_total_amount,
+        tax_breakup__c.name breakup,
+        payment__c.state__c, payment_email_rule__c.state__c hotel_state,payment_bifurcation__c.account_number__c as scheme_code
+        from 
+        tlcsalesforce.payment__c
+        Inner Join tlcsalesforce.account
+        On account.sfid = payment__c.account__c
+        Inner Join tlcsalesforce.payment_bifurcation__c
+        On payment_bifurcation__c.payment__c = payment__c.sfid
+        Inner Join tlcsalesforce.membership__c On --change here
+        payment__c.membership__c = membership__c.sfid
+        Inner Join tlcsalesforce.membershiptype__c On --change here
+        membership__c.customer_set__c = membershiptype__c.sfid
+        Left join tlcsalesforce.tax_master__c
+        On membershiptype__c.tax_master__c = tax_master__c.sfid
+        Left Join tlcsalesforce.tax_breakup__c
+        On tax_breakup__c.tax_master__c = tax_master__c.sfid
+        Left Join tlcsalesforce.payment_email_rule__c
+        On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
+        left join tlcsalesforce.property__c  on membershiptype__c.property__c = property__c.sfid
+        where 
+                (payment__c.payment_status__c = 'CONSUMED' OR 
+                payment__c.payment_status__c = 'SUCCESS')  and 
+                --payment__c.transaction_id__c = '7635753' and payment__c.transcationcode__c='1286212703' 
+                --and  payment_bifurcation__c.account_number__c = 'SECOND' 
+                payment__c.transaction_id__c = '${SMTransactionId}' and payment__c.transcationcode__c='${TPLSTransactionId}' 
+                and  payment_bifurcation__c.account_number__c = '${schmeCode}' 
+                limit 1
+        `
+        let data = await pool.query(qry)
+        // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as customerset
+        // ,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c from tlcsalesforce.payment__c p Inner Join
+        //  tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c
+        //   ms on m.customer_set__c = ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '${SMTransactionId}' and p.transcationcode__c = '${TPLSTransactionId}'
+        //    and pb.account_number__c='${schmeCode}' and p.transaction_id__c is not NULL`)
         // let qry = await pool.query(`select p.first_name__c,p.last_name__c,property__c.name property_name , property__c.sfid property_id, pb.account_number__c as scheme_code, ms.name as
         //  customerset,m.name membership_name,account__r__member_id__c member_id,membership__c, membership__r__membership_number__c 
         //  from tlcsalesforce.payment__c p Inner Join tlcsalesforce.payment_bifurcation__c pb On pb.payment__c = p.sfid left join 
         //  tlcsalesforce.membership__c m on  m.sfid = p.membership__c left join tlcsalesforce.membershiptype__c ms on m.customer_set__c = 
         //  ms.sfid Left Join tlcsalesforce.property__c On ms.property__c = property__c.sfid where p.transaction_id__c = '3802794' 
         //  and pb.account_number__c='SECOND' and p.transaction_id__c is not NULL`)   
-        let data = qry?qry.rows: []
-           return data
+        return data.rows?data.rows: []
     }catch{
         return [];
     }
 }
 
+let calculateIGSTCGSTSGST=async(d)=>{
+    try{
+        d.IGST=0;
+        d.CGST=0;
+        d.SGST=0;
+        let qryForGST = `select state__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${d.membership_type_id}' limit 1`;
+        let dataForGST = await pool.query(`${qryForGST}`)
+        let GSTstate = dataForGST.rows.length ?  dataForGST.rows[0].state__c : "";
+         if(GSTstate != d.state__c){
+             d.IGST = d.membership_amount ? ((d.membership_amount * 18) / 100): 0;
+         }else{
+            d.CGST=  d.membership_amount ? ((d.membership_amount * 9) / 100): 0;;
+            d.SGST= d.membership_amount ? ((d.membership_amount * 9) / 100): 0;;
+         }
+         return d;
+    }catch(e){
+          return d;
+    }
+}
+
 let arrangeDataSchemeCodeWise= async(data,fileName)=>{
     try{
-    
     let schemeObj = {}
-    
     for(let  a of data){
-        if(schemeObj[a['Scheme']]){
-            schemeObj[a['Scheme']].push(a)
+        // console.log(`-----------+++++++++++------------`)
+        let PCMMdata = await getPCMM(a['Scheme'],a['SM Transaction Id'],a['TPSL Transaction Id'])
+        let newObj = a
+        if(PCMMdata.length){
+            let calculateIGSTCGSTSGSTData = await calculateIGSTCGSTSGST(PCMMdata[0])
+           newObj = {
+            ...a,
+            ...calculateIGSTCGSTSGSTData 
+            }
+        }
+        if(schemeObj[newObj['Scheme']]){
+            schemeObj[newObj['Scheme']].push(newObj)
         }else{
-            schemeObj[a['Scheme']]=[a] 
+            schemeObj[newObj['Scheme']]=[newObj] 
         }
     //     //  console.log(schemeObj.hasOwnProperty(a[header.indexOf('Scheme_code')]))
     //  if(schemeObj[a[header.indexOf('Scheme')]]){

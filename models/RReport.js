@@ -84,7 +84,7 @@ let getDRRData =async()=>{
 
 let getRRData = async(property_id)=>{
 try{
-let qry = `select  Distinct property__c.name h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
+let qry = `select  Distinct outlet__c.property__c property_id,property__c.name h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
 outlet__c.name outlet_name,
 membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
 reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
@@ -118,7 +118,7 @@ return []
 
 let getRRDataCS=async(customer_set__c)=>{
     try{
- let qry = `select  Distinct membershiptype__c.name  h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
+ let qry = `select  Distinct outlet__c.property__c property_id,membershiptype__c.name  h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
  outlet__c.name outlet_name,
  membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
  reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,

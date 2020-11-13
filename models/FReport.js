@@ -1,6 +1,7 @@
 
 const pool = require("../databases/db").pool;
 let sendMail= require("../helper/mailModel")
+let generateFRPdf = require("../helper/generateFRPdf");
 
 let findPaymentRule= async(req)=>{
     try{
@@ -12,7 +13,6 @@ let findPaymentRule= async(req)=>{
         qry = `select hotel_email_send_fr__c,hotel_email_id_fr__c,tlc_email_id_fr__c,tlc_send_email_fr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
         else if(req.customer_set_sfid)
         qry = `select hotel_email_send_fr__c,hotel_email_id_fr__c,tlc_email_id_fr__c,tlc_send_email_fr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
-        console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -83,7 +83,8 @@ let getDRRData =async()=>{
 
 let getFRData=async(property__c)=>{
     try{
-        let qry =`select Distinct member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate
+        console.log(`property__c:` , property__c)
+        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
         on member_feedback__c.member__c=account.sfid
@@ -93,8 +94,10 @@ let getFRData=async(property__c)=>{
         on property__c.sfid=outlet__c.property__c
         Left join tlcsalesforce.membershiptype__c
         on membershiptype__c.property__c=property__c.sfid
+        Left join tlcsalesforce.case c
+        on c.sfid=member_feedback__c.case__c
         where
-        -- date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
+         --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
         date(member_feedback__c.createddate) =(current_date-1)
         and (outlet__c.property__c='${property__c}' 
         --or membershiptype__c.sfid=''
@@ -110,7 +113,8 @@ let getFRData=async(property__c)=>{
 
 let getFRDataCS=async( customer_set__c)=>{
     try{
-        let qry =`select Distinct member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate
+        console.log(`customer_set__c:${customer_set__c}`)
+        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
         on member_feedback__c.member__c=account.sfid
@@ -120,6 +124,8 @@ let getFRDataCS=async( customer_set__c)=>{
         on property__c.sfid=outlet__c.property__c
         Left join tlcsalesforce.membershiptype__c
         on membershiptype__c.property__c=property__c.sfid
+        Left join tlcsalesforce.case c
+        on c.sfid=member_feedback__c.case__c
         where
         --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
         date(member_feedback__c.createddate) =(current_date-1)
@@ -137,6 +143,23 @@ let getFRDataCS=async( customer_set__c)=>{
 }
 
 
+let getCSName=async(customer_set_sfid)=>{
+   try{
+    let data = await pool.query(`select name from tlcsalesforce.membershiptype__c where sfid = '${customer_set_sfid}'`)
+    return data.rows && data.rows[0].name
+    }catch(e){
+     return ``;
+   }
+}
+
+let getPName=async(property_sfid)=>{
+  try{
+    let data = await pool.query(`select name from tlcsalesforce.property__c where sfid = '${property_sfid}'`)
+    return data.rows && data.rows[0].name
+   }catch(e){
+    return ``
+   }
+}
 let FReport= ()=>{
     console.log(`-From FR Report-`)
     return new Promise(async(resolve, reject)=>{
@@ -147,21 +170,21 @@ let FReport= ()=>{
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind++];
                 let dataPropertyWise = await getFRData(propertyId)
                 if(dataPropertyWise.length){
-                    let pdfFile = ``//await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
+                    let propertyName = await getPName(propertyId)
+                    let pdfFile = await generateFRPdf.generateFRPDF(dataPropertyWise, propertyName , propertyId)
                     console.log(pdfFile)
                     sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e)
                     console.log(`From Model`)
                 }
             }
             let getEmailandCSArr = await getFRSfidCS();
-            console.log(getEmailandCSArr)
             let ind1 = 0;
             for(let e of getEmailandCSArr.emailArr){
                 let csId = getEmailandCSArr.customerSetArr[ind1++];
                 let dataCSWise = await getFRDataCS(csId)
                 if(dataCSWise.length){
-                let pdfFile = ``//await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
-                console.log(pdfFile)
+                    let customersetName = await getCSName(csId)
+                    let pdfFile = await generateFRPdf.generateFRPDF(dataCSWise,customersetName,csId)
                 sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e)
                 console.log(`From Model`)
                 }

@@ -242,7 +242,7 @@ let htmlStr=`
 
   </html>
 `
-let pdfName = `./reports/RReport/R_Repoprt_${Date.now()}.pdf`
+let pdfName = `./reports/RReport/R_Repoprt_${resultArr[0].property_id}_${Date.now()}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })

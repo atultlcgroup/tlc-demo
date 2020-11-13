@@ -6,6 +6,7 @@ today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('def
 let convertDateFormat= (date1)=>{
     if(date1){
         let today1 = new Date(date1);
+        console.log(today1)
         let hours1 = date1.getHours();
         let minutes = date1.getMinutes();
         let ampm = hours1 >= 12 ? 'pm' : 'am';
@@ -13,7 +14,7 @@ let convertDateFormat= (date1)=>{
         hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
         minutes = minutes < 10 ? '0'+minutes : minutes;
         let strTime = hours1 + ':' + minutes + ' ' + ampm;
-        dateTime = `${String(today1.getDate()).padStart(2, '0')} ${today1.toLocaleString('default', { month: 'short' })} ${today1.getFullYear()}`
+        dateTime = `${String(today1.getDate()).padStart(2, '0')}/${today1.toLocaleString('default', { month: 'short' })}/${today1.getFullYear()}  ${strTime}`
       }
       return dateTime
 }
@@ -22,7 +23,9 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateFRPDF=async()=>{
+let  generateFRPDF=async(frValues , pName, pId)=>{
+    console.log(frValues)
+    console.log(`=============`)
     let pyamnetObj={}
     let summaryTotalSale =0
     let summaryTotalAmount=0
@@ -30,29 +33,29 @@ let  generateFRPDF=async()=>{
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 console.log("FR values are");
 
-  frValues = [
-{Case:"00001212",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"Bella Cucina", rating__c:"5", createddate:"31/10/2021"},
-{Case:"00001211",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
-{Case:"00001212",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
-{Case:"00001213",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
-{Case:"00001214",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
-{Case:"00001215",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
-{Case:"00001216",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"Bella Cucina", rating__c:"4", createddate:"31/10/2021"},
+//   frValues = [
+// {Case:"00001212",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"Bella Cucina", rating__c:"5", createddate:"31/10/2021"},
+// {Case:"00001211",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
+// {Case:"00001212",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
+// {Case:"00001213",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
+// {Case:"00001214",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
+// {Case:"00001215",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"K3", rating__c:"3", createddate:"31/10/2021"},
+// {Case:"00001216",Feedbacknumber:"Record # 00090",ID:"a0AN00000AxxJK",AccountOwner:"Shubham Thute", outlet:"Bella Cucina", rating__c:"4", createddate:"31/10/2021"},
 
-]
-console.log("frValues",frValues)
+// ]
+// console.log("frValues",frValues)
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
 for(obj of frValues){
 dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
-                    <td align="center">${getEmptyIfNull(obj.Case)}</td>
-                    <td align="center">${getEmptyIfNull(obj.Feedbacknumber)}</td>
-                    <td align="center">${getEmptyIfNull(obj.ID)}</td>
-                    <td align="center">${getEmptyIfNull(obj.AccountOwner)}</td>
+                    <td align="center">${getEmptyIfNull(obj.casenumber)}</td>
+                    <td align="center">${getEmptyIfNull(obj.feedbacknumber)}</td>
+                    <td align="center">${getEmptyIfNull(obj.id)}</td>
+                    <td align="center">${getEmptyIfNull(obj.accountowner)}</td>
                     <td align="center">${getEmptyIfNull(obj.outlet)}</td>
                     <td align="center">${getEmptyIfNull(obj.rating__c)}</td>
-                    <td align="center">${getEmptyIfNull(obj.createddate)}</td>
+                    <td align="center">${(getEmptyIfNull(obj.createddate) ? convertDateFormat(new Date(obj.createddate)) : '')}</td>
                     </tr>
                     `
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
@@ -184,7 +187,7 @@ let htmlStr=`
   <div>
       <table style="width: 100%;">
           <tr>
-              <td style="font-size: 20px;color: #438282; border-bottom: 2px solid black; width: 100%">PropertyName</td>
+              <td style="font-size: 20px;color: #438282; border-bottom: 2px solid black; width: 100%">${pName}</td>
           </tr>
           <tr>
               <td style="width: 85%; font-size: 11px; padding-bottom: 10px;">
@@ -226,15 +229,14 @@ let htmlStr=`
 
   </html>
 `
-let pdfName = `./FRReport/FR_Repoprt_${Date.now()}.pdf`
+let pdfName = `./reports/FReport/FR_Repoprt_${pId}_${Date.now()}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName
 }
 
-generateFRPDF().then(data=>{
-    console.log("data");
-}).catch(e=>{
-    console.log(e);
-})
+module.exports={
+    generateFRPDF
+}
+

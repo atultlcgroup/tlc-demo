@@ -22,47 +22,44 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateRRPDF=async()=>{
+let  generateDRRPDF=async(drrValues)=>{
     let pyamnetObj={}
     let summaryTotalSale =0
     let summaryTotalAmount=0
- //propertyName = `${rrValues[0].property_name}`;
+ //propertyName = `${drrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 console.log("FR values are");
 
-  rrValues = [
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
-{hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+//   drrValues = [
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
+// {hotelName:"JW marriott Delhi aerocity",memberName:"shubham thute",memberEmail:"shubham.thute@tlcgroup.com",mobileNumber:"9180030303032", memershipType:"JW Aerocity level 2", outlet:"K3",membershipNumber:"101033827",redumptionBenefit:"50% off",redemptionDate:"9/1/2020",redemptionTime:"4:30 am",chequeNumber:404055,certificateCode:"123456",transactionCode:"ABCD",hotelAppUser:"Atul Kumar",netAmount:"INR 100.0",certificateNumber:"JWM1032969"},
 
-]
+// ]
 //9/1/2020 4:30 am
-console.log("rrValues",rrValues)
+console.log("drrValues",drrValues)
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
-for(obj of rrValues){
+for(obj of drrValues){
 dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
-                    <td align="center">${getEmptyIfNull(obj.hotelName)}</td>
-                    <td align="center">${getEmptyIfNull(obj.memberName)}</td>
-                    <td align="center">${getEmptyIfNull(obj.memberEmail)}</td>
-                    <td align="center">${getEmptyIfNull(obj.mobileNumber)}</td>
-                    <td align="center">${getEmptyIfNull(obj.memershipType)}</td>
-                    <td align="center">${getEmptyIfNull(obj.redumptionBenefit)}</td>
-                    <td align="center">${getEmptyIfNull(obj.outlet)}</td>
-                    <td align="center">${getEmptyIfNull(obj.membershipNumber)}</td> 
-                    <td align="center">${getEmptyIfNull(obj.redemptionDate)}</td>
-                    <td align="center">${getEmptyIfNull(obj.redemptionTime)}</td>
-                    <td align="center">${getEmptyIfNull(obj.chequeNumber)}</td>
-                    <td align="center">${getEmptyIfNull(obj.certificateCode)}</td>
-                    <td align="center">${getEmptyIfNull(obj.transactionCode)}</td>
-                    <td align="center">${getEmptyIfNull(obj.hotelAppUser)}</td>
-                    <td align="center">${getEmptyIfNull(obj.netAmount)}</td>
-                    <td align="center">${getEmptyIfNull(obj.certificateNumber)}</td>
+                    <td align="center">${getEmptyIfNull(obj.hotel_name)}</td>
+                    <td align="center">${getEmptyIfNull(obj.member_name)}</td>
+                    <td align="center">${getEmptyIfNull(obj.membership_type_name)}</td>
+                    <td align="center">${getEmptyIfNull(obj.offer_name)}</td>
+                    <td align="center">${getEmptyIfNull(obj.outlet_name)}</td>
+                    <td align="center">${getEmptyIfNull(obj.membership_number__c)}</td> 
+                    <td align="center">${getEmptyIfNull(obj.redemption_date_time__c)}</td>
+                    <td align="center">${getEmptyIfNull(obj.cheque_number__c)}</td>
+                    <td align="center">${getEmptyIfNull(obj.offer_unique_identifier__c)}</td>
+                    <td align="center">${getEmptyIfNull(obj.redemption_transaction_code__c)}</td>
+                    <td align="center">${getEmptyIfNull(obj.hotel_app_user)}</td>
+                    <td align="center">${getEmptyIfNull(obj.net_amount__c)}</td>
+                    <td align="center">${getEmptyIfNull(obj.certifcate_number__c)}</td>
                     
                     </tr>
                     `
@@ -195,7 +192,7 @@ let htmlStr=`
   <div>
       <table style="width: 100%;">
           <tr>
-              <td style="font-size: 20px;color: #438282; border-bottom: 2px solid black; width: 100%">PropertyName</td>
+              <td style="font-size: 20px;color: #438282; border-bottom: 2px solid black; width: 100%">${drrValues[0].hotel_name}</td>
           </tr>
           <tr>
               <td style="width: 85%; font-size: 11px; padding-bottom: 10px;">
@@ -219,14 +216,11 @@ let htmlStr=`
               <tr><th width="2%">S.N.</th>
                   <th width="3%">hotel Name</th>
                   <th width="7%" >Member Name</th>
-                  <th width="5%">Member Email</th>
-                  <th width="5%">Member Mobile Formula  </th>
                   <th width="5%">Membership Type</th>
                   <th width="3%">Membership Offer: <br> Customer Set Offer :<br> Offer Name</th>
                   <th width="5%">Outlet: <br> Outlet Name</th>
                   <th width="3%">Membership: <br> Membership Name</th>
-                  <th width="5%">Redemption Date </th>
-                  <th width="5%">Redemption Time </th>
+                  <th width="5%">Redemption <br>Date and Time </th>
                   <th width="3%">Cheque<br> Number</th>
                   <th width="5%">Certificate<br> Code</th>
                   <th width="5%">Transaction<br> Code</th>
@@ -247,15 +241,13 @@ let htmlStr=`
 
   </html>
 `
-let pdfName = `./DRReport/DR_Repoprt_${Date.now()}.pdf`
+let pdfName = `./reports/DRReport/DR_Repoprt_${drrValues[0].property_sfid}_${Date.now()}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName
 }
 
-generateRRPDF().then(data=>{
-    console.log("data");
-}).catch(e=>{
-    console.log(e);
-})
+module.exports={
+    generateDRRPDF
+}
