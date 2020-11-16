@@ -107,8 +107,9 @@ date(reservation__c.createddate) = (current_date-1)
 and (outlet__c.property__c='${property_id}' 
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
-)`
-// console.log(qry)
+)
+`
+console.log(qry)
 let data = await pool.query(qry)
 return data.rows ? data.rows : []
 }catch(e){
@@ -151,35 +152,75 @@ return []
 }
 }
 
+let updateLog = async(insertedId, isEmailSent ,status, errorDescription , fileName )=>
+{
+    try{
+    await pool.query(`update  tlcsalesforce.reports_log set "isEmailSent"=${isEmailSent} , status= '${status}', "errorDescription"='${errorDescription}', "fileName"='${fileName}'  where id = ${insertedId}`)
+    }catch(e){
+        console.log(e)
+    }
+}
+let insertLog = async(propertyId,customerSetId, emails)=>
+{
+    try{
+        emails =emails.length ? emails.join(","):''
+        let isEmailSent= false
+        let data = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent","propertyId",status,"typeBifurcation","customerSetId",emails) values(${isEmailSent},'${propertyId}', 'New' , 'RR' ,'${customerSetId}' , '${emails}') RETURNING  id`)
+        return data.rows ? data.rows[0].id : 0;
+    }catch(e){
+        console.log(e)
+    }
+}
+
 let RReport= ()=>{
     console.log(`-From RR Report-`)
     return new Promise(async(resolve, reject)=>{
         try{
             let getEmailandPropertyArr = await getRRSfid()
+            console.log(getEmailandPropertyArr)
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
-                let propertyId =  getEmailandPropertyArr.propertyArr[ind++];
+                let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
+                let propertyId =  getEmailandPropertyArr.propertyArr[ind];
+                ind++
                 let dataPropertyWise = await getRRData(propertyId)
                 // console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
-                    let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
-                    console.log(pdfFile)
-                    sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
+                    if(e.length){
+                        let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
+                        console.log(pdfFile)
+                        sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
+                        updateLog(insertedId, true ,'Success', '' , pdfFile)
+                    }else{
+                        updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+                    }
                     console.log(`From Model`)
+                }else{
+                    updateLog(insertedId, false ,'Error', 'Record not found!' , '' )
                 }
             }
             let getEmailandCSArr = await getFRSfidCS();
             let ind1 = 0;
             for(let e of getEmailandCSArr.emailArr){
-                let csId = getEmailandCSArr.customerSetArr[ind1++];
+                let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
+                let csId = getEmailandCSArr.customerSetArr[ind1];
+                ind1++;
                 let dataCSWise = await getRRDataCS(csId)
                 // console.log(dataCSWise)
                 if(dataCSWise.length){
-                let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
-                console.log(pdfFile)
-                sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
+                    if(e.length){
+                        let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
+                        console.log(pdfFile)
+                        sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
+                        updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                    }else{
+                        updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+                    }
+           
                 console.log(`From Model`)
-               }
+               }else{
+                updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
+              }
             }
         
             resolve('Success')

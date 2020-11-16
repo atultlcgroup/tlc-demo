@@ -27,7 +27,7 @@ let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription
             }
        return lastInsertedId
         }catch(e){
-            unlinkFiles(`UTRReport/${fileName}`)
+            unlinkFiles(`reports/UTReport/${fileName}`)
             console.log(e);
             return e
         }
@@ -111,7 +111,7 @@ try{
     }
     return {values: valuesArr, header:headerArr }
     }catch(e){
-        unlinkFiles(`UTRReport/${fileName}`)        
+        unlinkFiles(`reports/UTReport/${fileName}`)        
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
     return {values: [], header:[] }
     }
@@ -184,7 +184,7 @@ let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
        }
 
     }catch(e){
-        unlinkFiles(`UTRReport/${fileName}`)
+        unlinkFiles(`reports/UTReport/${fileName}`)
         console.log(e)
     }
 
@@ -195,14 +195,14 @@ let UTRReport = async(userid,fileName,file)=>{
         try{            
             let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
-            // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+             let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
             await createLogForUTRReport(fileName,'UPLOADED',false,'')
-            let csvData = await readCsv(`UTRReport/${fileName}`,fileName)
+            let csvData = await readCsv(`reports/UTReport/${fileName}`,fileName)
             await insertDataToLogTable(csvData,lastInsertedId , fileName)
-            // await moveFileToArchiveFolder(fileName)
+            await moveFileToArchiveFolder(fileName)
             if(csvData == 'Format Issue')
             throw `CSV Format Issue!`
-            unlinkFiles(`UTRReport/${fileName}`)
+            unlinkFiles(`reports/UTReport/${fileName}`)
             console.log(lastInsertedId)
             await UTRReport2(lastInsertedId, fileName, userid)
             resolve({userid:userid,fileName:`result`})
@@ -237,7 +237,6 @@ let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
             let emails = await findPaymentRule(obj,fileName)
             if(emails.length){
                 try{
-
                     let excelFile = await generateExcel.generateExcel(value,'PG Settlement Report');
                     await sendMail.sendUTRReport(`${excelFile}`,'PG Settlement Report',emails)
                     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',['atul.srivastava@tlcgroup.com'])
@@ -298,16 +297,16 @@ let uploadErrorFileToFTP = async (fileName) => {
         try {
             let path = `UTRReport/Error/${fileName}`
             ftpConnection = await ftp.connect();
-              await ftpConnection.uploadFrom(`UTRReport/${fileName}`, `${path}`)
+            //   await ftpConnection.uploadFrom(`reports/UTReport/${fileName}`, `${path}`)
             ftpConnection.close();
-            fs.unlink(`UTRReport/${fileName}`, (err, da) => {
+            fs.unlink(`reports/UTReport/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
             resolve(path)
         } catch (e) {
             // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
-            fs.unlink(`UTRReport/${fileName}`, (err, da) => {
+            fs.unlink(`reports/UTReport/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
@@ -345,7 +344,7 @@ let generateCSV=async(data,userId)=>{
     }
 
     let fileName = `UTR_Error_${userId}_${Date.now()}.csv`
-    let path = `./UTRReport/${fileName}`
+    let path = `./reports/UTReport/${fileName}`
     const csvWriter = createCsvWriter({
         path: path,
         header: headerArr
@@ -520,12 +519,12 @@ let uploadExcelToFTP = async (fileName, userId) => {
             ftpConnection = await ftp.connect();
             // // console.log(await ftpConnection.list())
             // console.log(data)
-              await ftpConnection.uploadFrom(`UTRReport/${fileName}`, `UTRReport/${fileName}`)
+              await ftpConnection.uploadFrom(`reports/UTReport/${fileName}`, `UTRReport/${fileName}`)
             ftpConnection.close();
             resolve('Success')
         } catch (e) {
             await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
-            fs.unlink(`UTRReport/${fileName}`, (err, da) => {
+            fs.unlink(`reports/UTReport/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
@@ -538,9 +537,9 @@ let uploadExcel = async (file, fileName) => {
     return new Promise(async (resolve,reject)=>{
         // console.log(`from here 1`)
     try{
-    const data = await writeFileSync(`UTRReport/${fileName}`, `${file}`, { encoding: "base64" })
+    const data = await writeFileSync(`reports/UTReport/${fileName}`, `${file}`, { encoding: "base64" })
     const result = await excelToJson({
-        source: fs.readFileSync(`UTRReport/${fileName}`)
+        source: fs.readFileSync(`reports/UTReport/${fileName}`)
     });
     // console.log(`from here 1`)
     // console.log(result)

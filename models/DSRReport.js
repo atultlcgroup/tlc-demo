@@ -1,6 +1,8 @@
 let sendMail= require("../helper/mailModel")
-let generatePdf = require("../helper/generateDSRPdf")
+let generatePdf = require("../helper/generateDSRPdf");
+const e = require("express");
 const pool = require("../databases/db").pool;
+const fs = require('fs')
 
 let findPaymentRule= async(req)=>{
     try{
@@ -31,26 +33,60 @@ let findPaymentRule= async(req)=>{
     }
 }
 
+let updateLog = async(insertedId, isEmailSent ,status, errorDescription , fileName )=>
+{
+    try{
+    await pool.query(`update  tlcsalesforce.reports_log set "isEmailSent"=${isEmailSent} , status= '${status}', "errorDescription"='${errorDescription}', "fileName"='${fileName}'  where id = ${insertedId}`)
+    }catch(e){
+        console.log(e)
+    }
+}
+let insertLog = async(propertyId,customerSetId, emails)=>
+{
+    try{
+        emails =emails.length ? emails.join(","):''
+        let isEmailSent= false
+        let data = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent","propertyId",status,"typeBifurcation","customerSetId",emails) values(${isEmailSent},'${propertyId}', 'New' , 'DSR' ,'${customerSetId}' , '${emails}') RETURNING  id`)
+        return data.rows ? data.rows[0].id : 0;
+    }catch(e){
+        console.log(e)
+    }
+}
+
+let unlinkFiles = (files)=>{
+    fs.unlink(`${files}`, (err, da) => {
+        if (err)
+            return(`${err}`);
+    })
+}
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
             let dataObj = await getEPRSfid();
             console.log(dataObj)
-
             let ind = 0;
-               
-             for(e of dataObj.emailArr){
+             for(let e of dataObj.emailArr){
+
+            let insertedId = await insertLog(dataObj.propertyArr[ind],'',e)
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
-            console.log("getting DSR report");
-            console.log(`----------------`)
+   
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
+                   
+                  if(emails.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(pdfFile)
-                  sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
+                      sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails) 
+                      updateLog(insertedId, true ,'Success', '' , pdfFile)
+                  }
+                  else{
+                      updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+                  }
                     console.log(`From Model`)
+                }else{
+                    updateLog(insertedId, false ,'Error', 'Record not found!', '' )
                 }
             ind++;
             
@@ -60,17 +96,24 @@ let DSRReport = async()=>{
           let dataObj1 = await getEPRSfidCS();
           console.log(dataObj1)
           let ind1 = 0;
-           for(e of dataObj1.emailArr){
+           for(let e of dataObj1.emailArr){
+            let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
           let emails1 = e;
           // req.property_sfid = 'a0Y1y000000EFBNEA4';
           console.log("getting DSR report");
-           let DSRRecords1=await getDSRReportCS(dataObj1.customer_set_sfid[ind1]);
+           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
         //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
               if(DSRRecords1.length){
-                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customer_set_sfid[ind1]);
-                  console.log(pdfFile1)
+                if(emails1.length){
+                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1]);                
                  sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
+                  updateLog(insertedId1, true ,'Success', '' , pdfFile1)
+                  }else{
+                    updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+                  }
                   console.log(`From Model`)
+              }else{
+                updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
               }
           ind1++;
         

@@ -109,7 +109,9 @@ let getDRRData =async(property_id)=>{
         --or membershiptype__c.sfid='a0f0k000003FSKyAAO'
         )
         and 
-        date(redemption_log__c.redemption_date_time__c) = (current_date-1) --'2020-08-25'`;
+        --date(redemption_log__c.redemption_date_time__c) = '2020-10-20'
+        date(redemption_log__c.redemption_date_time__c) = (current_date-1) --'2020-08-25'
+        `;
         let data = await pool.query(qry)
         return data.rows ? data.rows : []
     }catch(e){
@@ -159,40 +161,80 @@ let getDRRDataCS =async(customer_set__c)=>{
     }
 }
 
+let updateLog = async(insertedId, isEmailSent ,status, errorDescription , fileName )=>
+{
+    try{
+    await pool.query(`update  tlcsalesforce.reports_log set "isEmailSent"=${isEmailSent} , status= '${status}', "errorDescription"='${errorDescription}', "fileName"='${fileName}'  where id = ${insertedId}`)
+    }catch(e){
+        console.log(e)
+    }
+}
+let insertLog = async(propertyId,customerSetId, emails)=>
+{
+    try{
+        emails =emails.length ? emails.join(","):''
+        let isEmailSent= false
+        let data = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent","propertyId",status,"typeBifurcation","customerSetId",emails) values(${isEmailSent},'${propertyId}', 'New' , 'DRR' ,'${customerSetId}' , '${emails}') RETURNING  id`)
+        return data.rows ? data.rows[0].id : 0;
+    }catch(e){
+        console.log(e)
+    }
+}
+
 let DRReport= ()=>{
     console.log(`-From DRR Report-`)
     return new Promise(async(resolve, reject)=>{
         try{
             console.log(`-------------`)
             let getEmailandPropertyArr = await getDRRSfid()
+            console.log(getEmailandPropertyArr)
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
-                let propertyId =  getEmailandPropertyArr.propertyArr[ind++];
+                let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
+                let propertyId =  getEmailandPropertyArr.propertyArr[ind];
+                ind++;
                 let dataPropertyWise = await getDRRData(propertyId)
                 console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
+                    if(e.length){
                     let pdfFile = await generatePdf.generateDRRPDF(dataPropertyWise);
                     console.log(pdfFile)
                     sendMail.sendDRReport(`${pdfFile}`,'Daily Redemption Report',e)
+                    updateLog(insertedId, true ,'Success', '' , pdfFile)
                     console.log(`From Model`)
+                    }else{
+                        updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+                    }
+                }else{
+                    updateLog(insertedId, false ,'Error', 'Record not found!', '' )
                 }
             }
             let getEmailandCSArr = await getDRRSfidCS();
             let ind1 = 0;
             for(let e of getEmailandCSArr.emailArr){
-                let csId = getEmailandCSArr.customerSetArr[ind1++];
+                let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
+                let csId = getEmailandCSArr.customerSetArr[ind1];
+                ind1++
                 let dataCSWise = await getDRRDataCS(csId)
                 console.log(dataCSWise)
                 if(dataCSWise.length){
+                if(e.length){
                 let pdfFile = await generatePdf.generateDRRPDF(dataCSWise);
                 console.log(pdfFile)
                 sendMail.sendDRReport(`${pdfFile}`,'Daily Redemption Report',e)
                 console.log(`From Model`)
+                updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                }else{
+                    updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+                }
+                }else{
+                    updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
                 }
             }
         
             resolve('Success')
         }catch(e){
+            console.log(e)
             reject(e)
         }        
     })

@@ -1,6 +1,14 @@
 let paymentModel = require("../models/paymentReport")
+let  dotenv = require('dotenv');
+
+dotenv.config();
+
 let paymentReport = (req , res)=>{
     try{
+        if(req.headers.token != process.env.POS_VARIFICATION_KEY ){      
+            res.status(401).send({code: 401, message: 'Invalid Token'})
+            return
+        }
         if(!req.body.hotel || !req.body.name || !req.body.membership_number || !req.body.membership_type || !req.body.email|| !req.body.amount || !req.body.transaction_code || !req.body.date_time || !req.body.payment_mode  || !req.body.source){
             res.status(401).json({code : 401 , message : `Invalid Inputs`})
             return ;
@@ -21,6 +29,10 @@ let paymentReport = (req , res)=>{
 
 
 let reportForEODandEOM=(req,res)=>{ 
+    if(req.headers.token != process.env.POS_VARIFICATION_KEY ){      
+        res.status(401).send({code: 401, message: 'Invalid Token'})
+        return
+    }
     req.body.type =req.body.type || 'EOD';
     if(!req.body.property_sfid && !req.body.customer_set_sfid){
         res.status(401).json({code : 401 , message : `Please provide either property_sfid or customer_set_sfid`})
