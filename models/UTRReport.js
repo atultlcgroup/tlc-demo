@@ -297,7 +297,7 @@ let uploadErrorFileToFTP = async (fileName) => {
         try {
             let path = `UTRReport/Error/${fileName}`
             ftpConnection = await ftp.connect();
-            //   await ftpConnection.uploadFrom(`reports/UTReport/${fileName}`, `${path}`)
+              await ftpConnection.uploadFrom(`reports/UTReport/${fileName}`, `${path}`)
             ftpConnection.close();
             fs.unlink(`reports/UTReport/${fileName}`, (err, da) => {
                 if (err)
@@ -305,7 +305,7 @@ let uploadErrorFileToFTP = async (fileName) => {
             })
             resolve(path)
         } catch (e) {
-            // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
+            await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
             fs.unlink(`reports/UTReport/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
