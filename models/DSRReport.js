@@ -128,7 +128,7 @@ let DSRReport = async()=>{
 let getEPRSfid = async()=>{
     try{
       let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
-      (hotel_email_status__c = true or tlc_email_status__c = true) and  (property__c is not NULL or property__c !='')`
+      (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
