@@ -2,6 +2,7 @@
 const { writeFileSync } = require("fs");
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const excelToJson = require('convert-excel-to-json');
+const ObjectsToCsv = require('objects-to-csv')
 const fs = require('fs');
 const csv=require('csvtojson')
 const ftp = require('../databases/ftp');
@@ -319,7 +320,7 @@ let uploadErrorFileToFTP = async (fileName) => {
 
 let getErrorRecordandCreateCSV = async(UTRTrackingId, userId)=>{
     try{
-    let selectQry = await pool.query(`Select "property_name"  "Property Name","Member","Membership Number","Membership Type","SR No." "CSV Serial Number","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","ErrorDescription" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'Error'`)
+    let selectQry = await pool.query(`Select "SR No." "CSV Serial Number","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","ErrorDescription" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'Error'`)
     let data=selectQry.rows ? selectQry.rows:[]
     if(data.length){
         let fileName = await generateCSV(data,userId)
@@ -345,10 +346,10 @@ let generateCSV=async(data,userId)=>{
 
     let fileName = `UTR_Error_${userId}_${Date.now()}.csv`
     let path = `./reports/UTReport/${fileName}`
-    const csvWriter = createCsvWriter({
-        path: path,
-        header: headerArr
-    });
+    // const csvWriter = createCsvWriter({
+    //     path: path,
+    //     header: headerArr
+    // });
     let bodyArr = [];
     let index = 1;
     for(let d of data){
@@ -360,8 +361,9 @@ let generateCSV=async(data,userId)=>{
         bodyArr.push(bodyObj)
     }
     const records = bodyArr;
-     
-   let result= await csvWriter.writeRecords(records)  
+    const csv = new ObjectsToCsv(bodyArr)
+    await csv.toDisk(`${path}`)   
+//    let result= await csvWriter.writeRecords(records)  
     return  fileName;  
 } // returns a promise
 
