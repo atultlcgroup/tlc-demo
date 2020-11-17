@@ -103,8 +103,8 @@ on property__c.sfid=outlet__c.property__c
 Left join tlcsalesforce.membershiptype__c
 on membershiptype__c.property__c=property__c.sfid
 where
---date(reservation__c.createddate) = (current_date-1)
---and
+date(reservation__c.createddate) = (current_date-1)
+and
  (outlet__c.property__c='${property_id}' 
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
