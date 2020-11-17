@@ -3,9 +3,11 @@ const Promise = require('bluebird');
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
+
 let convertDateFormat= (date1)=>{
     if(date1){
         let today1 = new Date(date1);
+        console.log(today1)
         let hours1 = date1.getHours();
         let minutes = date1.getMinutes();
         let ampm = hours1 >= 12 ? 'pm' : 'am';
@@ -13,10 +15,11 @@ let convertDateFormat= (date1)=>{
         hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
         minutes = minutes < 10 ? '0'+minutes : minutes;
         let strTime = hours1 + ':' + minutes + ' ' + ampm;
-        dateTime = `${String(today1.getDate()).padStart(2, '0')} ${today1.toLocaleString('default', { month: 'short' })} ${today1.getFullYear()}`
+        dateTime = `${String(today1.getDate()).padStart(2, '0')}/${today1.toLocaleString('default', { month: 'short' })}/${today1.getFullYear()}  ${strTime}`
       }
       return dateTime
 }
+
 
 
 let getEmptyIfNull = (val) => {
@@ -53,7 +56,7 @@ dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.offer_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.outlet_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_number__c)}</td> 
-                    <td align="center">${getEmptyIfNull(obj.redemption_date_time__c)}</td>
+                    <td align="center">${(getEmptyIfNull(obj.redemption_date_time__c) ? convertDateFormat(new Date(obj.redemption_date_time__c)):'')}</td>
                     <td align="center">${getEmptyIfNull(obj.cheque_number__c)}</td>
                     <td align="center">${getEmptyIfNull(obj.offer_unique_identifier__c)}</td>
                     <td align="center">${getEmptyIfNull(obj.redemption_transaction_code__c)}</td>

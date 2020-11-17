@@ -195,12 +195,12 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         where
-        --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-        --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-        --and
-        --Membership__c is not Null and Membership_Offer__c is null
-        --and
+        or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+        and
+        Membership__c is not Null and Membership_Offer__c is null
+        and
         (Property__c.sfid='${property_sfid}'
         --or membership__c.customer_set__c IN ('')
         )
