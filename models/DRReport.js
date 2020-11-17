@@ -103,14 +103,14 @@ let getDRRData =async(property_id)=>{
         Left join  tlcsalesforce.account a
         on a.sfid=reservation__c.assigned_staff_member__c
         where 
-        (
-            membershiptype__c.property__c='${property_id}' 
+        --(
+           -- membershiptype__c.property__c='${property_id}' 
        -- membershiptype__c.property__c='a0D0k000009PPsEEAW' 
         --or membershiptype__c.sfid='a0f0k000003FSKyAAO'
-        )
-        and 
-        --date(redemption_log__c.redemption_date_time__c) = '2020-10-20'
-        date(redemption_log__c.redemption_date_time__c) = (current_date-1) --'2020-08-25'
+        --)
+        --and 
+        date(redemption_log__c.redemption_date_time__c) = '2020-10-20'
+        --date(redemption_log__c.redemption_date_time__c) = (current_date-1) --'2020-08-25'
         `;
         let data = await pool.query(qry)
         return data.rows ? data.rows : []
