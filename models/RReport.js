@@ -88,7 +88,7 @@ let qry = `select  Distinct outlet__c.property__c property_id,property__c.name h
 outlet__c.name outlet_name,
 membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
 reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
-reservation__c.specialrequest__c
+reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name
 from tlcsalesforce.reservation__c
 inner join tlcsalesforce.account
 on reservation__c.member__c=account.sfid
@@ -102,14 +102,17 @@ inner join tlcsalesforce.property__c
 on property__c.sfid=outlet__c.property__c
 Left join tlcsalesforce.membershiptype__c
 on membershiptype__c.property__c=property__c.sfid
+Left join tlcsalesforce.membershiptypeoffer__c
+on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
 where
-date(reservation__c.createddate) = (current_date-1)
-and (outlet__c.property__c='${property_id}' 
+--date(reservation__c.createddate) = (current_date-1)
+--and
+ (outlet__c.property__c='${property_id}' 
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
-)
+) limit 10
 `
-console.log(qry)
+// console.log(qry)
 let data = await pool.query(qry)
 return data.rows ? data.rows : []
 }catch(e){
@@ -123,7 +126,7 @@ let getRRDataCS=async(customer_set__c)=>{
  outlet__c.name outlet_name,
  membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
  reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
- reservation__c.specialrequest__c
+ reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name
  from tlcsalesforce.reservation__c
  inner join tlcsalesforce.account
  on reservation__c.member__c=account.sfid
@@ -137,6 +140,8 @@ let getRRDataCS=async(customer_set__c)=>{
  on property__c.sfid=outlet__c.property__c
  Left join tlcsalesforce.membershiptype__c
  on membershiptype__c.property__c=property__c.sfid
+ Left join tlcsalesforce.membershiptypeoffer__c
+on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
  where
  date(reservation__c.createddate) = (current_date-1)
  and (

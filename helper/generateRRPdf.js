@@ -52,7 +52,7 @@ for(obj of resultArr){
 dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.member_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.reservation_status__c)}</td>
-                    <td align="center">${getEmptyIfNull(obj.membership_offer_name)}</td>
+                    <td align="center">${getEmptyIfNull(obj.customer_set_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.outlet_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td align="center">${(getEmptyIfNull(obj.r_date_time) ? convertDateFormat(new Date(obj.r_date_time)) : '')}</td>

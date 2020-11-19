@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 
 let today = new Date();
+today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
 let convertDateFormat= (date1)=>{
@@ -51,7 +52,6 @@ for(obj of frValues){
 dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.casenumber)}</td>
                     <td align="center">${getEmptyIfNull(obj.feedbacknumber)}</td>
-                    <td align="center">${getEmptyIfNull(obj.id)}</td>
                     <td align="center">${getEmptyIfNull(obj.accountowner)}</td>
                     <td align="center">${getEmptyIfNull(obj.outlet)}</td>
                     <td align="center">${getEmptyIfNull(obj.rating__c)}</td>
@@ -209,13 +209,12 @@ let htmlStr=`
      
           <table class="tftable1" align="center" border="1">
               <tr><th width="2%">S.N.</th>
-                  <th width="3%">Case</th>
-                  <th width="7%" >Member Feedback: Feedback #</th>
-                  <th width="5%">Member Feedback : ID"</th>
+                  <th width="3%">Case #</th>
+                  <th width="7%" >Feedback #</th>
                   <th width="5%">Account Owner     </th>
                   <th width="5%">Outlet</th>
                   <th width="3%">Rating</th>
-                  <th width="5%">Member Feedback : Created Date</th>
+                  <th width="5%">Feedback <br>Date and Time</th>
 
               </tr>
 

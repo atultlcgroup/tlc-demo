@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 
 let today = new Date();
+today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
 let convertDateFormat= (date1)=>{
