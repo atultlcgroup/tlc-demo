@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 
 let today = new Date();
+today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
 
@@ -217,14 +218,14 @@ let htmlStr=`
      
           <table class="tftable1" align="center" border="1">
               <tr><th width="2%">S.N.</th>
-                  <th width="3%">hotel Name</th>
+                  <th width="3%">Hotel Name</th>
                   <th width="7%" >Member Name</th>
                   <th width="5%">Membership Type</th>
-                  <th width="3%">Membership Offer: <br> Customer Set Offer :<br> Offer Name</th>
-                  <th width="5%">Outlet: <br> Outlet Name</th>
-                  <th width="3%">Membership: <br> Membership Name</th>
+                  <th width="3%">Membership Offer</th>
+                  <th width="5%">Outlet</th>
+                  <th width="3%">Membership Number</th>
                   <th width="5%">Redemption <br>Date and Time </th>
-                  <th width="3%">Cheque<br> Number</th>
+                  <th width="3%">Check<br> Number</th>
                   <th width="5%">Certificate<br> Code</th>
                   <th width="5%">Transaction<br> Code</th>
                   <th width="5%">Hotel App User</th>
