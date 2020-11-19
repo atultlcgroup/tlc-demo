@@ -1,6 +1,7 @@
 const Promise = require('bluebird');
 
 let today = new Date();
+today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
 let convertDateFormat= (date1)=>{
@@ -49,7 +50,6 @@ let slNo =1;
 let dailySalesReportRows =``;
 for(obj of resultArr){
 dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
-                    <td align="center">${getEmptyIfNull(obj.record_id)}</td>
                     <td align="center">${getEmptyIfNull(obj.member_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.reservation_status__c)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_offer_name)}</td>
@@ -215,19 +215,18 @@ let htmlStr=`
      
           <table class="tftable1" align="center" border="1">
               <tr><th width="2%">S.N.</th>
-                  <th width="3%">Record #</th>
-                  <th width="7%" >Member:Account Name</th>
+                  <th width="7%" >Member Name</th>
                   <th width="5%">Reservation Status</th>
-                  <th width="3%">Membership Offer: <br> Customer Set Offer :<br> Offer Name</th>
-                  <th width="5%">Outlet: <br> Outlet Name</th>
-                  <th width="3%">Membership: <br> Membership Name</th>
+                  <th width="3%">Membership Offer</th>
+                  <th width="5%">Outlet</th>
+                  <th width="3%">Membership Number</th>
                   <th width="5%">Reservation <br>Date and Time</th>
                   <th width="3%">Number<br> of Guest</th>
                   <th width="5%">Number<br> of Adults</th>
                   <th width="5%">Number<br> of Kids</th>
                   <th width="5%">Celebration<br> Type</th>
                   <th width="5%">Celebration<br> Remark</th>    
-                  <th width="5%">Specail Request</th>  
+                  <th width="5%">Special Request</th>  
 
 
               </tr>
