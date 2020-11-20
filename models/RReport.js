@@ -105,12 +105,12 @@ on membershiptype__c.property__c=property__c.sfid
 Left join tlcsalesforce.membershiptypeoffer__c
 on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
 where
---date(reservation__c.createddate) = (current_date-1)
---and
+date(reservation__c.createddate) = (current_date-1)
+and
  (outlet__c.property__c='${property_id}' 
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
-) limit 10
+)
 `
 // console.log(qry)
 let data = await pool.query(qry)

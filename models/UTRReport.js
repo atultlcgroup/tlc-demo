@@ -10,6 +10,7 @@ let pool = require("../databases/db").pool
 // let generateExcel = require("../helper/generateUTRExcel")
 let generateExcel = require("../helper/generateExcelForUTRandCommision")
 let sendMail= require("../helper/mailModel");
+const { colorScheme } = require("excel4node/distribution/lib/types");
 
 
 let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
@@ -69,12 +70,12 @@ const readCsv=async(fileName,fileNameInLog)=>{
 try{
  let valuesArr=[]
  let formatCheck = 0
- const headerArr = ['SR No.','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Total Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount']
+ const headerArr = ['SR No.','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Total Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount','UTR_NO']
  const exceHeaderArr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','Member','Membership','Customer Set','Property_Id','Property','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO']
 
  const converter= await csv().fromFile(`${fileName}`)
  let button ='off' 
- for(d of converter){
+ for(let d of converter){
     let ind=0;
     let cnt =0;
     let cntIfButtonOn= 0;
@@ -82,24 +83,28 @@ try{
     let excelHeaderIndex = 0;
     for(let [key,value] of Object.entries(d)){
         excelHeaderIndex++;
-       if(button == 'on')
-       valueArr.push(value)
+       if(button == 'on'){
+        valueArr.push(value)
+       }
        if(headerArr[ind] && (value.toLowerCase()).trim()==headerArr[ind++].toLowerCase()){
         //    console.log(d)
         //    console.log(headerArr)
         cnt++;
        }
-       if(button == 'on' && (!value || value == null)){
+       if(button == 'on' && (value)){
         cntIfButtonOn++;
        }
      }
-    if((button == 'on' && headerArr.length == cntIfButtonOn) || (button == 'on' && headerArr.length != ind)){
-        button='off'
-       console.log(cntIfButtonOn)
+    if(button == 'on'){
+        if( headerArr.length == cntIfButtonOn || headerArr.length -1 == cntIfButtonOn){
+        }else{
+            button='off'
+        }
      }
-        if(button == 'on')
-        valuesArr.push(valueArr)
-        if(headerArr.length == cnt){
+        if(button == 'on'){
+        valuesArr.push(checkHeaderandValue(valueArr,headerArr))
+        }
+        if(headerArr.length -1 == cnt || headerArr.length == cnt){
          formatCheck=1;
           button = 'on'
           console.log(`Excel format matched`)
@@ -115,6 +120,18 @@ try{
         unlinkFiles(`reports/UTReport/${fileName}`)        
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
     return {values: [], header:[] }
+    }
+ }
+
+ let checkHeaderandValue=(valueArr,headerArr)=>{
+    try {
+        if(headerArr.length == valueArr.length +1 ){
+
+            valueArr.push('')
+        }
+        return valueArr;
+    } catch (e) {
+        
     }
  }
 
@@ -228,7 +245,7 @@ let updateUTRLogStatus = async(scheme,UTRTrackingId, isEmailSent,status,errorDes
 let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
     return new Promise(async(resolve, reject)=>{
         try{
-      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
+      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR_NO","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
       let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(selData.rows? selData.rows : [],fileName) 
       let errorArr = [];  
       for(let [key,value] of Object.entries(dataSchemeCodeWise)){
