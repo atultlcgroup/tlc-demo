@@ -137,11 +137,11 @@ let style = wb.createStyle({
   
   sheet2HeaderArr.map(d=>{
     if(index == 16){
-    ws2.cell(7, index++,7, 1 +  index++, true).string(d).style(style);
+    ws2.cell(8, index++,8, 1 +  index++, true).string(d).style(style);
     index++
-    ws2.cell(8, index-3).string('CGST').style(style);
-    ws2.cell(8, index-2).string('SGST').style(style);
-    ws2.cell(8, index-1).string('IGST').style(style);
+    ws2.cell(9, index-3).string('CGST').style(style);
+    ws2.cell(9, index-2).string('SGST').style(style);
+    ws2.cell(9, index-1).string('IGST').style(style);
   }
     else
     ws2.cell(8, index,9,index++,true).string(d).style(style);
