@@ -116,7 +116,7 @@ let style = wb.createStyle({
   //Sheet 2
 
 
-  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Aomunt','Charges','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount','UTR Number']
+  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Charges','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount','UTR Number']
   let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
 
   // ws2.cell(1, 1).string(`Hotel collects the money on Payment Gateway`).style(style);

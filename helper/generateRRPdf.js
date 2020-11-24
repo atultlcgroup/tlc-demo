@@ -205,7 +205,7 @@ let htmlStr=`
       </table>
       <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 4px; margin-bottom: 10px; color:white;">
           <tr>
-              <td>Daily Reservation Reports</td>
+              <td>Daily Reservation Report</td>
               <td style="text-align: right">
               ${today}
               </td>

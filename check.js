@@ -1,17 +1,26 @@
-let today = new Date();
-today.setDate(today.getDate() - 1); 
-console.log(today)
-today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
-console.log(today)
 
-// JavaScript program to illustrate 
-// calculation of yesterday's date 
 
-// create a date object using Date constructor 
-var dateObj = new Date(); 
+function getLetter(s) {
+    let letter;
+    // Write your code here
+    let char = s.charAt(0);
+    let arr = ['A','B','C','D']
+    let strArr = ['aeiou','bcdfg','hjklm','npqrstvwxyz']
+    switch(true){
+    case (strArr[0].includes(s)):
+    letter=arr[0]
+    break   
+    case (strArr[1].includes(s)):
+    letter=arr[1]
+    break    
+    case (strArr[2].includes(s)):
+    letter=arr[2]
+    break   
+    case (strArr[3].includes(s)):
+    letter=arr[3]
+    break   
+    }
+    return letter;
+}
 
-// subtract one day from current time						 
-dateObj.setDate(dateObj.getDate() - 1); 
-
-console.log(dateObj); 
-
+console.log(getLetter('zjh'))
