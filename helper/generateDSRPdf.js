@@ -1,7 +1,6 @@
 const Promise = require('bluebird');
 
 let today = new Date();
-today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
 let convertDateFormat= (date1)=>{
@@ -70,8 +69,8 @@ dailySalesReportRows += `<tr><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.name)}</td>
                     <td>${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
-                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
                     <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
+                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
@@ -252,7 +251,7 @@ let htmlStr=`
       </table>
       <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 4px; margin-bottom: 10px; color:white;">
           <tr>
-              <td>Daily Sales Report</td>
+              <td>Daily Sales Reports</td>
               <td style="text-align: right">
               ${today}
               </td>
@@ -267,11 +266,11 @@ let htmlStr=`
                   <th width="3%">Membership Number</th>
                   <th width="3%">Type
                       <br/>(N/R)</th>
+                  <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
-                  <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
-                  <th width="3%">CC/ChequeNo.
+                  <th width="3%">CC/CheqNo.
                       <br/>/Online Trn.No</th>
                   <th width="3%">CC Approval Code</th>
                   <th width="3%">Receipt No.</th>
