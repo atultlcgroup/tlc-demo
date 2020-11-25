@@ -86,7 +86,7 @@ let getDRRData =async()=>{
 let getFRData=async(property__c)=>{
     try{
         console.log(`property__c:` , property__c)
-        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate
+        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
         on member_feedback__c.member__c=account.sfid
@@ -98,12 +98,7 @@ let getFRData=async(property__c)=>{
         on membershiptype__c.property__c=property__c.sfid
         Left join tlcsalesforce.case c
         on c.sfid=member_feedback__c.case__c
-        where
-         --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        date(member_feedback__c.createddate) =(current_date-1)
-       and (outlet__c.property__c='${property__c}' 
-        --or membershiptype__c.sfid=''
-        )
+       
         `
         let data = await pool.query(qry)
         return data.rows? data.rows : []
@@ -116,7 +111,7 @@ let getFRData=async(property__c)=>{
 let getFRDataCS=async( customer_set__c)=>{
     try{
         console.log(`customer_set__c:${customer_set__c}`)
-        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate
+        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
         on member_feedback__c.member__c=account.sfid

@@ -56,6 +56,7 @@ dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.outlet)}</td>
                     <td align="center">${getEmptyIfNull(obj.rating__c)}</td>
                     <td align="center">${(getEmptyIfNull(obj.createddate) ? convertDateFormat(new Date(obj.createddate)) : '')}</td>
+                    <td align="center">${getEmptyIfNull(obj.member_comments__c)}</td>
                     </tr>
                     `
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
@@ -214,8 +215,8 @@ let htmlStr=`
                   <th width="5%">Account Owner     </th>
                   <th width="5%">Outlet</th>
                   <th width="3%">Rating</th>
-                  <th width="5%">Feedback <br>Date and Time</th>
-
+                  <th width="5%">Date and Time</th>
+                  <th width="5%">Comment</th>
               </tr>
 
               
