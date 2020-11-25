@@ -61,16 +61,47 @@ console.log(dsrValues);
 // {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Hotel Transfer",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 
 // ]
+let headerForPage = ` 
+
+
+</table>
+<table class="page-break tftable1" align="center" border="1" >
+<tr height="60px"></tr>
+<tr style="margin-top:10px;">
+<th width="2%">S.N.</th>
+<th width="15%" >Member Name</th>
+<th width="3%">Membership Number</th>
+<th width="3%">Type
+    <br/>(N/R)</th>
+<th width="3%">Enrollment/
+    <br/>Renewal
+    <br/>Date</th>
+    <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
+<th width="3%">CC/CheqNo.
+    <br/>/Online Trn.No</th>
+<th width="3%">CC Approval Code</th>
+<th width="3%">Receipt No.</th>
+<th width="4%">Payment Mode</th>
+<th width="3%">Batch Number</th>
+<th width="5%">Amount</th>
+<th width="4%">Tax</th>
+<th width="3%">Total Amount</th>
+<th width="5%">GSTIN</th>
+<th width="4%">State Code</th>
+<th width="7%">Remarks</th>
+</tr>
+`
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
+let indexForPage=0 ;
 for(obj of dsrValues){
 dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
-                    <td>${getEmptyIfNull(obj.name)}</td>
+                    <td >${getEmptyIfNull(obj.name)}</td>
                     <td>${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
-                    <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
                     <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
+                    <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
@@ -125,7 +156,15 @@ dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
                 // }
                     
 
-}
+
+
+                indexForPage++
+                if(indexForPage %10 == 0 && indexForPage != 0){
+                    dailySalesReportRows+=`${headerForPage}`
+                }
+
+
+            }
 
 // let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale + summaryData[3].noOfSale + summaryData[4].noOfSale
 // let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount + summaryData[3].amount + summaryData[4].amount
@@ -172,6 +211,12 @@ let htmlStr=`
       <meta charset="UTF-8" />
       <title>DSR Table</title>
       <style>
+      @media print {
+        table.page-break  {
+            display:block; page-break-before: always; 
+            margin-top: 100px;
+        }
+    }   
           @page {
               size: A4 landscape;
           }
@@ -251,7 +296,7 @@ let htmlStr=`
       </table>
       <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 4px; margin-bottom: 10px; color:white;">
           <tr>
-              <td>Daily Sales Reports</td>
+              <td>Daily Sales Report</td>
               <td style="text-align: right">
               ${today}
               </td>
@@ -266,10 +311,11 @@ let htmlStr=`
                   <th width="3%">Membership Number</th>
                   <th width="3%">Type
                       <br/>(N/R)</th>
-                  <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
+                      <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
+
                   <th width="3%">CC/CheqNo.
                       <br/>/Online Trn.No</th>
                   <th width="3%">CC Approval Code</th>
@@ -299,7 +345,7 @@ let htmlStr=`
               </tr>
 
           </table>
-
+          
           <div style="page-break-after: always;">&nbsp; </div>
       <table class="tftable" border="1" style="margin-top:10px; float:left;">
           <caption style="font-size: 13px; margin-top:12px;">Summary</caption>
@@ -347,7 +393,6 @@ let htmlStr=`
   </html>
 `
 let pdfName = `./reports/DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.pdf`
-
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName
