@@ -178,21 +178,21 @@ let htmlStr=`
 
           
           .tftable {
-              font-size: 9px;
+              font-size: 7px;
               color: #333333;
               width: 35%;
               border: 1px solid black;
               border-collapse: collapse;
           }
           .tftable th {
-              font-size: 9px;
+              font-size: 7px;
               background-color: #bfa57d;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
           }
           .tftable td {
-              font-size: 9px;
+              font-size: 7px;
               border: 1px solid black;
               padding: 6px;
           }
@@ -202,21 +202,21 @@ let htmlStr=`
 
 
           .tftable1 {
-            font-size: 9px;
+            font-size: 7px;
             color: #333333;
             width: 100%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable1 th {
-            font-size: 9px;
+            font-size: 7px;
             background-color: #bfa57d;
             border: 1px solid black;
             padding: 6px;
             text-align: center;
         }
         .tftable1 td {
-            font-size: 9px;
+            font-size: 7px;
             border: 1px solid black;
             padding: 6px;
         }
