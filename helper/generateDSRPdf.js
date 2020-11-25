@@ -65,7 +65,7 @@ let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
 for(obj of dsrValues){
-dailySalesReportRows += `<tr><td>${slNo++}</td>
+dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.name)}</td>
                     <td>${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
