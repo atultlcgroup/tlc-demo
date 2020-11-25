@@ -300,7 +300,7 @@ let htmlStr=`
 
           </table>
 
-
+          <div style="page-break-after: always;">&nbsp; </div>
       <table class="tftable" border="1" style="margin-top:10px; float:left;">
           <caption style="font-size: 13px; margin-top:12px;">Summary</caption>
           <tr>
