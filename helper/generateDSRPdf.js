@@ -67,7 +67,7 @@ let headerForPage = `
 </table>
 <table class="page-break tftable1" align="center" border="1" >
 <tr height="60px"></tr>
-<tr style="margin-top:10px;">
+<tr style="margin-top:10px; height="50"">
 <th width="2%">S.N.</th>
 <th width="15%" >Member Name</th>
 <th width="3%">Membership Number</th>
@@ -169,10 +169,10 @@ dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
 // let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale + summaryData[3].noOfSale + summaryData[4].noOfSale
 // let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount + summaryData[3].amount + summaryData[4].amount
 
-let summaryHtml = ` <tr>`
+let summaryHtml = ``
 
 for(let [key,value] of Object.entries(pyamnetObj)){
-    summaryHtml += ` <tr>`
+    summaryHtml += ` <tr height="50">`
     summaryHtml +=`<td>${key}</td>`
     summaryHtml +=`<td style="text-align: right;">${value.noOfSale}</td>`
     summaryHtml +=`<td style="text-align: right;">${value.amount}</td>`
@@ -305,7 +305,7 @@ let htmlStr=`
 
      
           <table class="tftable1" align="center" border="1">
-              <tr>
+              <tr height="50">
                   <th width="2%">S.N.</th>
                   <th width="15%" >Member Name</th>
                   <th width="3%">Membership Number</th>
@@ -334,7 +334,7 @@ let htmlStr=`
               
                  ${dailySalesReportRows}
           
-              <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')}">
+              <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')} " height="50">
                   <td colspan="11">Total Month Sales : ${salesCount}</td>
                   <td>${salesAmount}</td>
                   <td>${salesTax}</td>
@@ -349,8 +349,8 @@ let htmlStr=`
           <div style="page-break-after: always;">&nbsp; </div>
       <table class="tftable" border="1" style="margin-top:10px; float:left;">
           <caption style="font-size: 13px; margin-top:12px;">Summary</caption>
-          <tr>
-              <th width="200px">Type</th>
+          <tr width="200px">
+              <th  height="50">Type</th>
               <th>No. Of Sales</th>
               <th>Amount</th>
           </tr>
@@ -363,7 +363,7 @@ let htmlStr=`
           </tr-->
             ${summaryHtml}
 
-          <tr>
+          <tr height="50">
               <td>Total</td>
               <td style="text-align: right;">${summaryTotalSale}</td>
               <td style="text-align: right;">${summaryTotalAmount}</td>
