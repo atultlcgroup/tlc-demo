@@ -98,7 +98,7 @@ let indexForPage=0 ;
 for(obj of dsrValues){
 dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
                     <td >${getEmptyIfNull(obj.name)}</td>
-                    <td>${getEmptyIfNull(obj.membership_number__c)}</td>
+                    <td >${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
                     <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
                     <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
