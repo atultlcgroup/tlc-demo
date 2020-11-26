@@ -107,9 +107,9 @@ dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
                     <td>${getEmptyIfNull((obj.payment_mode__c=='Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c?obj.credit_card__c : '')}`: `${obj.payment_mode__c}`))}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
-                    <td>${getEmptyIfNull(obj.amount__c)}</td>
-                    <td>${getEmptyIfNull(obj.total_amount__c-obj.amount__c)}</td>
-                    <td>${getEmptyIfNull(obj.total_amount__c)}</td>
+                    <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)}</td>
+                    <td>${(obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0}</td>
+                    <td>${(obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}</td>
                     <td>${getEmptyIfNull(obj.gstin__c)}</td>
                     <td>${getEmptyIfNull(obj.state_code__c)}</td>
                     <td>${getEmptyIfNull(obj.remarks__c)}</td>
@@ -158,7 +158,7 @@ dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
 
 
 
-                indexForPage++
+                indexForPage++;
                 if(indexForPage %10 == 0 && indexForPage != 0){
                     dailySalesReportRows+=`${headerForPage}`
                 }
@@ -175,7 +175,7 @@ for(let [key,value] of Object.entries(pyamnetObj)){
     summaryHtml += ` <tr height="50">`
     summaryHtml +=`<td>${key}</td>`
     summaryHtml +=`<td style="text-align: right;">${value.noOfSale}</td>`
-    summaryHtml +=`<td style="text-align: right;">${value.amount}</td>`
+    summaryHtml +=`<td style="text-align: right;">${(value.amount ? (Math.floor(value.amount * 100) / 100):0)}</td>`
     summaryHtml+=`</tr>`
 }
 
@@ -336,9 +336,9 @@ let htmlStr=`
           
               <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')} " height="50">
                   <td colspan="11">Total Month Sales : ${salesCount}</td>
-                  <td>${salesAmount}</td>
-                  <td>${salesTax}</td>
-                  <td>${salesTotalAmount}</td>
+                  <td>${(salesAmount ? (Math.floor(salesAmount * 100) / 100): 0)}</td>
+                  <td>${(salesTax ? (Math.floor(salesTax * 100) / 100): 0)}</td>
+                  <td>${(salesTotalAmount ? (Math.floor(salesTotalAmount * 100) / 100): 0)}</td>
                   <td> </td>
                   <td></td>
                   <td></td>
@@ -347,7 +347,7 @@ let htmlStr=`
           </table>
           
           <div style="page-break-after: always;">&nbsp; </div>
-      <table class="tftable" border="1" style="margin-top:10px; float:left;">
+      <table class="tftable" border="1" style="margin-top:50px; float:left;">
           <caption style="font-size: 13px; margin-top:12px;">Summary</caption>
           <tr width="200px">
               <th  height="50">Type</th>
@@ -366,7 +366,7 @@ let htmlStr=`
           <tr height="50">
               <td>Total</td>
               <td style="text-align: right;">${summaryTotalSale}</td>
-              <td style="text-align: right;">${summaryTotalAmount}</td>
+              <td style="text-align: right;">${(summaryTotalAmount ? (Math.floor(summaryTotalAmount * 100) / 100):0)}</td>
           </tr>
       </table>
 
