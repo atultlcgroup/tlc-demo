@@ -63,7 +63,6 @@ let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
 let indexForPage = 0;
-for(let ij =0;ij<100;ij++)
 for(obj of frValues){
 dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.casenumber)}</td>
