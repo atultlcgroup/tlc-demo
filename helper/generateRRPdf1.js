@@ -45,34 +45,11 @@ console.log("FR values are");
 // {Record:"00001216",AccountName:"shubham thute", reservationStatus:"Cancelled", memershipType:"30% off on F&B", outlet:"K3",membership:"101033827",reservationDateTime:"9/1/2020 4:30 am",numberOfGuest:2,numberOfAdults:3,numberOfKids:2,celebrationType:"Birthday",celebrationRemark:"Birthday celebration",specialRequest:"flowers"}
 
 // ]
-
-let headerForPage = `
-</table>
-<table class="page-break tftable1" align="center" border="1" >
-<tr height="60px"></tr>
-<tr  style="margin-top:10px; " height="50">
-                  <th width="2%">S.N.</th>
-                  <th width="7%" >Member Name</th>
-                  <th width="5%">Reservation Status</th>
-                  <th width="3%">Membership Offer</th>
-                  <th width="5%">Outlet</th>
-                  <th width="3%">Membership Number</th>
-                  <th width="5%">Reservation <br>Date and Time</th>
-                  <th width="3%">Number<br> of Guest</th>
-                  <th width="5%">Number<br> of Adults</th>
-                  <th width="5%">Number<br> of Kids</th>
-                  <th width="5%">Celebration<br> Type</th>
-                  <th width="5%">Celebration<br> Remark</th>    
-                  <th width="5%">Special Request</th>  
-</tr>
-`
-
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
-let indexForPage = 0;
 let dailySalesReportRows =``;
 for(obj of resultArr){
-dailySalesReportRows += `<tr align="center"  height="50"><td>${slNo++}</td>
+dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.member_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.reservation_status__c)}</td>
                     <td align="center">${getEmptyIfNull(obj.customer_set_name)}</td>
@@ -87,11 +64,6 @@ dailySalesReportRows += `<tr align="center"  height="50"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.specialrequest__c)}</td>
                     </tr>
                     `
-
-                    indexForPage++;
-                    if(indexForPage %10 == 0 && indexForPage != 0){
-                        dailySalesReportRows+=`${headerForPage}`
-                    }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
                 // {
                 //     summaryData[0].amount +=  obj.total_amount__c;
@@ -154,12 +126,6 @@ let htmlStr=`
       <meta charset="UTF-8" />
       <title>DSR Table</title>
       <style>
-      @media print {
-        table.page-break  {
-            display:block; page-break-before: always; 
-            margin-top: 100px;
-        }
-    }   
           @page {
               size: A4 landscape;
           }
@@ -179,7 +145,6 @@ let htmlStr=`
               padding: 6px;
               text-align: center;
           }
-
           .tftable td {
               font-size: 8px;
               border: 1px solid black;
@@ -191,21 +156,21 @@ let htmlStr=`
 
 
           .tftable1 {
-            font-size: 7px;
+            font-size: 8px;
             color: #333333;
             width: 100%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable1 th {
-            font-size: 7px;
+            font-size: 8px;
             background-color: #bfa57d;
             border: 1px solid black;
             padding: 6px;
             text-align: center;
         }
         .tftable1 td {
-            font-size: 7px;
+            font-size: 8px;
             border: 1px solid black;
             padding: 6px;
         }
@@ -248,7 +213,7 @@ let htmlStr=`
       </table>
 
      
-          <table class="tftable1" align="center" border="1"  height="50">
+          <table class="tftable1" align="center" border="1">
               <tr><th width="2%">S.N.</th>
                   <th width="7%" >Member Name</th>
                   <th width="5%">Reservation Status</th>

@@ -104,7 +104,8 @@ Left join tlcsalesforce.membershiptype__c
 on membershiptype__c.property__c=property__c.sfid
 Left join tlcsalesforce.membershiptypeoffer__c
 on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
-where
+ limit 100`
+let e=`where
 date(reservation__c.createddate) = (current_date-1)
 and
  (outlet__c.property__c='${property_id}' 
