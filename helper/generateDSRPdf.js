@@ -159,7 +159,7 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
 
 
                 indexForPage++;
-                if(indexForPage %10 == 0 && indexForPage != 0){
+                if(indexForPage %10 == 0 && indexForPage != 0 && dsrValues[indexForPage]){
                     dailySalesReportRows+=`${headerForPage}`
                 }
 

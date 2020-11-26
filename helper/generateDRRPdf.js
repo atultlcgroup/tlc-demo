@@ -91,7 +91,7 @@ dailySalesReportRows += `<tr align="center"  height="50"><td>${slNo++}</td>
                     </tr>
                     `
                     indexForPage++;
-                    if(indexForPage %10 == 0 && indexForPage != 0){
+                    if(indexForPage %10 == 0 && indexForPage != 0 && drrValues[indexForPage]){
                         dailySalesReportRows+=`${headerForPage}`
                     }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
