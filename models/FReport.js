@@ -98,7 +98,8 @@ let getFRData=async(property__c)=>{
         on membershiptype__c.property__c=property__c.sfid
         Left join tlcsalesforce.case c
         on c.sfid=member_feedback__c.case__c
-        where
+         limit 100`
+        let e =`where
          --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
         date(member_feedback__c.createddate) =(current_date-1)
        and (outlet__c.property__c='${property__c}' 
@@ -136,6 +137,7 @@ let getFRDataCS=async( customer_set__c)=>{
             --outlet__c.property__c='' or 
         membershiptype__c.sfid='${customer_set__c}'
         )
+
         `
         let data = await pool.query(qry)
         return data.rows? data.rows : []

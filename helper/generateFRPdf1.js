@@ -45,27 +45,11 @@ console.log("FR values are");
 
 // ]
 // console.log("frValues",frValues)
-let headerForPage = ` 
-</table>
-<table class="page-break tftable1" align="center" border="1" >
-<tr height="60px"></tr>
-<tr  style="margin-top:10px; " height="50"><th width="2%">S.N.</th>
-<th width="3%">Case #</th>
-<th width="7%" >Feedback #</th>
-<th width="5%">Account Owner     </th>
-<th width="5%">Outlet</th>
-<th width="3%">Rating</th>
-<th width="5%">Date and Time</th>
-<th width="5%">Comment</th>
-</tr>
-`
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
-let indexForPage = 0;
-for(let ij =0;ij<100;ij++)
 for(obj of frValues){
-dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
+dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.casenumber)}</td>
                     <td align="center">${getEmptyIfNull(obj.feedbacknumber)}</td>
                     <td align="center">${getEmptyIfNull(obj.accountowner)}</td>
@@ -75,10 +59,6 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.member_comments__c)}</td>
                     </tr>
                     `
-                    indexForPage++;
-                    if(indexForPage %10 == 0 && indexForPage != 0 ){
-                        dailySalesReportRows+=`${headerForPage}`
-                    }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
                 // {
                 //     summaryData[0].amount +=  obj.total_amount__c;
@@ -141,12 +121,6 @@ let htmlStr=`
       <meta charset="UTF-8" />
       <title>DSR Table</title>
       <style>
-      @media print {
-        table.page-break  {
-            display:block; page-break-before: always; 
-            margin-top: 100px;
-        }
-    }   
           @page {
               size: A4 landscape;
           }
@@ -235,7 +209,7 @@ let htmlStr=`
 
      
           <table class="tftable1" align="center" border="1">
-              <tr height="50"><th width="2%">S.N.</th>
+              <tr><th width="2%">S.N.</th>
                   <th width="3%">Case #</th>
                   <th width="7%" >Feedback #</th>
                   <th width="5%">Account Owner     </th>
