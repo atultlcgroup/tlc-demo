@@ -102,8 +102,7 @@ let getDRRData =async(property_id)=>{
         on reservation__c.outlet__c=outlet__c.sfid
         Left join  tlcsalesforce.account a
         on a.sfid=reservation__c.assigned_staff_member__c
-       `
-       let e= ` where 
+        where 
         (
             membershiptype__c.property__c='${property_id}' 
        -- membershiptype__c.property__c='a0D0k000009PPsEEAW' 
