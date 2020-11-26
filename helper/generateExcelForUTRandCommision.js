@@ -189,7 +189,7 @@ let style = wb.createStyle({
       ws2.cell(cell, index++).string(`${(resultArr[i]['Bank Name'] ? resultArr[i]['Bank Name'] : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i]['TPSL Transaction Id'] ? resultArr[i]['TPSL Transaction Id'] : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i]['SM Transaction Id'] ? resultArr[i]['SM Transaction Id'] : '')}`).style(style);
-      ws2.cell(cell, index++).number(parseFloat(resultArr[i]['Bank Transaction Id'] ? resultArr[i]['Bank Transaction Id'] : '')).style(style);
+      ws2.cell(cell, index++).string(`${resultArr[i]['Bank Transaction Id'] ? resultArr[i]['Bank Transaction Id'] : ''}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].gst_details__c ? resultArr[i].gst_details__c : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i].payment_mode__c ? resultArr[i].payment_mode__c : '')}`).style(style);
       ws2.cell(cell, index++).number(parseFloat(resultArr[i].membership_amount ? resultArr[i].membership_amount : 0)).style(style);
