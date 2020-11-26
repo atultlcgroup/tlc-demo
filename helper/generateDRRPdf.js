@@ -29,6 +29,7 @@ let getEmptyIfNull = (val) => {
 let  generateDRRPDF=async(drrValues)=>{
     let pyamnetObj={}
     let summaryTotalSale =0
+
     let summaryTotalAmount=0
  //propertyName = `${drrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
@@ -45,12 +46,34 @@ console.log("FR values are");
 
 // ]
 //9/1/2020 4:30 am
-console.log("drrValues",drrValues)
+let headerForPage = ` 
+</table>
+<table class="page-break tftable1" align="center" border="1" >
+<tr height="60px"></tr>
+<tr  style="margin-top:10px; " height="50"><th width="2%">S.N.</th>
+    <th width="3%">Hotel Name</th>
+    <th width="7%" >Member Name</th>
+    <th width="5%">Membership Type</th>
+    <th width="3%">Membership Offer</th>
+    <th width="5%">Outlet</th>
+    <th width="3%">Membership Number</th>
+    <th width="5%">Redemption <br>Date and Time </th>
+    <th width="3%">Check<br> Number</th>
+    <th width="5%">Certificate<br> Code</th>
+    <th width="5%">Transaction<br> Code</th>
+    <th width="5%">Hotel App User</th>
+    <th width="5%">Net Amount</th>    
+    <th width="5%">Certificate Number</th>  
+
+
+</tr>
+`
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
+let indexForPage = 0;
 for(obj of drrValues){
-dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
+dailySalesReportRows += `<tr align="center"  height="50"><td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.hotel_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.member_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_type_name)}</td>
@@ -67,6 +90,10 @@ dailySalesReportRows += `<tr align="center"><td>${slNo++}</td>
                     
                     </tr>
                     `
+                    indexForPage++;
+                    if(indexForPage %10 == 0 && indexForPage != 0){
+                        dailySalesReportRows+=`${headerForPage}`
+                    }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
                 // {
                 //     summaryData[0].amount +=  obj.total_amount__c;
@@ -129,6 +156,12 @@ let htmlStr=`
       <meta charset="UTF-8" />
       <title>DSR Table</title>
       <style>
+      @media print {
+        table.page-break  {
+            display:block; page-break-before: always; 
+            margin-top: 100px;
+        }
+    }   
           @page {
               size: A4 landscape;
           }
@@ -159,21 +192,21 @@ let htmlStr=`
 
 
           .tftable1 {
-            font-size: 10px;
+            font-size: 7px;
             color: #333333;
             width: 100%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable1 th {
-            font-size: 10px;
+            font-size: 7px;
             background-color: #bfa57d;
             border: 1px solid black;
             padding: 6px;
             text-align: center;
         }
         .tftable1 td {
-            font-size: 10px;
+            font-size: 7px;
             border: 1px solid black;
             padding: 6px;
         }
@@ -217,7 +250,7 @@ let htmlStr=`
 
      
           <table class="tftable1" align="center" border="1">
-              <tr><th width="2%">S.N.</th>
+              <tr height="50"><th width="2%">S.N.</th>
                   <th width="3%">Hotel Name</th>
                   <th width="7%" >Member Name</th>
                   <th width="5%">Membership Type</th>

@@ -96,7 +96,7 @@ let slNo =1;
 let dailySalesReportRows =``;
 let indexForPage=0 ;
 for(obj of dsrValues){
-dailySalesReportRows += `<tr height="50"><td>${slNo++}</td>
+dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td >${getEmptyIfNull(obj.name)}</td>
                     <td >${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
