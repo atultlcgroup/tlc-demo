@@ -316,7 +316,7 @@ let htmlStr=`
                       <br/>Date</th>
                       <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
 
-                  <th width="3%">CC/CheqNo.
+                  <th width="3%">CC/ChequeNo.
                       <br/>/Online Trn.No</th>
                   <th width="3%">CC Approval Code</th>
                   <th width="3%">Receipt No.</th>

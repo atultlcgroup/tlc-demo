@@ -89,7 +89,7 @@ let DSRReport = async()=>{
                     updateLog(insertedId, false ,'Error', 'Record not found!', '' )
                 }
             ind++;
-            break
+            
           }
 
           //For customerset 
@@ -194,7 +194,19 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-     
+        where
+        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        
+        or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+        and
+        Membership__c is not Null and Membership_Offer__c is null
+        and
+        (Property__c.sfid='${property_sfid}'
+        --or membership__c.customer_set__c IN ('')
+        )
+        and
+        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
+      
         
          `)
         console.log(`hiiiSS`)
