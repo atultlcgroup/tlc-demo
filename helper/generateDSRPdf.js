@@ -30,7 +30,6 @@ let  generateDSRPDF=async(dsrValues,propertyId)=>{
  propertyName = `${dsrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 console.log("DSR values are");
-console.log(dsrValues);
  //  dsrValues = [
 // {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 // {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
@@ -77,7 +76,7 @@ let headerForPage = `
 <th width="3%">Enrollment/
     <br/>Renewal
     <br/>Date</th>
-    <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
+    <th>Expiry</br> Date</th>
 <th width="3%">CC/CheqNo.
     <br/>/Online Trn.No</th>
 <th width="3%">CC Approval Code</th>
@@ -101,7 +100,7 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td >${getEmptyIfNull(obj.name)}</td>
                     <td >${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
-                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
+                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c: obj.membership_enrollment_date__c)) : '')}</td>
                     <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
@@ -173,10 +172,10 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
 let summaryHtml = ``
 
 for(let [key,value] of Object.entries(pyamnetObj)){
-    summaryHtml += ` <tr height="50">`
-    summaryHtml +=`<td>${key}</td>`
-    summaryHtml +=`<td style="text-align: right;">${value.noOfSale}</td>`
-    summaryHtml +=`<td style="text-align: right;">${(value.amount ? (Math.floor(value.amount * 100) / 100):0)}</td>`
+    summaryHtml += ` <tr height="50" align="center">`
+    summaryHtml +=`<td >${key}</td>`
+    summaryHtml +=`<td >${value.noOfSale}</td>`
+    summaryHtml +=`<td >${(value.amount ? (Math.floor(value.amount * 100) / 100):0)}</td>`
     summaryHtml+=`</tr>`
 }
 
@@ -315,7 +314,7 @@ let htmlStr=`
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
-                      <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
+                      <th>Expiry</br> Date</th>
 
                   <th width="3%">CC/ChequeNo.
                       <br/>/Online Trn.No</th>
@@ -337,9 +336,9 @@ let htmlStr=`
           
               <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')} " height="50">
                   <td colspan="11">Total Month Sales : ${salesCount}</td>
-                  <td>${(salesAmount ? (Math.floor(salesAmount * 100) / 100): 0)}</td>
-                  <td>${(salesTax ? (Math.floor(salesTax * 100) / 100): 0)}</td>
-                  <td>${(salesTotalAmount ? (Math.floor(salesTotalAmount * 100) / 100): 0)}</td>
+                  <td  align="center">${(salesAmount ? (Math.floor(salesAmount * 100) / 100): 0)}</td>
+                  <td  align="center">${(salesTax ? (Math.floor(salesTax * 100) / 100): 0)}</td>
+                  <td  align="center">${(salesTotalAmount ? (Math.floor(salesTotalAmount * 100) / 100): 0)}</td>
                   <td> </td>
                   <td></td>
                   <td></td>
@@ -364,10 +363,10 @@ let htmlStr=`
           </tr-->
             ${summaryHtml}
 
-          <tr height="50">
+          <tr height="50"  align="center">
               <td>Total</td>
-              <td style="text-align: right;">${summaryTotalSale}</td>
-              <td style="text-align: right;">${(summaryTotalAmount ? (Math.floor(summaryTotalAmount * 100) / 100):0)}</td>
+              <td >${summaryTotalSale}</td>
+              <td >${(summaryTotalAmount ? (Math.floor(summaryTotalAmount * 100) / 100):0)}</td>
           </tr>
       </table>
 

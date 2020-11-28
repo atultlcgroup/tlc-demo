@@ -167,14 +167,14 @@ let getEPRSfidCS = async()=>{
 
 let getDSRReport=async(property_sfid)=>{
     try{
-
-        let query=await pool.query(`select account.name,membership__c.membership_number__c,
+        let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
         --Type_N_R__c,
         case
         when payment__c.payment_for__c='New Membership' then 'N'
         when payment__c.payment_for__c='Renewal' then 'R'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is null then 'N'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is not null then 'R'
+        when payment__c.payment_for__c='Add-on Renewal' then 'R'
         END as Type_N_R__c,
         membership__c.expiry_date__c,
         Membership__c.Membership_Enrollment_Date__c,
@@ -205,10 +205,6 @@ let getDSRReport=async(property_sfid)=>{
         (Property__c.sfid='${property_sfid}'
         --or membership__c.customer_set__c IN ('')
         )
-        and
-        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
-      
-        
          `)
         console.log(`hiiiSS`)
         let result = query ? query.rows : [];
@@ -223,13 +219,14 @@ let getDSRReport=async(property_sfid)=>{
 
 let getDSRReportCS=async(customer_set_sfid)=>{
     try{
-        let query=await pool.query(`select account.name,membership__c.membership_number__c,
+        let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
         --Type_N_R__c,
         case
         when payment__c.payment_for__c='New Membership' then 'N'
         when payment__c.payment_for__c='Renewal' then 'R'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is null then 'N'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is not null then 'R'
+        when payment__c.payment_for__c='Add-on Renewal' then 'R'
         END as Type_N_R__c,
         membership__c.expiry_date__c,
         Membership__c.Membership_Enrollment_Date__c,
@@ -262,9 +259,6 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         --or 
         membership__c.customer_set__c IN ('${customer_set_sfid}')
         )
-        and
-        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
-        
          `)
         let result = query ? query.rows : [];
         return result;

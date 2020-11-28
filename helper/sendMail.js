@@ -11,7 +11,8 @@ const SMTPConfiguration = (mailData) => {
         auth: {
             user: config.MAILER_USER,
             pass: config.MAILER_PASSWORD
-        },tls:{
+        }
+        ,tls:{
             ciphers:'SSLv3'
         }
     });
