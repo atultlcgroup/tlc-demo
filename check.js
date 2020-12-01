@@ -1,24 +1,9 @@
-var randomstring = require("randomstring");
 
-let random=()=>{
-    return randomstring.generate(10);
-}
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
-console.log(random())
 
+setTimeout(()=>{
+    console.log(`from settimeout`)
+},100)
+
+setInterval(() => {
+    console.log(`from setinterval`)
+}, 100);

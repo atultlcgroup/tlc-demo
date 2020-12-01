@@ -2,6 +2,8 @@ let  dotenv = require('dotenv');
 dotenv.config();
 const sendmail = require('./sendMail')
 const pool = require("../databases/db").pool;
+const fromEmailForPOSError=process.env.FROM_EMAIL_FOR_POS_ERROR || ''; 
+
 
 // const config = require('../config').ENV_OBJ
 
@@ -11,7 +13,7 @@ const subject =process.env.MAIL_SUBJECT || "";
 let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
 const fromEmailForDSR = process.env.FROM_EMAIL_FOR_DSR || "";
 const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
-const fromEmailForPOSError=process.env.FROM_EMAIL_FOR_POS_ERROR
+
 
 let today = new Date();
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
@@ -292,7 +294,6 @@ let sendPOSErrorReport=(file,fileName,emails)=>{
 
 // End POS report error
 
-
             module.exports={
                 sendMail,
                 sendEODPaymentReport,
@@ -300,7 +301,7 @@ let sendPOSErrorReport=(file,fileName,emails)=>{
                 sendMailForEachPayment,
                 sendDSRReport,
                 sendUTRReport,
-                sendPOSErrorReport,
+                sendPOSErrorReport
             }
 
         

@@ -110,10 +110,10 @@ let findPaymentRule= async(req)=>{
         let result = emailData ? emailData.rows : []
         let resultArray=[];
         if(result){
-            if(result[0].hotel_email_status__c == true)
-            resultArray= resultArray.concat(result[0].hotel_emails__c.split(','));
-            if(result[0].tlc_email_status__c == true)
-            resultArray=resultArray.concat(result[0].manager_email__c.split(','));
+            if(result[0].hotel_email_send_payment__c == true)
+            resultArray= resultArray.concat(result[0].hotel_email_id_payment__c.split(','));
+            if(result[0].tlc_send_email_payment__c == true)
+            resultArray=resultArray.concat(result[0].tlc_email_id_payment__c.split(','));
         }
         return resultArray
     }catch(e){

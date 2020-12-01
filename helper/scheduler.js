@@ -5,8 +5,12 @@ const DSRReport = require('../models/DSRReport')
 const getMembershipDetails=require('../models/memberSpentForPOS');
 
 let posModel = require('../models/pos')
+const DRReport = require('../models/DRReport')
+const FReport = require('../models/FReport')
+const RReport = require('../models/RReport')
 
 
+// POS Scheduler
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
     console.log(`=================   SCHEDULER START POS   ========================`)
     await posModel.getPosData()
@@ -14,6 +18,8 @@ let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, a
     await posModel.getPosLogData()
     console.log(`=================   SCHEDULER END FOR POS    ========================`)
 });
+
+// F&B Scheduler
 let scheduleTasksForFNB =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
   console.log(`=================   SCHEDULER START FOR FNB  ========================`)
   await FandBSummary.FandBSummaryReport()
@@ -88,13 +94,13 @@ let scheduleTasksForDSRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTi
  console.log(`================= DSR REPORT: Success=============`)
 });
 
-if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_PAYMENT_REPORT_EOM == 'TRUE')
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT == 'TRUE')
 {
   console.log(`DSR Report`);
   scheduleTasksForDSRReport(process.env.SCHEDULER_TIME_FOR_DSR_REPORT);
 }
 
-//For POS membership Totatl spent
+//For POS membership Total spent
 let scheduleTasksForMemberSpentReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
   console.log(`=================   SCHEDULER START FOR Member Spent Report   ========================`)
  let data= await getMembershipDetails.getMembershipDetails('')
@@ -109,4 +115,51 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == true || proces
 }
 
 
-// Member spent for POS
+
+
+//For DR Report
+
+let scheduleTasksForDRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR DRR REPORT   ========================`)
+ let data= await DRReport.DRReport('')
+ console.log(data) 
+ console.log(`================= DRR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DRR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DRR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_DRR_REPORT == 'TRUE')
+{
+  console.log(`DRR Report`);
+  scheduleTasksForDRReport(process.env.SCHEDULER_TIME_FOR_DRR_REPORT);
+}
+
+
+
+//For FR Report
+
+let scheduleTasksForFReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR FR REPORT   ========================`)
+ let data= await FReport.FReport('')
+ console.log(data) 
+ console.log(`================= FR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_FR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_FR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_FR_REPORT == 'TRUE')
+{
+  console.log(`FR Report`);
+  scheduleTasksForFReport(process.env.SCHEDULER_TIME_FOR_FR_REPORT);
+}
+
+//For RR Report
+
+let scheduleTasksForRReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR RR REPORT   ========================`)
+ let data= await RReport.RReport('')
+ console.log(data) 
+ console.log(`================= RR REPORT: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == 'TRUE')
+{
+  console.log(`RR Report`);
+  scheduleTasksForRReport(process.env.SCHEDULER_TIME_FOR_RR_REPORT);
+}

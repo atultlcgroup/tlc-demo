@@ -163,7 +163,6 @@ const sendMailAttachmentUTR = (to, from, subject, text, html,file,fileName) => {
 }
 
 
-
 //POS mailer
 const sendMailAttachmentPOSError = (to, from, subject, text, html,file,fileName) => {
     console.log(`----------------------------`)
@@ -206,7 +205,4 @@ exports.smtpAttachment = (to, from, subject, text, html,file,pdf,fileName) => se
 
 exports.smtpAttachmentDSR = (to, from, subject, text, html,file,fileName) => sendMailAttachmentDSR(to, from, subject, text, html, file,fileName);
 exports.smtpAttachmentUTR = (to, from, subject, text, html,file,fileName) => sendMailAttachmentUTR(to, from, subject, text, html, file,fileName);
-
-
 exports.smtpAttachmentPOSError = (to, from, subject, text, html,file,fileName) => sendMailAttachmentPOSError(to, from, subject, text, html, file,fileName);
-

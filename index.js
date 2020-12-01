@@ -11,6 +11,10 @@ const posRouters= require("./routers/posCheque");
 let paymentReport = require("./routers/paymentReport")
 const DSRReport = require("./routers/DSRReport")
 const UTRReport = require("./routers/UTRReport")
+const DRReport = require("./routers/DRReport")
+const FReport = require("./routers/FReport")
+const RReport = require("./routers/RReport")
+
 const helmet = require('helmet')
 
 
@@ -46,6 +50,11 @@ app.use("/api/DSR",DSRReport);
 app.use("/api/MemberSpend",memberSpentPOS)
 app.use("/api/DSR",DSRReport)
 app.use("/api/UTR",UTRReport)
+app.use("/api/DRR",DRReport)
+app.use("/api/FR",FReport)
+app.use("/api/RR",RReport)
+
+
 
 
 // app.use("/")
