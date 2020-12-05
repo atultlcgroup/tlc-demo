@@ -303,14 +303,16 @@ let UTRReport = async(userid,fileName,file)=>{
                 await moveFileToArchiveFolder(fileName)
                 unlinkFiles(`reports/UTReport/${fileName}`)
             }else{
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                unlinkFiles(`reports/UTReport/${fileName}`)
                 let UTRData = await updateDataToUTRLog(csvData.values,csvData.header)
                 console.log(`From Yes!!!!`)
-                unlinkFiles(`reports/UTReport/${fileName}`)
                 if(!UTRData.length){
                     reject('Please upload the crosspondent file first!')
+                    unlinkFiles(`reports/UTReport/${fileName}`)
                     return
                   }
-                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+
                 await moveFileToArchiveFolder(fileName)  
                 await UTRReport2(UTRData, fileName, userid)
             }
