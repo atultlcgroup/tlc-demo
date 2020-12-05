@@ -116,7 +116,7 @@ let style = wb.createStyle({
   //Sheet 2
 
 
-  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Charges','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount','UTR Number']
+  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','Schemeamount','UTR Number']
   let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
 
   // ws2.cell(1, 1).string(`Hotel collects the money on Payment Gateway`).style(style);
@@ -197,6 +197,7 @@ let style = wb.createStyle({
       ws2.cell(cell, index++).number(parseFloat(resultArr[i].SGST ? resultArr[i].SGST : 0)).style(style);
       ws2.cell(cell, index++).number(parseFloat(resultArr[i].IGST ? resultArr[i].IGST : 0)).style(style);
       console.log(parseFloat(resultArr[i].Charges ? resultArr[i].Charges : 0))
+      ws2.cell(cell, index++).number(parseFloat(resultArr[i]['Service Tax'] ? resultArr[i]['Service Tax'] : 0)).style(style);
       ws2.cell(cell, index++).number(parseFloat(resultArr[i].Charges ? resultArr[i].Charges : 0)).style(style);
       ws2.cell(cell, index++).number(parseFloat(resultArr[i]['Net Amount'] ? resultArr[i]['Net Amount'] : 0)).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i]['Transaction Date'] ? resultArr[i]['Transaction Date'] : '')}`).style(style); 

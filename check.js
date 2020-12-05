@@ -1,3 +1,1 @@
-let d = 1000.21988;
-
-console.log(Math.floor(d * 100) / 100)
+let arr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO ' ]

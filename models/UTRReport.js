@@ -1,6 +1,5 @@
 
 const { writeFileSync } = require("fs");
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const excelToJson = require('convert-excel-to-json');
 const ObjectsToCsv = require('objects-to-csv')
 const fs = require('fs');
@@ -10,7 +9,6 @@ let pool = require("../databases/db").pool
 // let generateExcel = require("../helper/generateUTRExcel")
 let generateExcel = require("../helper/generateExcelForUTRandCommision")
 let sendMail= require("../helper/mailModel");
-const { colorScheme } = require("excel4node/distribution/lib/types");
 
 
 let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription,uploadedBy)=>{
@@ -34,6 +32,7 @@ let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription
             return e
         }
 }
+
 
 
 
@@ -66,6 +65,61 @@ let findPaymentRule= async(req,fileName)=>{
     }
 }
 
+
+let checkExcelFormatWithUTR = async(converter)=>{
+    try{ 
+        let valuesArr=[]
+        let formatCheck = 0
+        let headerArr=['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO'];
+        let button ='off' 
+        for(let d of converter){
+            let ind=0;
+            let cnt =0;
+            let cntIfButtonOn= 0;
+            let valueArr=[]
+            let excelHeaderIndex = 0;
+            for(let [key,value] of Object.entries(d)){
+                excelHeaderIndex++;
+               if(button == 'on'){
+                valueArr.push(value)
+               }
+               if(headerArr[ind] && (value.toLowerCase()).trim()==headerArr[ind++].toLowerCase()){
+                //    console.log(d)
+                //    console.log(headerArr)
+                cnt++;
+               }
+               if(button == 'on' && (value)){
+                cntIfButtonOn++;
+               }
+             }
+            if(button == 'on'){
+                if( headerArr.length == cntIfButtonOn || headerArr.length -1 == cntIfButtonOn){
+                }else{
+                    button='off'
+                }
+             }
+                if(button == 'on'){
+                valuesArr.push(checkHeaderandValue(valueArr,headerArr))
+                }
+                if(headerArr.length -1 == cnt || headerArr.length == cnt){
+                 formatCheck=1;
+                  button = 'on'
+                  console.log(`Excel format matched`)
+              }
+            }
+            if(formatCheck == 0){
+                console.log(`----Format Issue----`)
+                // await createLogForUTRReport(fileNameInLog,'ERROR',false,`CSV Format Issue!`)
+                return `Format Issue`
+            }
+
+            return {values: valuesArr, header:headerArr , utr: 'YES'}
+    }catch(e){
+        // unlinkFiles(`reports/UTReport/${fileName}`)        
+        // await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
+      return {values: [], header:[] ,  utr: 'YES' }
+    }
+}
 const readCsv=async(fileName,fileNameInLog)=>{
 try{
  let valuesArr=[]
@@ -111,15 +165,19 @@ try{
       }
     }
     if(formatCheck == 0){
-        console.log(`----Format Issue----`)
-        await createLogForUTRReport(fileNameInLog,'ERROR',false,`CSV Format Issue!`)
-        return `Format Issue`
+       let UTRFormat = await checkExcelFormatWithUTR(converter)
+
+        // console.log(`----Format Issue----`)
+        // await createLogForUTRReport(fileNameInLog,'ERROR',false,`CSV Format Issue!`)
+        // return `Format Issue`
+        return UTRFormat;
     }
-    return {values: valuesArr, header:headerArr }
+    return {values: valuesArr, header:headerArr  , utr: 'NO'}
     }catch(e){
+        console.log(`error: ${e}`)
         unlinkFiles(`reports/UTReport/${fileName}`)        
         await createLogForUTRReport(fileNameInLog,'ERROR',false,`${e}`)
-    return {values: [], header:[] }
+    return {values: [], header:[] , utr: 'NO'}
     }
  }
 
@@ -208,21 +266,55 @@ let insertDataToLogTable = async(csvData, lastInsertedId, fileName)=>{
 
 }
 
+let updateDataToUTRLog= async(values, header)=>{
+    try{
+        let TPSLTransactionIdIndex=header.indexOf('TPSL TransactiON id');
+        let SMTransactionIdIndex=header.indexOf('SM TransactiON Id');
+        let UTRNoIndex = header.indexOf('UTR_NO')
+        let Identifier= 0;
+        let UTRLogArr = [];
+        let fileName = '';
+        for(d of values){
+            console.log(`Update tlcsalesforce."UTR_Log" set  "UTR_NO"= '${d[UTRNoIndex]}' where "SM Transaction Id"  = '${d[SMTransactionIdIndex]}' and "TPSL Transaction Id" = '${d[TPSLTransactionIdIndex]}'  RETURNING "UTR Log Id"`)
+            let updateUTR = await pool.query(`Update tlcsalesforce."UTR_Log" set  "UTR_NO"= '${d[UTRNoIndex]}' where "SM Transaction Id"  = '${d[SMTransactionIdIndex]}' and "TPSL Transaction Id" = '${d[TPSLTransactionIdIndex]}'  RETURNING "UTR Log Id"`)
+            let data = updateUTR.rows.length ? updateUTR.rows[0]["UTR Log Id"] : 0;
+            if(data > 0)
+            UTRLogArr.push(data)
+        }
+        return UTRLogArr;
+    
+    }catch(e){
+
+    }
+}
+
 let UTRReport = async(userid,fileName,file)=>{
     return new Promise(async(resolve, reject)=>{
         try{            
-            let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
             let data = await uploadExcel(file,fileName)
-             let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
-            await createLogForUTRReport(fileName,'UPLOADED',false,'')
             let csvData = await readCsv(`reports/UTReport/${fileName}`,fileName)
-            await insertDataToLogTable(csvData,lastInsertedId , fileName)
-            await moveFileToArchiveFolder(fileName)
             if(csvData == 'Format Issue')
             throw `CSV Format Issue!`
-            unlinkFiles(`reports/UTReport/${fileName}`)
-            console.log(lastInsertedId)
-            await UTRReport2(lastInsertedId, fileName, userid)
+            if(csvData.utr=='NO'){
+                let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                await createLogForUTRReport(fileName,'UPLOADED',false,'')
+                await insertDataToLogTable(csvData,lastInsertedId , fileName)
+                await moveFileToArchiveFolder(fileName)
+                unlinkFiles(`reports/UTReport/${fileName}`)
+            }else{
+                let UTRData = await updateDataToUTRLog(csvData.values,csvData.header)
+                console.log(`From Yes!!!!`)
+                unlinkFiles(`reports/UTReport/${fileName}`)
+                if(!UTRData.length){
+                    reject('Please upload the crosspondent file first!')
+                    return
+                  }
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                await moveFileToArchiveFolder(fileName)  
+                await UTRReport2(UTRData, fileName, userid)
+            }
+            // console.log(lastInsertedId)
             resolve({userid:userid,fileName:`result`})
         }catch(e){
             await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
@@ -242,10 +334,32 @@ let updateUTRLogStatus = async(scheme,UTRTrackingId, isEmailSent,status,errorDes
 
 }
 
-let UTRReport2=async(UTRTrackingId,fileName,userid)=>{
+let updateUTRLogStatusByArr=async(scheme,UTRTrackingId, isEmailSent,status,errorDescription)=>{
+    if(scheme)
+    await pool.query(`update tlcsalesforce."UTR_Log" set "Status"='${status}',"ErrorDescription"='${errorDescription}',"isEmailSent"=${isEmailSent} where "UTR Tracking Id"='${UTRTrackingId}' and "Scheme"='${scheme}'`)
+    else
+    await pool.query(`update tlcsalesforce."UTR_Log" set "Status"='${status}',"ErrorDescription"='${errorDescription}',"isEmailSent"=${isEmailSent} where "UTR Tracking Id"='${UTRTrackingId}'`)
+
+}
+
+let getFileName = async(logId)=>{
+    try{
+        let selFileName = await pool.query(`select file_name__c,id from tlcsalesforce.utr_tracking__c utc left join tlcsalesforce."UTR_Log" ul on utc.id =  CAST(ul."UTR Tracking Id" as INTEGER) where ul."UTR Log Id" = ${logId}`)
+        return selFileName.rows.length ? selFileName.rows[0] : {id: 0,file_name__c:''}
+    }catch(e){
+        return {id: 0,file_name__c:''}
+    }
+}
+let UTRReport2=async(UTRData,fileName,userid)=>{
+    console.log(`UTRData=${UTRData}`)
     return new Promise(async(resolve, reject)=>{
-        try{
-      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR_NO","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Tracking Id"='${UTRTrackingId}' and "Status"= 'New'`)
+    try{
+       let fileData = await getFileName(UTRData[0])
+       console.log(fileData)
+       UTRTrackingId = fileData.id
+       fileName = fileData.file_name__c
+       console.log(`file Name= ${fileName} and utr Tracking id = ${UTRTrackingId}`) 
+      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR_NO","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Log Id" in (${UTRData}) and "Status"= 'New'`)
       let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(selData.rows? selData.rows : [],fileName) 
       let errorArr = [];  
       for(let [key,value] of Object.entries(dataSchemeCodeWise)){

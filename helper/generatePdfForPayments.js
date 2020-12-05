@@ -224,7 +224,7 @@ let generatePDF =async(resultArr,hotelName,summaryName,propertyId)=>{
     <div>
     <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 1px; color:white;">
     <tr>
-        <td>Daily Summary</td>
+        <td>${summaryName}</td>
         <td style="text-align: right">
            
         </td>
