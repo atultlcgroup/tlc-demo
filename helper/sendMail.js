@@ -2,6 +2,12 @@ const nodemailer = require('nodemailer');
 
 const fs = require('fs')
 const config = process.env;
+
+let ReportType = [
+{type: 'POS',logoName:'logo-cm.png',logoURL:'./helper/cm.png'},
+{type: 'GM-POS',logoName:'os.png',logoURL:'./helper/os.png'},
+{type: 'TAJ',logoName:'taj.png',logoURL:'./helper/taj.png'}];
+
 const SMTPConfiguration = (mailData) => {
     const transporter = nodemailer.createTransport({
         host:  config.MAILER_HOST,
@@ -164,7 +170,7 @@ const sendMailAttachmentUTR = (to, from, subject, text, html,file,fileName) => {
 
 
 //POS mailer
-const sendMailAttachmentPOSError = (to, from, subject, text, html,file,fileName) => {
+const sendMailAttachmentPOSError = (to, from, subject, text, html,file,fileName,logoName) => {
     console.log(`----------------------------`)
     console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
     console.log(`----------------------------`)    // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
@@ -178,8 +184,8 @@ const sendMailAttachmentPOSError = (to, from, subject, text, html,file,fileName)
             filename: `${fileName}.csv`,
             path: `${file}`
         },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
+            filename: `${logoName}`,
+            path: `./helper/${logoName}`,
             cid:'logocm'
         }]
     };
@@ -205,4 +211,4 @@ exports.smtpAttachment = (to, from, subject, text, html,file,pdf,fileName) => se
 
 exports.smtpAttachmentDSR = (to, from, subject, text, html,file,fileName) => sendMailAttachmentDSR(to, from, subject, text, html, file,fileName);
 exports.smtpAttachmentUTR = (to, from, subject, text, html,file,fileName) => sendMailAttachmentUTR(to, from, subject, text, html, file,fileName);
-exports.smtpAttachmentPOSError = (to, from, subject, text, html,file,fileName) => sendMailAttachmentPOSError(to, from, subject, text, html, file,fileName);
+exports.smtpAttachmentPOSError = (to, from, subject, text, html,file,fileName,logoNmae) => sendMailAttachmentPOSError(to, from, subject, text, html, file,fileName,logoNmae);
