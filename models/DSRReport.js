@@ -1,6 +1,8 @@
 let sendMail= require("../helper/mailModel")
-let generatePdf = require("../helper/generateDSRPdf")
+let generatePdf = require("../helper/generateDSRPdf");
+const e = require("express");
 const pool = require("../databases/db").pool;
+const fs = require('fs')
 
 let findPaymentRule= async(req)=>{
     try{
@@ -8,9 +10,9 @@ let findPaymentRule= async(req)=>{
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
         qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
-        if(req.property_sfid)
-        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
-        if(req.customer_set_sfid)
+        else if(req.property_sfid)
+         qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+         else if(req.customer_set_sfid)
         qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
         console.log(qry)
         let emailData = await pool.query(`${qry}`)
@@ -31,26 +33,60 @@ let findPaymentRule= async(req)=>{
     }
 }
 
+let updateLog = async(insertedId, isEmailSent ,status, errorDescription , fileName )=>
+{
+    try{
+    await pool.query(`update  tlcsalesforce.reports_log set "isEmailSent"=${isEmailSent} , status= '${status}', "errorDescription"='${errorDescription}', "fileName"='${fileName}'  where id = ${insertedId}`)
+    }catch(e){
+        console.log(e)
+    }
+}
+let insertLog = async(propertyId,customerSetId, emails)=>
+{
+    try{
+        emails =emails.length ? emails.join(","):''
+        let isEmailSent= false
+        let data = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent","propertyId",status,"typeBifurcation","customerSetId",emails) values(${isEmailSent},'${propertyId}', 'New' , 'DSR' ,'${customerSetId}' , '${emails}') RETURNING  id`)
+        return data.rows ? data.rows[0].id : 0;
+    }catch(e){
+        console.log(e)
+    }
+}
+
+let unlinkFiles = (files)=>{
+    fs.unlink(`${files}`, (err, da) => {
+        if (err)
+            return(`${err}`);
+    })
+}
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
             let dataObj = await getEPRSfid();
             console.log(dataObj)
-
             let ind = 0;
-               
-             for(e of dataObj.emailArr){
+             for(let e of dataObj.emailArr){
+
+            let insertedId = await insertLog(dataObj.propertyArr[ind],'',e)
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
-            console.log("getting DSR report");
-            console.log(`----------------`)
+   
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
+                   
+                  if(emails.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(pdfFile)
-                  sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails)
+                      sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails) 
+                      updateLog(insertedId, true ,'Success', '' , pdfFile)
+                  }
+                  else{
+                      updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+                  }
                     console.log(`From Model`)
+                }else{
+                    updateLog(insertedId, false ,'Error', 'Record not found!', '' )
                 }
             ind++;
             
@@ -60,17 +96,24 @@ let DSRReport = async()=>{
           let dataObj1 = await getEPRSfidCS();
           console.log(dataObj1)
           let ind1 = 0;
-           for(e of dataObj1.emailArr){
+           for(let e of dataObj1.emailArr){
+            let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
           let emails1 = e;
           // req.property_sfid = 'a0Y1y000000EFBNEA4';
           console.log("getting DSR report");
-           let DSRRecords1=await getDSRReportCS(dataObj1.customer_set_sfid[ind1]);
+           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
         //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
               if(DSRRecords1.length){
-                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customer_set_sfid[ind1]);
-                  console.log(pdfFile1)
+                if(emails1.length){
+                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1]);                
                  sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
+                  updateLog(insertedId1, true ,'Success', '' , pdfFile1)
+                  }else{
+                    updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+                  }
                   console.log(`From Model`)
+              }else{
+                updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
               }
           ind1++;
         
@@ -85,7 +128,7 @@ let DSRReport = async()=>{
 let getEPRSfid = async()=>{
     try{
       let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
-      (hotel_email_status__c = true or tlc_email_status__c = true) and  (property__c is not NULL or property__c !='')`
+      (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
@@ -124,13 +167,14 @@ let getEPRSfidCS = async()=>{
 
 let getDSRReport=async(property_sfid)=>{
     try{
-        let query=await pool.query(`select account.name,membership__c.membership_number__c,
+        let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
         --Type_N_R__c,
         case
         when payment__c.payment_for__c='New Membership' then 'N'
         when payment__c.payment_for__c='Renewal' then 'R'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is null then 'N'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is not null then 'R'
+        when payment__c.payment_for__c='Add-on Renewal' then 'R'
         END as Type_N_R__c,
         membership__c.expiry_date__c,
         Membership__c.Membership_Enrollment_Date__c,
@@ -161,10 +205,6 @@ let getDSRReport=async(property_sfid)=>{
         (Property__c.sfid='${property_sfid}'
         --or membership__c.customer_set__c IN ('')
         )
-        and
-        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
-      
-        
          `)
         console.log(`hiiiSS`)
         let result = query ? query.rows : [];
@@ -179,13 +219,14 @@ let getDSRReport=async(property_sfid)=>{
 
 let getDSRReportCS=async(customer_set_sfid)=>{
     try{
-        let query=await pool.query(`select account.name,membership__c.membership_number__c,
+        let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
         --Type_N_R__c,
         case
         when payment__c.payment_for__c='New Membership' then 'N'
         when payment__c.payment_for__c='Renewal' then 'R'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is null then 'N'
         when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is not null then 'R'
+        when payment__c.payment_for__c='Add-on Renewal' then 'R'
         END as Type_N_R__c,
         membership__c.expiry_date__c,
         Membership__c.Membership_Enrollment_Date__c,
@@ -218,9 +259,6 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         --or 
         membership__c.customer_set__c IN ('${customer_set_sfid}')
         )
-        and
-        (payment__c.payment_status__c = 'CONSUMED' OR payment__c.payment_status__c = 'SUCCESS')
-        
          `)
         let result = query ? query.rows : [];
         return result;

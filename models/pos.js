@@ -136,8 +136,9 @@ let updatePOSTracking = (body, fileName) => {
 
 let getPosData = async (fileName) => {
     return new Promise(async (resolve, reject) => {
-        try {
-            // console.log('get Pos data api called');
+        try { 
+            // checking FTP file to upload;
+            await directUploadingFileFromFTP()
             let qry = ``;
             if (fileName)
                 qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet__c outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED' and file_name__c = '${fileName}'`;
@@ -145,6 +146,7 @@ let getPosData = async (fileName) => {
                 qry = `select file_name__c file_name,pos_source__c pos_source,id sync_id,outlet__c outlet from tlcsalesforce.pos_tracking__c where status__c='UPLOADED'`;
             const result = await pool.query(qry);
             await getFileFromFTP((result) ? result.rows : null, fileName);
+            //await get
             resolve(`SUCCESS`)
         } catch (e) {
             // console.log(`${e}`)
@@ -583,11 +585,18 @@ let generateCSV=async(data,email)=>{
     await csv.toDisk(`${path}`)    
     // const records = bodyArr;
     // console.log(headerArr)
-     console.log("email",email);
+     console.log("email value ",email);
 
 //    let result= await csvWriter.writeRecords(records) 
    let fileUrl=await uploadErrorFileToFTP (fileName)
-   await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email)
+   
+    if(email){
+        console.log("email will send");
+    await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email);
+    }
+    
+   
+   
    console.log("path",fileUrl);
    return  fileUrl;  
 } // returns a promise
@@ -633,6 +642,81 @@ let getRefferalData2 = (data) => {
 
 
 
+
+//Direct uploading file from FTP 
+let directUploadingFileFromFTP=async()=>{
+    ftpConnection = await ftp.connect();
+    // // console.log(await ftpConnection.list())
+    let data =await ftpConnection.list('/POS_direct_uploaded')
+    for(d of data ){
+       let dir1= d['name']
+       //check for dir
+       let data1 =await ftpConnection.list(`/POS_direct_uploaded/${dir1}`)
+       for(d1 of data1){
+        let outlet = d1['name']
+        let posSource = dir1;
+        console.log(dir1+'/'+d1['name'])
+        let data2 =await ftpConnection.list(`/POS_direct_uploaded/${posSource}/${outlet}`)
+        for(d2 of data2){
+            result=await pool.query(`
+                    select 
+                    p1.name outletName,p1.unique_identifier__c  outletUniqueIdentifier, 
+                    p2.name propertyName,p2.unique_identifier__c  propertyUniqueIdentifier,
+                    p4.name brandName,p4.unique_identifier__c  brandUniqueIdentifier,
+                    p5.name programName,p5.unique_identifier__c  programUniqueIdentifier
+                    from tlcsalesforce.outlet__c p1 left join tlcsalesforce.property__c p2 on p1.property__c=p2.sfid
+                    left join tlcsalesforce.subbrand__c p3 on p2.sub_brand__c=p3.sfid 
+                    left join tlcsalesforce.brand__c p4 on p3.brand__c=p4.sfid 
+                    left join tlcsalesforce.program__c p5 on p4.sfid=p5.brand__c where p1.unique_identifier__c='${outlet}'
+                     limit 1`)
+
+                    console.log("result rows",result.rows)
+                    let resultValue = (result) ? result.rows[0] : null
+                    
+                    let body={}
+                    body.brandName=resultValue.brandname;
+                    body.propertyName=resultValue.propertyname;
+                    body.programName=resultValue.programname;
+                    body.outletName=resultValue.outletname;
+                    body.userId='';
+                    body.posSource=posSource;
+                    body.brandUniqueIdentifier=resultValue.branduniqueidentifier;
+                    body.programUniqueIdentifier=resultValue.programuniqueidentifier;
+                    body.propertyUniqueIdentifier=resultValue.propertyuniqueidentifier
+                    body.outletUniqueIdentifier=resultValue.outletuniqueidentifier;
+                    body.userEmail='';
+                    body.isDirectUploaded=true
+
+                    fileName=await createFileName(body,d2['name']);
+                    console.log("body",body);
+                    console.log("fileName",fileName);
+            //create a record in pos_tracking table
+            //After inserting data to pos_tracking atble rename the file and move it to pos folder with current format of filename
+            console.log("fileName",dir1+'/'+d1['name']+'/'+d2['name'])
+            await ftpConnection.rename(`POS_direct_uploaded/${posSource}/${outlet}/${d2['name']}`, `POS/${fileName}`)
+            console.log("After file++++++++++++++");
+            await updatePOSTracking(body, fileName);
+            console.log("AFTER UPDATEING IN DIRECT POS TRACKING")
+
+        }
+    
+       }
+      
+    }
+    
+    ftpConnection.close();
+    return data
+    }
+
+
+// creating unique filename
+let createFileName= (body,file)=>{
+    let fileName =``;
+    console.log("file name body ",body)
+    fileName = `${body.brandUniqueIdentifier}-${body.programUniqueIdentifier}-${body.propertyUniqueIdentifier}-${body.outletUniqueIdentifier}-${require('dateformat')(new Date(), "yyyymmddhMMss")}-${file}`  
+    console.log("fileName",fileName)
+    return fileName;
+}
 
 
 

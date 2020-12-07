@@ -1,9 +1,1 @@
-
-
-setTimeout(()=>{
-    console.log(`from settimeout`)
-},100)
-
-setInterval(() => {
-    console.log(`from setinterval`)
-}, 100);
+let arr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO ' ]

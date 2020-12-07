@@ -1,5 +1,0 @@
-SR No.,Card_No,Bill_No,BillDate,BillTime,Actual_Pax,Pos_Code,Food,Disc_Food,Soft_Bev,Disc_Soft_Bev,Dom_Liq,Disc_Dom_Liq,Imp_Liq,Disc_Imp_Liq,Tobacco,Disc_Tobacco,Misc,Grossbilltotal,Disc_Misc,Tax,status,error_description
-1,10165305,414638,14-Oct-2019,20:34,5,0002,8250,2475,0,0,0,0,0,0,0,0,0,8250,0,1179,SYNC_ERROR,duplicate record
-2,10178607,414639,14-Oct-2019,21:19,2,0002,1975,720,0,0,0,0,0,0,0,0,0,1975,0,284,SYNC_ERROR,duplicate record
-3,10001441,414696,15-Oct-2019,20:15,3,0002,5250,2625,150,0,0,0,0,0,0,0,0,5400,0,499,SYNC_ERROR,duplicate record
-4,107051558,414652,15-Oct-2019,21:14,10,0002,8175,4087,0,0,0,0,0,0,0,0,0,8175,0,3736,SYNC_ERROR,duplicate record

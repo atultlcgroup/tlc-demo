@@ -1,8 +1,9 @@
 let UTRModel = require('../models/UTRReport')
 // const extensions = ['xls','xlsx','xlsm','xlt','xltx','xltm','xla','xlam','csv'];
 const extensions = ['csv'];
+let  dotenv = require('dotenv');
 
-
+dotenv.config();
 
 let UTRReport =async(req,res)=>{
     try{
@@ -10,6 +11,10 @@ let UTRReport =async(req,res)=>{
         res.status(401).send({code :401 , message:'Please provide userid'})
            return
        } 
+       if(req.headers.token != process.env.POS_VARIFICATION_KEY ){      
+        res.status(401).send({code: 401, message: 'Invalid Token'})
+        return
+        }
         let file =  req.body.fileContent;
         let fileName = req.body.fileName;
         if(!req.body.fileName|| !req.body.fileContent){
@@ -30,7 +35,7 @@ let UTRReport =async(req,res)=>{
          }
          let fineNameWithoutFileExt = (req.body.fileName).replace(`.${extension}`,``)
         let UTRData =await UTRModel.UTRReport(req.headers.userid,createFileName(fineNameWithoutFileExt,req.headers.userid,extension),file)
-        res.status(200).send({code :200 , message:'Success'})
+        res.status(200).send({code :200 , message:UTRData})
     }catch(e){
         console.log(e)
         console.log(`${e}`)
