@@ -271,17 +271,33 @@ let updateDataToUTRLog= async(values, header)=>{
         let TPSLTransactionIdIndex=header.indexOf('TPSL TransactiON id');
         let SMTransactionIdIndex=header.indexOf('SM TransactiON Id');
         let UTRNoIndex = header.indexOf('UTR_NO')
+        let slNoIndex = header.indexOf('SR No.')
         let Identifier= 0;
+        let slNoArr = [];
+        let totatRecord = values.length;
         let UTRLogArr = [];
         let fileName = '';
         for(d of values){
             console.log(`Update tlcsalesforce."UTR_Log" set  "UTR_NO"= '${d[UTRNoIndex]}' where "SM Transaction Id"  = '${d[SMTransactionIdIndex]}' and "TPSL Transaction Id" = '${d[TPSLTransactionIdIndex]}'  RETURNING "UTR Log Id"`)
             let updateUTR = await pool.query(`Update tlcsalesforce."UTR_Log" set  "UTR_NO"= '${d[UTRNoIndex]}' where "SM Transaction Id"  = '${d[SMTransactionIdIndex]}' and "TPSL Transaction Id" = '${d[TPSLTransactionIdIndex]}'  RETURNING "UTR Log Id"`)
             let data = updateUTR.rows.length ? updateUTR.rows[0]["UTR Log Id"] : 0;
-            if(data > 0)
-            UTRLogArr.push(data)
+            if(data > 0){
+                UTRLogArr.push(data)
+            }else{
+                slNoArr.push(d[slNoIndex])
+            }
         }
-        return UTRLogArr;
+        let updatedRecords = totatRecord - slNoArr.length;
+        let pendingRecords = slNoArr.length
+        let resultObject = {
+            totalUpdatedRecords : updatedRecords,
+            totalPendingRecords: pendingRecords,
+            totalRecords: totatRecord,
+            UTRLogArr: UTRLogArr,
+            slNoArr: slNoArr
+        } 
+        console.log(resultObject)
+        return resultObject;
     
     }catch(e){
 
@@ -307,19 +323,21 @@ let UTRReport = async(userid,fileName,file)=>{
                 unlinkFiles(`reports/UTReport/${fileName}`)
                 let UTRData = await updateDataToUTRLog(csvData.values,csvData.header)
                 console.log(`From Yes!!!!`)
-                if(!UTRData.length){
-                    reject('Please upload the crosspondent file first!')
+                console.log(UTRData)
+                if(!UTRData['UTRLogArr'].length){
+                    resolve(`Total records= ${UTRData['totalRecords']} \n Updated records= ${UTRData['totalUpdatedRecords']} \n Total pending records= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`)
                     unlinkFiles(`reports/UTReport/${fileName}`)
                     return
                   }
 
                 await moveFileToArchiveFolder(fileName)  
-                await UTRReport2(UTRData, fileName, userid)
+                let resultOfUTR =await UTRReport2(UTRData, fileName, userid)
+                resolve(resultOfUTR)
             }
             // console.log(lastInsertedId)
-            resolve({userid:userid,fileName:`result`})
+            resolve(`Success`)
         }catch(e){
-            await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+            // await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
             console.log(`${e}`)
             reject(`${e}`)
         }
@@ -356,12 +374,13 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
     console.log(`UTRData=${UTRData}`)
     return new Promise(async(resolve, reject)=>{
     try{
-       let fileData = await getFileName(UTRData[0])
+       let fileData = await getFileName(UTRData['UTRLogArr'][0])
        console.log(fileData)
        UTRTrackingId = fileData.id
        fileName = fileData.file_name__c
-       console.log(`file Name= ${fileName} and utr Tracking id = ${UTRTrackingId}`) 
-      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR_NO","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Log Id" in (${UTRData}) and "Status"= 'New'`)
+       console.log(`file Name= ${fileName} and utr Tracking id = ${UTRTrackingId}`)
+       console.log(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR_NO","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Log Id" in (${UTRData['UTRLogArr']}) and "Status"= 'New'`) 
+      let selData = await pool.query(`Select "SR No.","Bank Id","Bank Name","TPSL Transaction Id","SM Transaction Id","Bank Transaction Id","Total Amount","Charges","Service Tax","Net Amount","Transaction Date","Transaction Time","Payment Date","SRC ITC","Scheme","Schemeamount","UTR_NO","UTR Log Id" from tlcsalesforce."UTR_Log" where "UTR Log Id" in (${UTRData['UTRLogArr']}) and "Status"= 'New'`)
       let dataSchemeCodeWise = await arrangeDataSchemeCodeWise(selData.rows? selData.rows : [],fileName) 
       let errorArr = [];  
       for(let [key,value] of Object.entries(dataSchemeCodeWise)){
@@ -392,8 +411,14 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
             ``
         }
         await getErrorRecordandCreateCSV(UTRTrackingId,userid)
-        resolve("Success")
-        }catch(e){
+        let message = ``
+        if(UTRData['slNoArr'].length)
+        message=`Total records= ${UTRData['totalRecords']} \n Updated records= ${UTRData['totalUpdatedRecords']} \n Total pending records= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`
+        else
+        message=`Total records= ${UTRData['totalRecords']} \n Updated records= ${UTRData['totalUpdatedRecords']} \n Total pending records= ${UTRData['totalPendingRecords']}`
+        resolve(message)
+         
+    }catch(e){
             console.log(e)
        await updateUTRLogStatus('',UTRTrackingId, false,'Error',`${e}`)   
          reject(e)
