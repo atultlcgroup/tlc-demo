@@ -284,7 +284,7 @@ let updateDataToUTRLog= async(values, header)=>{
             if(data > 0){
                 UTRLogArr.push(data)
             }else{
-                slNoArr.push(d[slNoIndex])
+                slNoArr.push(d[TPSLTransactionIdIndex])
             }
         }
         let updatedRecords = totatRecord - slNoArr.length;
@@ -313,31 +313,31 @@ let UTRReport = async(userid,fileName,file)=>{
             throw `CSV Format Issue!`
             if(csvData.utr=='NO'){
                 let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
-                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
                 await createLogForUTRReport(fileName,'UPLOADED',false,'')
                 await insertDataToLogTable(csvData,lastInsertedId , fileName)
-                await moveFileToArchiveFolder(fileName)
+                // await moveFileToArchiveFolder(fileName)
                 unlinkFiles(`reports/UTReport/${fileName}`)
             }else{
-                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
                 unlinkFiles(`reports/UTReport/${fileName}`)
                 let UTRData = await updateDataToUTRLog(csvData.values,csvData.header)
                 console.log(`From Yes!!!!`)
                 console.log(UTRData)
                 if(!UTRData['UTRLogArr'].length){
-                    resolve(`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n  Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`)
+                    resolve(`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n  Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following Transaction ids \n ${UTRData['slNoArr']}`)
                     unlinkFiles(`reports/UTReport/${fileName}`)
                     return
                   }
 
-                await moveFileToArchiveFolder(fileName)  
+                // await moveFileToArchiveFolder(fileName)  
                 let resultOfUTR =await UTRReport2(UTRData, fileName, userid)
                 resolve(resultOfUTR)
             }
             // console.log(lastInsertedId)
             resolve(`Success`)
         }catch(e){
-            await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+            // await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
             console.log(`${e}`)
             reject(`${e}`)
         }
@@ -413,7 +413,7 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
         await getErrorRecordandCreateCSV(UTRTrackingId,userid)
         let message = ``
         if(UTRData['slNoArr'].length)
-        message=`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`
+        message=`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following Transaction ids \n ${UTRData['slNoArr']}`
         else
         message=`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n Total number of pending record= ${UTRData['totalPendingRecords']}`
         resolve(message)
