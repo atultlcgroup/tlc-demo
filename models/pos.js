@@ -440,7 +440,7 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
             if(validateDate){
                 if(validateTime){
                     console.log("time validation ");
-                    if (billTotal >= verifyBillTotal-2 && billTotal <= verifyBillTotal+2) {
+                    if (billTotal >= verifyBillTotal-10 && billTotal <= verifyBillTotal+10) {
                         console.log("uploading POS log data to POS cheque details");
                         let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
                         membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c,member_id)
