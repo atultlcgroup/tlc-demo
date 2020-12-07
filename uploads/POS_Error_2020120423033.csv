@@ -1,4 +1,0 @@
-SR No.,Card_No,Bill_No,BillDate,BillTime,Actual_Pax,Pos_Code,Food,Disc_Food,Soft_Bev,Disc_Soft_Bev,Dom_Liq,Disc_Dom_Liq,Imp_Liq,Disc_Imp_Liq,Tobacco,Disc_Tobacco,Misc,Grossbilltotal,Disc_Misc,Tax,status,error_description
-1,107051558,414652,15-Oct-2019,21:65,10,0002,8175,4087,0,0,0,0,0,0,0,0,0,8175,0,3736,SYNC_ERROR,error:time and should be in HH:MM and dd-mon-yyyy
-2,10001441,414696,51-Oct-2019,20:15,3,0002,5250,2625,150,0,0,0,0,0,0,0,0,5400,0,499,SYNC_ERROR,error:date should be in  dd-mon-yyyy
-3,290000001,414592,9-Oct-2019,20:32,4,0002,7400,3700,195,0,3850,1155,0,0,0,0,0,11045,0,701,SYNC_ERROR,"ToTAL value mismatch,please check total"

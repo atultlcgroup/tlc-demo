@@ -653,10 +653,10 @@ let uploadErrorFileToFTP = async (fileName) => {
             ftpConnection = await ftp.connect();
               await ftpConnection.uploadFrom(`uploads/${fileName}`, `${path}`)
             ftpConnection.close();
-            // fs.unlink(`uploads/${fileName}`, (err, da) => {
-            //     if (err)
-            //         reject(`${err}`);
-            // })
+            fs.unlink(`uploads/${fileName}`, (err, da) => {
+                if (err)
+                    reject(`${err}`);
+            })
             resolve(path)
         } catch (e) {
             // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)
