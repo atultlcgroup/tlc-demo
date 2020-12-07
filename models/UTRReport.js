@@ -325,7 +325,7 @@ let UTRReport = async(userid,fileName,file)=>{
                 console.log(`From Yes!!!!`)
                 console.log(UTRData)
                 if(!UTRData['UTRLogArr'].length){
-                    resolve(`Total records= ${UTRData['totalRecords']} \n Updated records= ${UTRData['totalUpdatedRecords']} \n  Pending records= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`)
+                    resolve(`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n  Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`)
                     unlinkFiles(`reports/UTReport/${fileName}`)
                     return
                   }
@@ -413,9 +413,9 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
         await getErrorRecordandCreateCSV(UTRTrackingId,userid)
         let message = ``
         if(UTRData['slNoArr'].length)
-        message=`Total records= ${UTRData['totalRecords']} \n Updated records= ${UTRData['totalUpdatedRecords']} \n Pending records= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`
+        message=`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following SL No \n ${UTRData['slNoArr']}`
         else
-        message=`Total records= ${UTRData['totalRecords']} \n Updated records= ${UTRData['totalUpdatedRecords']} \n Pending records= ${UTRData['totalPendingRecords']}`
+        message=`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n Total number of pending record= ${UTRData['totalPendingRecords']}`
         resolve(message)
          
     }catch(e){
