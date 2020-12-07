@@ -4,13 +4,10 @@ const paymentReport=require('../models/paymentReport');
 const DSRReport = require('../models/DSRReport')
 const FandBSummary = require('../models/FandBSummary')
 let posModel = require('../models/pos')
-<<<<<<< HEAD
-=======
 const DRReport = require('../models/DRReport')
 const FReport = require('../models/FReport')
 const RReport = require('../models/RReport')
 
->>>>>>> 4c21fe4c4812b8b31410673ab7a1e2a02ef1a65f
 
 
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
