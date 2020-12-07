@@ -313,13 +313,13 @@ let UTRReport = async(userid,fileName,file)=>{
             throw `CSV Format Issue!`
             if(csvData.utr=='NO'){
                 let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
-                // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
                 await createLogForUTRReport(fileName,'UPLOADED',false,'')
                 await insertDataToLogTable(csvData,lastInsertedId , fileName)
-                // await moveFileToArchiveFolder(fileName)
+                await moveFileToArchiveFolder(fileName)
                 unlinkFiles(`reports/UTReport/${fileName}`)
             }else{
-                // let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
                 unlinkFiles(`reports/UTReport/${fileName}`)
                 let UTRData = await updateDataToUTRLog(csvData.values,csvData.header)
                 console.log(`From Yes!!!!`)
@@ -330,14 +330,14 @@ let UTRReport = async(userid,fileName,file)=>{
                     return
                   }
 
-                // await moveFileToArchiveFolder(fileName)  
+                await moveFileToArchiveFolder(fileName)  
                 let resultOfUTR =await UTRReport2(UTRData, fileName, userid)
                 resolve(resultOfUTR)
             }
             // console.log(lastInsertedId)
             resolve(`Success`)
         }catch(e){
-            // await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+            await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
             console.log(`${e}`)
             reject(`${e}`)
         }
