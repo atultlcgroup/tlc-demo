@@ -337,7 +337,7 @@ let UTRReport = async(userid,fileName,file)=>{
             // console.log(lastInsertedId)
             resolve(`Success`)
         }catch(e){
-            // await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+            await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
             console.log(`${e}`)
             reject(`${e}`)
         }
