@@ -116,7 +116,9 @@ let style = wb.createStyle({
   //Sheet 2
 
 
-  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Gross Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','UTR Number']
+  // let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Gross Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','UTR Number']
+  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Gross Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','UTR Number']
+
   let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
 
   // ws2.cell(1, 1).string(`Hotel collects the money on Payment Gateway`).style(style);
@@ -136,7 +138,7 @@ let style = wb.createStyle({
    index= 1
   
   sheet2HeaderArr.map(d=>{
-    if(index == 16){
+    if(index == 15){
     ws2.cell(8, index++,8, 1 +  index++, true).string(d).style(style);
     index++
     ws2.cell(9, index-3).string('CGST').style(style);
@@ -184,7 +186,7 @@ let style = wb.createStyle({
    //paymentMode:"Online",membershipFee:"5000",membershipAmount_A:"900"},
  //membershipAmount_A:"900",totalAmount:"5900",GSTAmount:"2000",charges:"1000",netAmount:"9000",transactionDate:"12/1/2020"
 
-      ws2.cell(cell, index++).string(`${(resultArr[i].freshrenewal ? resultArr[i].freshrenewal : '')}`).style(style);
+      // ws2.cell(cell, index++).string(`${(resultArr[i].freshrenewal ? resultArr[i].freshrenewal : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i]['Bank Id'] ? resultArr[i]['Bank Id'] : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i]['Bank Name'] ? resultArr[i]['Bank Name'] : '')}`).style(style);
       ws2.cell(cell, index++).string(`${(resultArr[i]['TPSL Transaction Id'] ? resultArr[i]['TPSL Transaction Id'] : '')}`).style(style);
