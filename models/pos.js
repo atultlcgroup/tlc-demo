@@ -624,39 +624,41 @@ let generateCSV=async(data,email,posSource)=>{
      console.log("email value ",email);
 
 //    let result= await csvWriter.writeRecords(records) 
-   let fileUrl=await uploadErrorFileToFTP (fileName)
-   
-    if(email){
-        let logoName='';
-        if(posSource == 'POS'){
-            logoName=reportType[0].logoName;
-
-        }
-        else if(posSource == 'GM-POS'){
-            logoName=reportType[1].logoName;
-        }
-        console.log("email will send");
-    await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName);
-    }
+   let fileUrl=await uploadErrorFileToFTP (fileName,email,posSource)
     
-   
-   
    console.log("path",fileUrl);
    return  fileUrl;  
 } // returns a promise
 
 
-let uploadErrorFileToFTP = async (fileName) => {
+let uploadErrorFileToFTP = async (fileName,email,posSource) => {
     return new Promise(async(resolve,reject)=>{
         try {
             let path = `POS/error/${fileName}`
             ftpConnection = await ftp.connect();
               await ftpConnection.uploadFrom(`uploads/${fileName}`, `${path}`)
             ftpConnection.close();
-            fs.unlink(`uploads/${fileName}`, (err, da) => {
+            console.log("email value uploadErrorFileToFTP ",email);
+            if(email){
+                let logoName='';
+                if(posSource == 'POS'){
+                    logoName=reportType[0].logoName;
+        
+                }
+                else if(posSource == 'GM-POS'){
+                    logoName=reportType[1].logoName;
+                }
+                console.log("email will send");
+            await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName);
+            }
+            else{
+                fs.unlink(`uploads/${fileName}`, (err, da) => {
                 if (err)
                     reject(`${err}`);
             })
+
+            }
+            
             resolve(path)
         } catch (e) {
             // await createLogForUTRReport(fileName,'ERROR', false,`${e}`)

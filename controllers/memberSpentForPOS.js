@@ -2,16 +2,11 @@ let memberSpentForPOS = require('../models/memberSpentForPOS')
 
 let getPosMembersData = async(req,res)=>{
     try{
-        memberSpentForPOS.getMembershipDetails().
-        then(data=>{
+        memberSpentForPOS.getMembershipDetails()
+      
            
-            res.status(200).send({code :200 , message: data})
+            res.status(200).send({code :200 , message: 'Success'})
 
-        }).catch(e=>{
-            console.log(e);
-            res.status(500).send({code: 500, message: e})
-            
-        })
 
     }catch(e){
         console.log(`${e}`)
