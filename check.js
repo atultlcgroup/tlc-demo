@@ -1,1 +1,1 @@
-let arr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO ' ]
+1296791201,1296839264,1296883381,1296886239,1296891829,1296900809,1296902733,1296908742,1296929562,1296933587,1296948443,1297019275,1297422920,1297681249
