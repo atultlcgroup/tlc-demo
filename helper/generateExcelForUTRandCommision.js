@@ -117,7 +117,7 @@ let style = wb.createStyle({
 
 
   // let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Fresh / Renewal','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Gross Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','UTR Number']
-  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Gross Amount','Charges','Service Tax','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','UTR Number']
+  let sheet2HeaderArr=['S.N','First Name','Last Name','Membership Type','Email','State','Bank Id','Bank Name','TPSL Transaction Id','SM Transaction Id','Bank Transaction Id','Member GST Details','Payment Mode','Membership Amount','GST Amount','Gross Amount','Charges','GST on Charges','Net Amount','Transaction Date','Transaction Time','Payment Date','SRC ITC','Scheme','UTR Number']
 
   let sheet2FooterArr=['Total','','','','','','','','','','','','','','','','0','0','0','','','0']
 
