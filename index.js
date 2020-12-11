@@ -30,9 +30,9 @@ const whatsAppRouters=require("./routers/whatsAppOtp")
 const cors = require("cors");
 const app = express();
 app.use(cors());
-// app.use(body_parser.urlencoded({limit: "50mb", extended: false}))
-// app.use(body_parser.json({limit: '50mb'}));
-app.use(body_parser.json());
+app.use(body_parser.urlencoded({limit: "50mb", extended: false}))
+app.use(body_parser.json({limit: '50mb'}));
+// app.use(body_parser.json());
 app.use(helmet())
 app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
