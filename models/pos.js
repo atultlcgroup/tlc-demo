@@ -190,6 +190,20 @@ let getMemberId = async (memberShipNumber) => {
 
 }
 
+
+
+let findTendorMediaNumber = (str)=>{
+    console.log(`From findTendorMediaNumber`)
+    let err = ``
+    let TendorMediaArr =["'AME'","'CAS'","'MAS'","'ROM'","'SAF'","'TBD'","'VIS'"]
+    let str1 = str.substring(str.indexOf('pos_log(') + 8 , str.indexOf(') values'))
+    let str2 = str.substring(str.indexOf('values(') + 7 , str.lastIndexOf(')'))
+    let arr1 = str1.split(",")
+    let arr2 = str2.split(",")
+     return TendorMediaArr.indexOf(arr2[arr1.indexOf('"Tendor_No"')]) == -1 ? err=`Invalid Tendor Media Number!`:``
+    }
+
+
 let readExcel = async (fileName, posSource, posTrackingId, bodyFileName, outlet) => {
     try {
         let checkDuplicateExcel = 1;
@@ -247,6 +261,13 @@ let readExcel = async (fileName, posSource, posTrackingId, bodyFileName, outlet)
                        console.log(`${query} ${query2}`)
                         let checkDuplicate = await findDuplicate(`${query} ${query2}`)
                         console.log(`------check duplicate=${checkDuplicate}---------`)
+                        if(posSource == 'GM-POS'){
+                            let errTendor =findTendorMediaNumber(`${query} ${query2}`)
+                            if(errTendor){
+                                console.log(`update tlcsalesforce.pos_log set status='SYNC_ERROR',error_description='${errTendor}' where mapping_id = '${insertedlogId}'`)
+                               await pool.query(`update tlcsalesforce.pos_log set status='SYNC_ERROR',error_description='${errTendor}' where mapping_id = '${insertedlogId}'`)
+                            }
+                        }
                         if (checkDuplicate > 0) {
                             checkDuplicateExcel++;
                             let updatelog = await pool.query(`update tlcsalesforce.pos_log set status='SYNC_ERROR',error_description='duplicate record' where mapping_id = '${insertedlogId}'`)
@@ -426,7 +447,8 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
             let verifyBillTotal = parseInt(n.Food) + parseInt(n.Soft_Bev) + parseInt(n.Misc) + parseInt(n.Dom_Liq) + parseInt(n.Imp_Liq) + parseInt(n.Tobacco);
 
             let billTotal = parseInt(n.Grossbilltotal);
-            let grossbilltotal = billTotal - billDiscount + parseInt(n.Tax)
+            // let grossbilltotal = billTotal - billDiscount + parseInt(n.Tax)
+            let grossbilltotal = billTotal - billDiscount ;
             console.log('type');
             
             console.log('billDiscount', billDiscount);

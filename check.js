@@ -1,9 +1,8 @@
+const schedule = require('node-schedule');
+console.log(`=================  From worker dyno  ========================`)
 
-
-setTimeout(()=>{
-    console.log(`from settimeout`)
-},100)
-
-setInterval(() => {
-    console.log(`from setinterval`)
-}, 100);
+let scheduledTime = `* * * * *`
+ schedule.scheduleJob(scheduledTime, async()=>{
+    console.log(`=================  From worker dyno  ========================`)
+    console.log(`=================   From worer dyno   ========================`)
+  });

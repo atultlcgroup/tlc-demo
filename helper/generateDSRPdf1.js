@@ -30,6 +30,7 @@ let  generateDSRPDF=async(dsrValues,propertyId)=>{
  propertyName = `${dsrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 console.log("DSR values are");
+console.log(dsrValues);
  //  dsrValues = [
 // {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 // {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
@@ -61,55 +62,24 @@ console.log("DSR values are");
 // {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Hotel Transfer",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
 
 // ]
-let headerForPage = ` 
-
-
-</table>
-<table class="page-break tftable1" align="center" border="1" >
-<tr height="60px"></tr>
-<tr style="margin-top:10px; height="50"">
-<th width="2%">S.N.</th>
-<th width="15%" >Member Name</th>
-<th width="3%">Membership Number</th>
-<th width="3%">Type
-    <br/>(N/R)</th>
-<th width="3%">Enrollment/
-    <br/>Renewal
-    <br/>Date</th>
-    <th>Expiry</br> Date</th>
-<th width="3%">CC/CheqNo.
-    <br/>/Online Trn.No</th>
-<th width="3%">CC Approval Code</th>
-<th width="3%">Receipt No.</th>
-<th width="4%">Payment Mode</th>
-<th width="3%">Batch Number</th>
-<th width="5%">Amount</th>
-<th width="4%">Tax</th>
-<th width="3%">Total Amount</th>
-<th width="5%">GSTIN</th>
-<th width="4%">State Code</th>
-<th width="7%">Remarks</th>
-</tr>
-`
 let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
 let slNo =1;
 let dailySalesReportRows =``;
-let indexForPage=0 ;
 for(obj of dsrValues){
-dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
-                    <td >${getEmptyIfNull(obj.name)}</td>
-                    <td >${getEmptyIfNull(obj.membership_number__c)}</td>
+dailySalesReportRows += `<tr><td>${slNo++}</td>
+                    <td>${getEmptyIfNull(obj.name)}</td>
+                    <td>${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
-                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c: obj.membership_enrollment_date__c)) : '')}</td>
+                    <td>${(obj.membership_enrollment_date__c ? convertDateFormat(obj.membership_enrollment_date__c) : '')}</td>
                     <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
                     <td>${getEmptyIfNull((obj.payment_mode__c=='Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c?obj.credit_card__c : '')}`: `${obj.payment_mode__c}`))}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
-                    <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)}</td>
-                    <td>${(obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0}</td>
-                    <td>${(obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}</td>
+                    <td>${getEmptyIfNull(obj.amount__c)}</td>
+                    <td>${getEmptyIfNull(obj.total_amount__c-obj.amount__c)}</td>
+                    <td>${getEmptyIfNull(obj.total_amount__c)}</td>
                     <td>${getEmptyIfNull(obj.gstin__c)}</td>
                     <td>${getEmptyIfNull(obj.state_code__c)}</td>
                     <td>${getEmptyIfNull(obj.remarks__c)}</td>
@@ -156,26 +126,18 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                 // }
                     
 
-
-
-                indexForPage++;
-                if(indexForPage %10 == 0 && indexForPage != 0 && dsrValues[indexForPage]){
-                    dailySalesReportRows+=`${headerForPage}`
-                }
-
-
-            }
+}
 
 // let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale + summaryData[3].noOfSale + summaryData[4].noOfSale
 // let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount + summaryData[3].amount + summaryData[4].amount
 
-let summaryHtml = ``
+let summaryHtml = ` <tr>`
 
 for(let [key,value] of Object.entries(pyamnetObj)){
-    summaryHtml += ` <tr height="50" align="center">`
-    summaryHtml +=`<td >${key}</td>`
-    summaryHtml +=`<td >${value.noOfSale}</td>`
-    summaryHtml +=`<td >${(value.amount ? (Math.floor(value.amount * 100) / 100):0)}</td>`
+    summaryHtml += ` <tr>`
+    summaryHtml +=`<td>${key}</td>`
+    summaryHtml +=`<td style="text-align: right;">${value.noOfSale}</td>`
+    summaryHtml +=`<td style="text-align: right;">${value.amount}</td>`
     summaryHtml+=`</tr>`
 }
 
@@ -211,33 +173,27 @@ let htmlStr=`
       <meta charset="UTF-8" />
       <title>DSR Table</title>
       <style>
-      @media print {
-        table.page-break  {
-            display:block; page-break-before: always; 
-            margin-top: 100px;
-        }
-    }   
           @page {
               size: A4 landscape;
           }
 
           
           .tftable {
-              font-size: 7px;
+              font-size: 9px;
               color: #333333;
               width: 35%;
               border: 1px solid black;
               border-collapse: collapse;
           }
           .tftable th {
-              font-size: 7px;
+              font-size: 9px;
               background-color: #bfa57d;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
           }
           .tftable td {
-              font-size: 7px;
+              font-size: 9px;
               border: 1px solid black;
               padding: 6px;
           }
@@ -247,21 +203,21 @@ let htmlStr=`
 
 
           .tftable1 {
-            font-size: 7px;
+            font-size: 9px;
             color: #333333;
             width: 100%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable1 th {
-            font-size: 7px;
+            font-size: 9px;
             background-color: #bfa57d;
             border: 1px solid black;
             padding: 6px;
             text-align: center;
         }
         .tftable1 td {
-            font-size: 7px;
+            font-size: 9px;
             border: 1px solid black;
             padding: 6px;
         }
@@ -305,7 +261,7 @@ let htmlStr=`
 
      
           <table class="tftable1" align="center" border="1">
-              <tr height="50">
+              <tr>
                   <th width="2%">S.N.</th>
                   <th width="15%" >Member Name</th>
                   <th width="3%">Membership Number</th>
@@ -314,8 +270,7 @@ let htmlStr=`
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
-                      <th>Expiry</br> Date</th>
-
+                  <th style='  text-align: left;margin-left: 2px'>Expiry<span style="visibility:hidden">ment</span></br> Date</th>
                   <th width="3%">CC/ChequeNo.
                       <br/>/Online Trn.No</th>
                   <th width="3%">CC Approval Code</th>
@@ -323,8 +278,8 @@ let htmlStr=`
                   <th width="4%">Payment Mode</th>
                   <th width="3%">Batch Number</th>
                   <th width="5%">Amount</th>
-                  <th width="4%">Tax</th>
-                  <th width="3%">Total Amount</th>
+                  <th width="5%">Tax</th>
+                  <th width="5%">Total Amount</th>
                   <th width="5%">GSTIN</th>
                   <th width="4%">State Code</th>
                   <th width="7%">Remarks</th>
@@ -334,23 +289,23 @@ let htmlStr=`
               
                  ${dailySalesReportRows}
           
-              <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')} " height="50">
+              <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')}">
                   <td colspan="11">Total Month Sales : ${salesCount}</td>
-                  <td  align="center">${(salesAmount ? (Math.floor(salesAmount * 100) / 100): 0)}</td>
-                  <td  align="center">${(salesTax ? (Math.floor(salesTax * 100) / 100): 0)}</td>
-                  <td  align="center">${(salesTotalAmount ? (Math.floor(salesTotalAmount * 100) / 100): 0)}</td>
+                  <td>${salesAmount}</td>
+                  <td>${salesTax}</td>
+                  <td>${salesTotalAmount}</td>
                   <td> </td>
                   <td></td>
                   <td></td>
               </tr>
 
           </table>
-          
-          <div style="page-break-after: always;">&nbsp; </div>
-      <table class="tftable" border="1" style="margin-top:50px; float:left;">
+
+
+      <table class="tftable" border="1" style="margin-top:10px; float:left;">
           <caption style="font-size: 13px; margin-top:12px;">Summary</caption>
-          <tr width="200px">
-              <th  height="50">Type</th>
+          <tr>
+              <th width="200px">Type</th>
               <th>No. Of Sales</th>
               <th>Amount</th>
           </tr>
@@ -363,10 +318,10 @@ let htmlStr=`
           </tr-->
             ${summaryHtml}
 
-          <tr height="50"  align="center">
+          <tr>
               <td>Total</td>
-              <td >${summaryTotalSale}</td>
-              <td >${(summaryTotalAmount ? (Math.floor(summaryTotalAmount * 100) / 100):0)}</td>
+              <td style="text-align: right;">${summaryTotalSale}</td>
+              <td style="text-align: right;">${summaryTotalAmount}</td>
           </tr>
       </table>
 
@@ -393,6 +348,7 @@ let htmlStr=`
   </html>
 `
 let pdfName = `./reports/DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.pdf`
+
 const pdf = Promise.promisifyAll(require('html-pdf'));
     let data = await pdf.createAsync(`${htmlStr}`, { "height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName

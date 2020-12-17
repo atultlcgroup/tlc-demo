@@ -17,6 +17,7 @@ let formatDate1=(date)=>{
 
 
 let today = new Date();
+today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 let generateExcel = async(resultArr,hotelName,summaryName,propertyId)=>{
 //date format 
@@ -216,7 +217,7 @@ cell++;
 cell+=4;
 index = 1;
 ws2.cell(cell, index++).string('Refund / Cancellations').style(style);
-let fileName = `./paymentReport/Payment_Report_${propertyId}_${Date.now()}.xlsx`
+let fileName = `./reports/paymentReport/Payment_Report_${propertyId}_${Date.now()}.xlsx`
 const buffer = await wb.writeToBuffer();
  
 await wb.write(`${fileName}`);

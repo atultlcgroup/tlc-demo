@@ -10,6 +10,8 @@ const FReport = require('../models/FReport')
 const RReport = require('../models/RReport')
 
 
+
+
 // POS Scheduler
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
     console.log(`=================   SCHEDULER START POS   ========================`)
@@ -163,3 +165,6 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == true || process.env.IS_SCHE
   console.log(`RR Report`);
   scheduleTasksForRReport(process.env.SCHEDULER_TIME_FOR_RR_REPORT);
 }
+
+
+

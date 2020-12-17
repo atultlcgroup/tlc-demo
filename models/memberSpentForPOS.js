@@ -1,6 +1,3 @@
-
-
-
 const pool = require("../databases/db").pool;
 
 let getMembershipDetails = async()=>{
