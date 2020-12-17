@@ -1,1 +1,8 @@
-let arr = ['SR No.','Bank Id','Bank Name','TPSL TransactiON id','SM TransactiON Id','Bank TransactiON id','Total Amount','Net Amount','TransactiON Date','TransactiON Time','Payment Date','SRC ITC','Scheme_code','UTR_NO ' ]
+const schedule = require('node-schedule');
+console.log(`=================  From worker dyno  ========================`)
+
+let scheduledTime = `* * * * *`
+ schedule.scheduleJob(scheduledTime, async()=>{
+    console.log(`=================  From worker dyno  ========================`)
+    console.log(`=================   From worer dyno   ========================`)
+  });

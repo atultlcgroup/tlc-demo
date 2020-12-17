@@ -26,13 +26,13 @@ const body_parser = require("body-parser");
 const FandBSummary = require("./routers/FandBSummary")
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
-
+const memberSpentPOS = require("./routers/memberSpentForPOS")
 const cors = require("cors");
 const app = express();
 app.use(cors());
 app.use(body_parser.urlencoded({limit: "50mb", extended: false}))
 app.use(body_parser.json({limit: '50mb'}));
-
+// app.use(body_parser.json());
 app.use(helmet())
 app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
@@ -46,7 +46,7 @@ app.use("/api/UTR",UTRReport)
 app.use("/api/DRR",DRReport)
 app.use("/api/FR",FReport)
 app.use("/api/RR",RReport)
-
+app.use("/api/MemberSpend",memberSpentPOS)
 
 
 

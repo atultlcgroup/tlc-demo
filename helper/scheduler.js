@@ -7,6 +7,8 @@ let posModel = require('../models/pos')
 const DRReport = require('../models/DRReport')
 const FReport = require('../models/FReport')
 const RReport = require('../models/RReport')
+const getMembershipDetails=require('../models/memberSpentForPOS');
+
 
 
 
@@ -144,4 +146,18 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == true || process.env.IS_SCHE
 {
   console.log(`RR Report`);
   scheduleTasksForRReport(process.env.SCHEDULER_TIME_FOR_RR_REPORT);
+}
+
+//For POS membership Total spent
+let scheduleTasksForMemberSpentReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR Member Spent Report   ========================`)
+ let data= await getMembershipDetails.getMembershipDetails('')
+ console.log(data) 
+ console.log(`================= Member Spent Report: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == 'TRUE')
+{
+  console.log(`schedule Tasks For Member Spent Report `);
+  scheduleTasksForMemberSpentReport(process.env.SCHEDULER_TIME_FOR_POS_TOTAL_SPENT_REPORT);
 }

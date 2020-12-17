@@ -364,7 +364,7 @@ let sendUTRReport=(file,fileName,emails)=>{
 
 
 // POS error report 
-let sendPOSErrorReport=(file,fileName,emails)=>{
+let sendPOSErrorReport=(file,fileName,emails,logoName)=>{
     try{
         readHTMLFile(__dirname + `/posError.html`, function(err, html) {
             console.log('hi')
@@ -377,7 +377,7 @@ let sendPOSErrorReport=(file,fileName,emails)=>{
             replacements={};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPOSError : ${fromEmailForPOSError} to ${emails} subject ${subjectForPOSErrorReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentPOSError(emails, `Club Marriott <${fromEmailForPOSError}>` , subjectForPOSErrorReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentPOSError(emails, `Club Marriott <${fromEmailForPOSError}>` , subjectForPOSErrorReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`,logoName).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
@@ -398,6 +398,8 @@ let sendPOSErrorReport=(file,fileName,emails)=>{
 }   
 
 // End POS report error
+
+
 
             module.exports={
                 sendMail,
