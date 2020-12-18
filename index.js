@@ -14,7 +14,7 @@ const UTRReport = require("./routers/UTRReport")
 const DRReport = require("./routers/DRReport")
 const FReport = require("./routers/FReport")
 const RReport = require("./routers/RReport")
-
+const UPL= require("./routers/updateProfileLinkURL")
 const helmet = require('helmet')
 
 
@@ -37,6 +37,7 @@ app.use(helmet())
 app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
 app.use("/api/feedback",reservationRouters)
+app.use("/api/UPL",UPL)
 app.use("/api/paymentLink",paymentRouters)
 app.use("/api/referral",referralRouters);
 app.use("/api/FandBSummary",FandBSummary);
