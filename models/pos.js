@@ -464,10 +464,13 @@ let postLogDataToPosChequeDetails = async (data, propertObj) => {
                     console.log("time validation ");
                     if (billTotal >= verifyBillTotal-2 && billTotal <= verifyBillTotal+2) {
                         console.log("uploading POS log data to POS cheque details");
+                        console.log(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
+                            membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c,member_id)
+                            VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now(),'${n.member_id}') RETURNING id`)
                         let insertedValue = await pool.query(`INSERT INTO tlcsalesforce.pos_cheque_details__c(
                         membership__r_membership_number__c, bill_number__c, bill_time__c,bill_date__c,pos_code__c,pax__c,bill_tax__c,gross_bill_total__c,outlet__c,pos_log_id,covers__c,actual_bill_date__c,property__c,bill_total__c,bill_disc__C,created_time__c,member_id)
                         VALUES ('${n.Card_No}', '${n.Bill_No}', '${n.BillTime}', '${ConvertedBillDate}','${n.Pos_Code}', '${n.Actual_Pax}',  '${n.Tax}','${grossbilltotal}','${n.outlet_id}','${n.mapping_id}','${n.Actual_Pax}', '${ConvertedBillDate}','${propertObj[n.pos_tracking_id]}','${billTotal}','${billDiscount}',now(),'${n.member_id}') RETURNING id`);
-        
+                    
                         console.log('id', insertedValue.rows[0].id, 'mapping iD', n.mapping_id);
                        
                         let syncUpadte = await insertInPosChequeDetailsItemCategory(insertedValue.rows[0].id, n, billDiscount, grossbilltotal);
