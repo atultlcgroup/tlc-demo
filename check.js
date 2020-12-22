@@ -1,5 +1,4 @@
 const schedule = require('node-schedule');
-const schedule = require('node-schedule');
 
 console.log(`=================  From worker dyno  ========================`)
 
