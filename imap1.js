@@ -72,23 +72,31 @@ let IMAPMAINFUNCTION=()=>{
 
     mailListener.on("attachment",async function(attachment){
         console.log("Attachement")        
-        let file = fs.createWriteStream("./reports/UTReport/"+attachment.fileName);
+        let file = fs.createWriteStream("./reports/UTReport/"+createtFileName(attachment.fileName,'1234'));
         file.on('pipe',(file)=>{
             console.log('Test download ') 
             }); 
     attachment.stream.pipe(file)
-            console.log(`GENERATED FILENAME =${attachment.generatedFileName}`)
-            await UTRModel.UTRReport('1234',`${attachment.generatedFileName}`,``)
+            console.log(`GENERATED FILENAME =${createtFileName(attachment.fileName,'1234')}`)
+            await UTRModel.UTRReport('1234',`${createtFileName(attachment.fileName,'1234')}`,``)
     });
     
-    mailListener.on("server:disconnected", function(){
-    console.log("imapDisconnected");
-    // IMAPMAINFUNCTION();
-    console.log(`imapDisconnected`)
-    return  1;
-    });
+    // mailListener.on("server:disconnected", function(){
+    // console.log("imapDisconnected");
+    // // IMAPMAINFUNCTION();
+    // console.log(`imapDisconnected`)
+    // return  1;
+    // });
     // return 0;
     // stop listening
+}
+
+let createtFileName = (fileName,userid)=>{
+    let extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase()
+    let fineNameWithoutFileExt = (fileName).replace(`.${extension}`,``)
+    fileName = `${fineNameWithoutFileExt}_${userid}_${require('dateformat')(new Date(), "yyyymmddhMMss")}.${extension}`  
+    return fileName;
+
 }
 
 
