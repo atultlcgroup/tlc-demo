@@ -81,12 +81,12 @@ let IMAPMAINFUNCTION=()=>{
             await UTRModel.UTRReport('1234',`${createtFileName(attachment.fileName,'1234')}`,``)
     });
     
-    // mailListener.on("server:disconnected", function(){
-    // console.log("imapDisconnected");
-    // // IMAPMAINFUNCTION();
-    // console.log(`imapDisconnected`)
-    // return  1;
-    // });
+    mailListener.on("server:disconnected", function(){
+    console.log("imapDisconnected");
+    // IMAPMAINFUNCTION();
+    console.log(`imapDisconnected`)
+    return  1;
+    });
     // return 0;
     // stop listening
 }
@@ -99,8 +99,13 @@ let createtFileName = (fileName,userid)=>{
 
 }
 
+const schedule = require('node-schedule');
 
+let schedulerForImap =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+console.log(`IMAP FUNCTION CALLED`)
 IMAPMAINFUNCTION()
+});
+schedulerForImap('* * * * *')
 // module.exports = {IMAPMAINFUNCTION};
 // mailListener.on("error", function(err){
 //   console.log(err);
