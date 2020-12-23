@@ -3,6 +3,7 @@ const fs = require('fs')
 const simpleParser = require('mailparser').simpleParser;
 const schedule = require('node-schedule');
 let  dotenv = require('dotenv');
+let UTRModel = require('./models/UTRReport')
 
 dotenv.config();
 let config = process.env
@@ -13,6 +14,7 @@ var imap = new Imap({
     host: config.HOST,
     port: config.IMAP_PORT, // imap port
     tls: true,
+    tlsOptions: { rejectUnauthorized: false },
     authTimeout: 30000
 });
 console.log(`IMAP 1 FILE CALLED`)
@@ -117,6 +119,11 @@ let isRunning = false;
                                             var subjects =mail.subject;
                                             console.log(`====================================================================================================================`)
                                             console.log(`${mail.text}`)
+                                             for(file of attachmentsARR){
+                                                 let fileName = createtFileName(file.filename,'1234')
+                                                 fs.writeFileSync("./reports/UTReport/"+fileName,new Buffer(file.content))
+                                                  UTRModel.UTRReport('1234',`${fileName}`,``)
+                                             }
 
                                         // var data = {
                                         //     "from": fromString,
@@ -206,7 +213,15 @@ let isRunning = false;
     }
 })
 
-schedulerForImap('*/10 * * * * *');
+
+let createtFileName = (fileName,userid)=>{
+    let extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase()
+    let fineNameWithoutFileExt = (fileName).replace(`.${extension}`,``)
+    fileName = `${fineNameWithoutFileExt}_${userid}_${require('dateformat')(new Date(), "yyyymmddhMMss")}.${extension}`  
+    return fileName;
+
+}
+schedulerForImap('* * * * *');
 
 
 

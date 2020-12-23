@@ -308,6 +308,7 @@ let UTRReport = async(userid,fileName,file)=>{
     return new Promise(async(resolve, reject)=>{
         try{            
             // let data = await uploadExcel(file,fileName)
+            console.log(`filename -----------------------------------${fileName}`)
             let csvData = await readCsv(`reports/UTReport/${fileName}`,fileName)
             if(csvData == 'Format Issue')
             throw `CSV Format Issue!`
