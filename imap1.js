@@ -99,13 +99,13 @@ let createtFileName = (fileName,userid)=>{
 
 }
 
-const schedule = require('node-schedule');
+// const schedule = require('node-schedule');
 
-let schedulerForImap =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
-console.log(`IMAP FUNCTION CALLED`)
+// let schedulerForImap =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+// console.log(`IMAP FUNCTION CALLED`)
 IMAPMAINFUNCTION()
-});
-schedulerForImap('* * * * *')
+// });
+// schedulerForImap('* * * * *')
 // module.exports = {IMAPMAINFUNCTION};
 // mailListener.on("error", function(err){
 //   console.log(err);
