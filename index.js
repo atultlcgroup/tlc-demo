@@ -6,14 +6,15 @@ dotenv.config();
 const scheduler = require('./helper/scheduler');
 const port = process.env.PORT;
 const posRouters= require("./routers/posCheque");
-let imap = require('./imap')
-
+// let imap = require('./imap')
+const path = require("path")
 let paymentReport = require("./routers/paymentReport")
 const DSRReport = require("./routers/DSRReport")
 const UTRReport = require("./routers/UTRReport")
 const DRReport = require("./routers/DRReport")
 const FReport = require("./routers/FReport")
 const RReport = require("./routers/RReport")
+const Logo = require("./routers/Logo")
 const UPL= require("./routers/updateProfileLinkURL")
 const helmet = require('helmet')
 
@@ -32,10 +33,12 @@ const app = express();
 app.use(cors());
 app.use(body_parser.urlencoded({limit: "50mb", extended: false}))
 app.use(body_parser.json({limit: '50mb'}));
+app.use("/",express.static(path.join(__dirname,"/")))
 // app.use(body_parser.json());
 app.use(helmet())
 app.use("/api",posRouters)
 app.use("/api/pos",excelRouters)
+app.use("/api/logo",Logo)
 app.use("/api/feedback",reservationRouters)
 app.use("/api/UPL",UPL)
 app.use("/api/paymentLink",paymentRouters)

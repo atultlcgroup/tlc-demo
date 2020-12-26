@@ -118,12 +118,14 @@ let isRunning = false;
                                             var emailContent =  mail.text.split(myRegex)[0];
                                             var subjects =mail.subject;
                                             console.log(`====================================================================================================================`)
-                                            console.log(`${mail.text}`)
-                                             for(file of attachmentsARR){
-                                                 let fileName = createtFileName(file.filename,'1234')
-                                                 fs.writeFileSync("./reports/UTReport/"+fileName,new Buffer(file.content))
-                                                  UTRModel.UTRReport('1234',`${fileName}`,``)
-                                             }
+                                            console.log(`${ JSON.stringify(mail.from.value[0].address)}`)
+                                            if((mail.from.value[0].address == 'atul.srivastava@tlcgroup.com' || mail.from.value[0].address == 'atul.srivastava@tlcgroup.com') && (subjects.indexOf('Mis report for L358369_Tlc Relationship Management Pvt Ltd') > -1 || subjects.indexOf('UTR Report - L358369_TLC RELATIONSHIP MANAGEMENT PVT LTD') > -1) ){
+                                                for(file of attachmentsARR){
+                                                    let fileName = createtFileName(file.filename,'1234')
+                                                    fs.writeFileSync("./reports/UTReport/"+fileName,new Buffer(file.content))
+                                                     UTRModel.UTRReport('1234',`${fileName}`,``)
+                                                }
+                                            }
 
                                         // var data = {
                                         //     "from": fromString,
