@@ -4,11 +4,10 @@ const extensions = ['jpeg','jpg','png'];
 
 dotenv.config();
 let uploadLogo=(req,res)=>{
-    console.time("dbsave");
     console.log(req.headers.token)
     try{
         console.log(`uploadExcel api called in controller`)
-        if(!req.body.fileName|| !req.body.fileContent || !req.body.logoType){
+        if(!req.body.fileName|| !req.body.fileContent){
             res.status(401).send({code: 401, message: 'Invalid Inputs'})
             return
         }
@@ -18,13 +17,12 @@ let uploadLogo=(req,res)=>{
         }
         let file =  req.body.fileContent;
         let fileName = req.body.fileName;
-        let type = req.body.logoType;
         let extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length).toLowerCase()
         if(!extensions.includes(extension)){
             res.status(401).send({code: 401, message: `Please provide image among ${extensions.join(",")} format!`})
             return
         }
-        Logo.uploadLogo(file,fileName,type).then(data=>{
+        Logo.uploadLogo(file,fileName).then(data=>{
             res.status(200).send({code: 200, message: data})
         }).catch(e=>{
             console.log(e)

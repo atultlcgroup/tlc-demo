@@ -1,6 +1,6 @@
 const { writeFileSync } = require("fs");
 
-let uploadLogo = async (file, fileName,type) => {
+let uploadLogo = async (file, fileName) => {
     return new Promise(async (resolve, reject) => {
         // console.log(`from here 1`)
         try {
