@@ -1,5 +1,7 @@
 let sendMail= require("../helper/mailModel")
 let generatePdf = require("../helper/generateDSRPdf");
+let generateExcel = require("../helper/generateExcelForDSR");
+
 const e = require("express");
 const pool = require("../databases/db").pool;
 const fs = require('fs')
@@ -77,8 +79,9 @@ let DSRReport = async()=>{
                    
                   if(emails.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
+                    let pdfFile = await generatePdf.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(pdfFile)
-                      sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails) 
+                    //   sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails) 
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
