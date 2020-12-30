@@ -78,11 +78,11 @@ let DSRReport = async()=>{
                 if(DSRRecords.length){
                    
                   if(emails.length){
-                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
-                    let pdfFile = await generatePdf.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
+                    // let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
+                    let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(pdfFile)
                     //   sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails) 
-                      updateLog(insertedId, true ,'Success', '' , pdfFile)
+                    //   updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
                       updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
@@ -197,8 +197,9 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
-        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-        where
+        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c limit 20
+        `)
+        let e=(`where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
         or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
