@@ -16,6 +16,7 @@ let convertDateFormat= (date1)=>{
       return dateTime
 }
 let generateExcel = async(dsrValues,propertyId)=>{
+let     propertyName = `${dsrValues[0].property_name}`;
 
 let wb = new xl.Workbook();
 
@@ -171,7 +172,7 @@ let style = wb.createStyle({
   let row = 3;
   let column = 2
 
-  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - Club Marriott                                                                    JW Marriott Hotel New Delhi Aerocity`).style(myStyle);
+  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - Club Marriott                                                                    ${propertyName}`).style(myStyle);
   ws2.cell(row+=1, column,row, column + 17, true).string(`MON 14/12/2020 8:30 AM`).style(style);
 //table header
 console.log(`row = ${row}`)
@@ -599,7 +600,9 @@ ws2.cell(row, column,row, column+2, true).string(`Disclaimer`).style(myStyle1);
 row +=1;
 column = 2;
 ws2.cell(row, column,row+2, column+10, true).string(`While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."`).style(myStyleAlignCenterWithoutBoldAlignLeft);
-  let fileName = `./reports/DSRReport/DSR_Report.xlsx`
+// let pdfName = `./reports/DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.pdf`
+
+let fileName = `./reports/DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.xlsx`
 const buffer = await wb.writeToBuffer();
  
 await wb.write(`${fileName}`);
