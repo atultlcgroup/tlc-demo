@@ -111,7 +111,7 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,file
             path: `${file}`
         },{
             filename: `${fileName}.xlsx`,
-            path: `${file}`
+            path: `${excelFile}`
         }
         ,{
             filename: `logo-cm.png`,
@@ -122,11 +122,11 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,file
     return new Promise((resolve, reject) => {
          SMTPConfiguration(newMail).then((res) => {
              unlinkFiles(file)
-            //  unlinkFiles(pdf)
+             unlinkFiles(excelFile)
             resolve(res);
         }).catch((err) => {
             unlinkFiles(file)
-            // unlinkFiles(pdf)
+            unlinkFiles(excelFile)
             reject(err);
         });    
     })

@@ -80,7 +80,8 @@ let DSRReport = async()=>{
                   if(emails.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
                     let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
-                    console.log(pdfFile)
+                    console.log(excelFile)
+                    console.log(`------------------------------------------------------------`)
                       sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
