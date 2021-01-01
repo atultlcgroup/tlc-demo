@@ -79,17 +79,10 @@ let DSRReport = async()=>{
                    
                   if(emails.length){
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
-<<<<<<< HEAD
-                    console.log(pdfFile)
-                       console.log("not sending mail")
-                      //sendMail.sendDSRReport(`${pdfFile}`,'Daily Sales Report',emails) 
-                      console.log("not sending mail")
-=======
                     let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(excelFile)
                     console.log(`------------------------------------------------------------`)
                       sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
->>>>>>> 08aad30a78089dc3edcdd13fd447f01bc2b326a4
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
@@ -181,47 +174,6 @@ let getEPRSfidCS = async()=>{
 let getDSRReport=async(property_sfid)=>{
     try{
         let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
-<<<<<<< HEAD
-        membershiptype__c.customer_set_program_level__c,
-                --Type_N_R__c,
-                case
-                when payment__c.payment_for__c='New Membership' then 'N'
-                when payment__c.payment_for__c='Renewal' then 'R'
-                when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is null then 'N'
-                when payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is not null then 'R'
-                when payment__c.payment_for__c='Add-on Renewal' then 'R'
-                END as Type_N_R__c,
-                membership__c.expiry_date__c,
-                Membership__c.Membership_Enrollment_Date__c,
-                membership__c.membership_renewal_date__c,
-                --CC_CheqNo_Online_Trn_No__c,
-                case
-                when payment__c.payment_mode__c='Cheque'then payment__c.cheque_number__c
-                when payment__c.payment_mode__c='Credit Card' then payment__c.credit_number__c
-                when payment__c.payment_mode__c='Online' then payment__c.transaction_id__c
-                END as CC_CheqNo_Online_Trn_No__c,
-                authorization_number__c,
-                receipt_No__c,Payment_Mode__c,Batch_Number__c,Amount__c,
-                Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
-                account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c
-                from tlcsalesforce.payment__c
-                inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
-                inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
-                inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
-                inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
-                inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-                --where
-                --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
-                
-                --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-                --and
-                --Membership__c is not Null and Membership_Offer__c is null
-                --and
-                --(Property__c.sfid='${property_sfid}'
-                --or membership__c.customer_set__c IN ('')
-               -- )
-               limit 15        
-=======
         case
         when payment__c.payment_for__c='New Membership' OR (payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is null) then 'N'
         when payment__c.payment_for__c='Renewal' OR (payment__c.payment_for__c='Add-On' and membership__c.membership_renewal_date__c is not null) OR (payment__c.payment_for__c='Add-on Renewal') then 'R'
@@ -258,7 +210,6 @@ let getDSRReport=async(property_sfid)=>{
            (Property__c.sfid='${property_sfid}'
            --or membership__c.customer_set__c IN ('')
             )
->>>>>>> 08aad30a78089dc3edcdd13fd447f01bc2b326a4
          `)
         console.log(`hiiiSS`)
         let result = query ? query.rows : [];
