@@ -179,8 +179,8 @@ let getEPRSfidCS = async()=>{
 
 let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
     try{
-        let qry = ` Select payment__c.createddate, account.name,
-        membership__c.membership_number__c, membershiptype__c.name,
+        let qry = ` Select payment__c.createddate, account.name membername,
+        membership__c.membership_number__c, membershiptype__c.name membershiptypename,
         count(payment__c.sfid) from tlcsalesforce.payment__c
         Inner Join tlcsalesforce.account On 
         payment__c.account__c = account.sfid

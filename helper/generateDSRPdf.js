@@ -25,44 +25,18 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateDSRPDF=async(dsrValues,propertyId)=>{
+let  generateDSRPDF=async(dsrValues,propertyId,certificateIssuedArr)=>{
     let pyamnetObj={}
     let summaryTotalSale =0
     let summaryTotalAmount=0
  propertyName = `${dsrValues[0].property_name}`;
  let summaryData = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
-console.log("DSR values are");
- //  dsrValues = [
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Hotel Transfer",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Complimentary",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Credit Card(Master)",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
-// {name:"Mr. Neeraj Sharma",amount:12000,tax:2160,totalamt:14160, number:"104778475", type:"R", expiry:"31/10/2021", ren:"14 Oct 2020", cheqno:4427, cc:863577, recno:3784, paymode: "Hotel Transfer",batchno:"000040",GSTIN:'GST12345', statecode:"06", remarks:"10092371"},
+ let summaryDataNRC = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
 
-// ]
+ let summaryDataLevel = [{key:'Spouse Complimentary',amount:0, noOfSale:0 },{key:'Credit Card',amount:0, noOfSale:0 },{key:'Hotel Transfer',amount:0, noOfSale:0 },{key:'Cash',amount:0, noOfSale:0 },{key:'Online',amount:0, noOfSale:0 }]
+ 
+ console.log("DSR values are");
+ 
 let headerForPage = ` 
 
 
@@ -103,7 +77,7 @@ for(obj of dsrValues){
 dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td >${getEmptyIfNull(obj.name)}</td>
                     <td >${getEmptyIfNull(obj.membership_number__c)}</td>
-                    <td >${getEmptyIfNull(obj.customer_set_program_level__c)}</td>
+                    <td >${getEmptyIfNull(obj.customer_set_level)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
                     <td>${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c: obj.membership_enrollment_date__c)) : '')}</td>
                     <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
@@ -121,6 +95,8 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.remarks__c)}</td>
                     </tr>
                     `
+                      
+
                     if(obj.payment_mode__c != 'Complimentary')
                 {
                     salesCount++;
@@ -138,29 +114,44 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     }else{
                        pyamnetObj[obj.payment_mode__c]= {amount:obj.total_amount__c,noOfSale:1}
                     }
-                   console.log(pyamnetObj)
-                // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
-                // {
-                //     summaryData[0].amount +=  obj.total_amount__c;
-                //     summaryData[0].noOfSale += 1;
-                // }
-                // if((obj.payment_mode__c).indexOf('Credit Card') >= 0){
-                //     summaryData[1].amount +=  obj.total_amount__c;
-                //     summaryData[1].noOfSale += 1;
-                // }
-                // if((obj.payment_mode__c).indexOf('Hotel Transfer') >= 0){
-                //     summaryData[2].amount +=  obj.total_amount__c;
-                //     summaryData[2].noOfSale += 1;
-                // }
-                // if((obj.payment_mode__c).indexOf('Cash') >= 0){
-                //     summaryData[3].amount +=  obj.total_amount__c;
-                //     summaryData[3].noOfSale += 1;
-                // }
-                // if((obj.payment_mode__c).indexOf('Online') >= 0){
-                //     summaryData[4].amount +=  obj.total_amount__c;
-                //     summaryData[4].noOfSale += 1;
-                // }
-                    
+                   console.log("pyamnetObj",pyamnetObj)
+                   console.log("obj.type_n_r__c",obj.type_n_r__c)
+                   //NRC 
+                 if(obj.type_n_r__c == 'N')
+                {
+                    summaryDataNRC[0].amount +=  obj.total_amount__c;
+                    summaryDataNRC[0].noOfSale += 1;
+                }
+                 if(obj.type_n_r__c =='R'){
+                    summaryDataNRC[1].amount +=  obj.total_amount__c;
+                    summaryDataNRC[1].noOfSale += 1;
+                }
+                if(obj.type_n_r__c == 'C'){
+                    summaryDataNRC[2].amount +=  obj.total_amount__c;
+                    summaryDataNRC[2].noOfSale += 1;
+                 } 
+                 // NRC end 
+
+
+                  console.log("obj.customer_set_level",obj.customer_set_level)
+                 // For Sumaary by level count 
+                if(obj.customer_set_level == 'Level 1'){
+                    summaryDataLevel[0].amount +=  obj.total_amount__c;
+                    summaryDataLevel[0].noOfSale += 1;
+                }
+                if(obj.customer_set_level == 'Level 2'){
+                    summaryDataLevel[1].amount +=  obj.total_amount__c;
+                    summaryDataLevel[1].noOfSale += 1;
+                }
+                if(obj.customer_set_level == 'Level 3'){
+                    summaryDataLevel[2].amount +=  obj.total_amount__c;
+                    summaryDataLevel[2].noOfSale += 1;
+                }
+                if(obj.customer_set_level == 'Level 4'){
+                    summaryDataLevel[3].amount +=  obj.total_amount__c;
+                    summaryDataLevel[3].noOfSale += 1;
+                }
+                 //Summary by level end    
 
 
 
@@ -171,9 +162,14 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
 
 
             }
+//For NRC Summary
+ let summaryTotalSalesNRC = summaryDataNRC[0].noOfSale + summaryDataNRC[1].noOfSale - summaryDataNRC[2].noOfSale;
+ let summaryTotalAmountNRC = summaryDataNRC[0].amount + summaryDataNRC[1].amount + summaryDataNRC[2].amount ;
 
-// let summaryTotalSale = summaryData[0].noOfSale + summaryData[1].noOfSale + summaryData[2].noOfSale + summaryData[3].noOfSale + summaryData[4].noOfSale
-// let summaryTotalAmount = summaryData[0].amount + summaryData[1].amount + summaryData[2].amount + summaryData[3].amount + summaryData[4].amount
+ //For level summary 
+ let summaryTotalSalesByLevl = summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].amount;
+ let summaryTotalAmountByLevl = summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount ;
+
 
 let summaryHtml = ``
 let serialNumber=1;
@@ -402,7 +398,7 @@ let htmlStr=`
                  ${dailySalesReportRows}
           
               <tr style="{! IF(pageno == lstPages.size,'display:bock;','display: none;')} " height="50">
-                  <td colspan="12">Total Month Sales : ${salesCount}</td>
+                  <td colspan="13">Total Month Sales : ${salesCount}</td>
                   <td  align="center">${(salesAmount ? (Math.floor(salesAmount * 100) / 100): 0)}</td>
                   <td  align="center">${(salesTax ? (Math.floor(salesTax * 100) / 100): 0)}</td>
                   <td  align="center">${(salesTotalAmount ? (Math.floor(salesTotalAmount * 100) / 100): 0)}</td>
@@ -424,12 +420,6 @@ let htmlStr=`
               <th>Amount</th>
           </tr>
 
-              <!--tr>
-              <td>{!summary['mode']}</td>
-              <td>{!summary['modefor']}</td>
-              <td style="text-align: right;">{!summary['recordCount']}</td>
-              <td style="text-align: right;">{!summary['amount']}</td>
-          </tr-->
             ${summaryHtml}
 
           <tr height="50"  align="center">
@@ -454,38 +444,32 @@ let htmlStr=`
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-    
-          <!--tr>
-          <td>{!summary['mode']}</td>
-          <td>{!summary['modefor']}</td>
-          <td style="text-align: right;">{!summary['recordCount']}</td>
-          <td style="text-align: right;">{!summary['amount']}</td>
-      </tr-->
+
       <tr>
           <td>1</td>
           <td>New(N)</td>
-          <td>4</td>
-          <td>10000</td>
+          <td>${summaryDataNRC[0].noOfSale}</td>
+          <td>${summaryDataNRC[0].amount}</td>
       </tr>
       <tr>
           <td>2</td>
           <td>Renewal(R)(N)</td>
-          <td>5</td>
-          <td>9000</td>
+          <td>${summaryDataNRC[1].noOfSale}</td>
+          <td>${summaryDataNRC[1].amount}</td>
          
       </tr>
       <tr>
           <td>3</td>
           <td>Cancellation (C)</td>
-          <td>6</td>
-          <td>12000</td>
+          <td>${summaryDataNRC[2].noOfSale}</td>
+          <td>${summaryDataNRC[2].amount}</td>
       </tr>
-       <!-- ${summaryHtml} -->
-    
+      
+       
       <tr height="50"  align="center">
           <td colspan="2">Total (N+R-C)</td>
-          <td >${summaryTotalSale}</td>
-          <td >${(summaryTotalAmount ? (Math.floor(summaryTotalAmount * 100) / 100):0)}</td>
+          <td >${summaryTotalSalesNRC}</td>
+          <td >${(summaryTotalAmountNRC ? (Math.floor(summaryTotalAmountNRC * 100) / 100):0)}</td>
       </tr>
     </table>
     
@@ -500,41 +484,35 @@ let htmlStr=`
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-
-          <!--tr>
-          <td>{!summary['mode']}</td>
-          <td>{!summary['modefor']}</td>
-          <td style="text-align: right;">{!summary['recordCount']}</td>
-          <td style="text-align: right;">{!summary['amount']}</td>
-      </tr-->
+      
       <tr>
          <td>1</td>   
           <td>Level 1</td>
-          <td>5</td>
-          <td>5000</td>
+          <td>${summaryDataLevel[0].noOfSale}</td>
+          <td>${summaryDataLevel[0].amount}</td>
       </tr>
       <tr>
           <td>2</td>
           <td>Level 2</td>
-          <td>7</td>
-          <td>15000</td>
+          <td>${summaryDataLevel[1].noOfSale}</td>
+          <td>${summaryDataLevel[1].amount}</td>
       </tr>
       <tr>
           <td>3</td>
           <td>Level 3</td>
-          <td>3</td>
-          <td>3000</td>
+          <td>${summaryDataLevel[2].noOfSale}</td>
+          <td>${summaryDataLevel[2].amount}</td>
       </tr>
       <tr>
           <td>4</td>
           <td>Level 4</td>
-          <td>2</td>
-          <td>4000</td>
+          <td>${summaryDataLevel[3].noOfSale}</td>
+          <td>${summaryDataLevel[3].amount}</td>
       </tr>
       <tr>
       <td colspan="2">Sub Total of Paid sales</td>
-      <td>3</td>
-      <td>5000</td>
+      <td>${summaryTotalSalesByLevl}</td>
+      <td>${summaryTotalAmountByLevl}</td>
       </tr>
       <tr>
       <td>5</td>

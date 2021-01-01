@@ -16,7 +16,7 @@ let convertDateFormat= (date1)=>{
       }
       return dateTime
 }
-let generateExcel = async(dsrValues,propertyId)=>{
+let generateExcel = async(dsrValues,propertyId, certificateIssuedArr)=>{
 let     propertyName = `${dsrValues[0].property_name}`;
 
 let wb = new xl.Workbook();
@@ -507,38 +507,40 @@ ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Certificate Number Issued`).style(myStyleAlignCenter)
 slNo =1;
+for(d of certificateIssuedArr){
 row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).string(d.createddate ? d.createddate : '').style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).string(d.membername ? d.membername : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).string(d.certificatenumber ? d.certificatenumber : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
+}
+// row+=1;
+// column = 2
+// ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// row+=1;
+// column = 2
+// ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// row+=1;
+// column = 2
+// ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++).string(`20-Dec-20`).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+// ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
  
 //Annexure – 2 		Credit Card Batch Closure  table
