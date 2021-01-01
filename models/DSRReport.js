@@ -82,7 +82,7 @@ let DSRReport = async()=>{
                     let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
                     console.log(excelFile)
                     console.log(`------------------------------------------------------------`)
-                      sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
+                      //sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
@@ -193,23 +193,24 @@ let getDSRReport=async(property_sfid)=>{
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
         account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c,
         membershiptype__c.sfid as customer_set_sfid,
-        membershiptype__c.name customer_set_name
+        membershiptype__c.customer_set_program_level__c customer_set_level
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-        where
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+      --  where
+        --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-           or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-           and
-           Membership__c is not Null and Membership_Offer__c is null
-           and
-           (Property__c.sfid='${property_sfid}'
+          -- or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+           --and
+           --Membership__c is not Null and Membership_Offer__c is null
+           --and
+           --(Property__c.sfid='${property_sfid}'
            --or membership__c.customer_set__c IN ('')
-            )
+            --)
+            limit 20
          `)
         console.log(`hiiiSS`)
         let result = query ? query.rows : [];
@@ -244,25 +245,25 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
         account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c,
         membershiptype__c.sfid as customer_set_sfid,
-        membershiptype__c.name customer_set_name
+        membershiptype__c.customer_set_program_level__c customer_set_level
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-        where
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+       -- where
+        --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-           or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-           and
-           Membership__c is not Null and Membership_Offer__c is null
-           and
-           (
+          -- or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+           --and
+           --Membership__c is not Null and Membership_Offer__c is null
+           --and
+          -- (
            --    Property__c.sfid='${property_sfid}'
            --or 
-           membership__c.customer_set__c IN ('${customer_set_sfid}')
-            )
+           --membership__c.customer_set__c IN ('${customer_set_sfid}')
+            --)
          `)
         let result = query ? query.rows : [];
         return result;
