@@ -86,6 +86,7 @@ let headerForPage = `
 <th width="3%">Receipt No.</th>
 <th width="4%">Payment Mode</th>
 <th width="3%">Batch Number</th>
+<th width="4%">Cheque Details</th>
 <th width="5%">Amount</th>
 <th width="4%">Tax</th>
 <th width="3%">Total Amount</th>
@@ -111,6 +112,7 @@ dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
                     <td>${getEmptyIfNull((obj.payment_mode__c=='Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c?obj.credit_card__c : '')}`: `${obj.payment_mode__c}`))}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
+                    <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
                     <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)}</td>
                     <td>${(obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0}</td>
                     <td>${(obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}</td>
@@ -335,21 +337,28 @@ let htmlStr=`
   <body style="font-family:sans-serif;" >
   
   <div>
- 
-      <table style="width: 100%;">
-          <tr>
-              <td align="left" style="font-size: 25px;color: #808000; border-bottom: 2px solid black; width: 30%"><img src="file:///D:/referralDemo/tlc-demo/helper/logo-tlc.png" alt=""  height=80 width=200 ></img></td>
-              <td aligh="center" style="font-size: 25px;color: #808000; border-bottom: 2px solid black; width: 25%">Daily Sales repprt</td>
-              <td aligh="right"style="font-size: 25px;color: #438282; border-bottom: 2px solid black; width: 30%">${propertyName}</td>
-          </tr>
-          <tr>
-              <td style="width: 10%; font-size: 11px; padding-bottom: 10px;">
-                  <apex:outputText value="{0, date,EEE dd/MM/yyyy HH:mm a}">
-                      <apex:param value="{!Now()}" />
-                  </apex:outputText>
-              </td>
-          </tr>
-      </table>
+  <table style="width: 100%;">
+        <tbody>
+            <tr>
+                <td align="left" style="font-size: 25px;color: #808000;  width: 30%"><img src="file:///D:/referralDemo/tlc-demo/helper/logo-tlc.png" alt=""  height=70 width=160></img></td>
+                <td align="center" style="font-size: 25px;color: #808000;  width: 30%">Daily Sales report</td>
+                <td align="right"style="font-size: 23px;color: #438282; width: 30%"></td>
+            </tr>
+        </tbody>
+    </table>
+    <table style="width: 100%;">
+        
+        <tr style="width: 100%">
+            <td > 
+                <span style="font-size:30px;">DSR</span>
+                <br><hr color="black" style="margin: 0; width:100%"/>
+                <span style="font-size: 10px;"> ${today}</span>
+            </td>
+            <td  align="right" style="font-size: 23px;color: #438282; width:30%"> ${propertyName}</td>
+
+        </tr>
+    </table>
+  
       <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 4px; margin-bottom: 10px; color:white;">
           <tr>
               
@@ -379,6 +388,7 @@ let htmlStr=`
                   <th width="3%">Receipt No.</th>
                   <th width="4%">Payment Mode</th>
                   <th width="3%">Batch Number</th>
+                  <th width="4%">Cheque Details</th>
                   <th width="5%">Amount</th>
                   <th width="4%">Tax</th>
                   <th width="3%">Total Amount</th>
