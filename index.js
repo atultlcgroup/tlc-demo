@@ -48,7 +48,7 @@ app.use("/api/payment",paymentReport);
 app.use("/api/payment",paymentReport)
 app.use("/api/DSR",DSRReport);
 app.use("/api/MemberSpend",memberSpentPOS)
-app.use("/api/DSR",DSRReport)
+
 app.use("/api/UTR",UTRReport)
 app.use("/api/DRR",DRReport)
 app.use("/api/FR",FReport)
