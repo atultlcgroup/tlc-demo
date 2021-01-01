@@ -4,7 +4,7 @@ let generateExcel = require("../helper/generateExcelForDSR");
 
 const e = require("express");
 const pool = require("../databases/db").pool;
-const fs = require('fs')
+const fs = require('fs');
 
 let findPaymentRule= async(req)=>{
     try{
@@ -74,15 +74,19 @@ let DSRReport = async()=>{
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
    
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
+            let DSRCertificateIssued =await getCertificateIssuedByPropertyId(dataObj.propertyArr[ind] , ``)
+            console.log(`DSRCertificateIssued`)
+             console.log(DSRCertificateIssued)
+             return
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                    
                   if(emails.length){
-                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind]);
-                    let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind]);
+                    // let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued1);
+                    let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
                     console.log(excelFile)
                     console.log(`------------------------------------------------------------`)
-                      sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
+                    //   sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
@@ -97,31 +101,35 @@ let DSRReport = async()=>{
           }
 
           //For customerset 
-          let dataObj1 = await getEPRSfidCS();
-          console.log(dataObj1)
-          let ind1 = 0;
-           for(let e of dataObj1.emailArr){
-            let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
-          let emails1 = e;
-          // req.property_sfid = 'a0Y1y000000EFBNEA4';
-          console.log("getting DSR report");
-           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
-        //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
-              if(DSRRecords1.length){
-                if(emails1.length){
-                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1]);                
-                 sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
-                  updateLog(insertedId1, true ,'Success', '' , pdfFile1)
-                  }else{
-                    updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
-                  }
-                  console.log(`From Model`)
-              }else{
-                updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
-              }
-          ind1++;
+        //   let dataObj1 = await getEPRSfidCS();
+        //   console.log(dataObj1)
+        //   let ind1 = 0;
+        //    for(let e of dataObj1.emailArr){
+        //     let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
+        //   let emails1 = e;
+        //   // req.property_sfid = 'a0Y1y000000EFBNEA4';
+        //   console.log("getting DSR report");
+        //    let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
+        //    let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1])
+
+        // //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
+        //       if(DSRRecords1.length){
+        //         if(emails1.length){
+        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1); 
+        //           let excelFile = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1);
+               
+        //          sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
+        //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
+        //           }else{
+        //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+        //           }
+        //           console.log(`From Model`)
+        //       }else{
+        //         updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
+        //       }
+        //   ind1++;
         
-        }
+        // }
 
         }catch(e){
             console.log(`${e}`)
@@ -169,6 +177,42 @@ let getEPRSfidCS = async()=>{
     }
 }
 
+let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
+    try{
+        let qry = ` Select payment__c.createddate, account.name,
+        membership__c.membership_number__c, membershiptype__c.name,
+        count(payment__c.sfid) from tlcsalesforce.payment__c
+        Inner Join tlcsalesforce.account On 
+        payment__c.account__c = account.sfid
+        Inner Join tlcsalesforce.membership_offers__c
+        On payment__c.membership_offer__c = membership_offers__c.sfid
+        Inner Join tlcsalesforce.membership__c
+        On membership_offers__c.membership2__c = membership__c.sfid
+        Inner Join tlcsalesforce.membershiptype__c
+        On membership__c.customer_set__c = membershiptype__c.sfid
+        Left Join tlcsalesforce.property__c
+        On membershiptype__c.property__c = property__c.sfid
+        where  (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+    
+       or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+       and
+       Membership__c is not Null and Membership_Offer__c is null
+       and`
+       ;
+       if(property_sfid)
+       qry+=` (Property__c.sfid='${property_sfid}') `
+       else
+       qry+=` membership__c.customer_set__c IN ('customer_set_sfid') `
+       qry+=`group by payment__c.createddate, account.name,
+        membership__c.membership_number__c, membershiptype__c.name`
+        let result  = await pool.query(qry)
+        return result ? result.rows : []
+     }catch(e){
+        return []
+    }
+}
+
+
 let getDSRReport=async(property_sfid)=>{
     try{
         let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
@@ -191,13 +235,15 @@ let getDSRReport=async(property_sfid)=>{
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
         account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c,
         membershiptype__c.sfid as customer_set_sfid,
-        membershiptype__c.name customer_set_name
+        membershiptype__c.customer_set_program_level__c customer_set_name
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
-        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
+        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c limit 10
+        `)
+        let qry =(`
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
