@@ -25,7 +25,7 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateDSRPDF=async(dsrValues,propertyId)=>{
+let  generateDSRPDF=async(dsrValues,propertyId,certificateIssuedArr)=>{
     let pyamnetObj={}
     let summaryTotalSale =0
     let summaryTotalAmount=0
