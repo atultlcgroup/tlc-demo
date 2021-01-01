@@ -195,7 +195,7 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
 }
 
 
-let sendDSRReport=(file,fileName,emails)=>{
+let sendDSRReport=(file,excelFile,fileName,emails)=>{
     try{
         readHTMLFile(__dirname + `/DSR_Report.html`, function(err, html) {
             console.log('hi')
@@ -208,7 +208,7 @@ let sendDSRReport=(file,fileName,emails)=>{
             replacements={};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')

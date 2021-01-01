@@ -571,7 +571,11 @@ let htmlStr=`
 
 
   <table class="tftable border-none" style="margin-top:50px; width: 45%">
+<<<<<<< HEAD
   <caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Annexure – 1 		Certificate Numbers Issued for Audit purpose</b></caption>
+=======
+  <caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
+>>>>>>> 08aad30a78089dc3edcdd13fd447f01bc2b326a4
   <tr width="200px">
       <th>S. No.</th>
       <th>Date</th>
@@ -609,7 +613,11 @@ let htmlStr=`
 
 
 <table class="tftable border-none" style="margin-top:50px; ">
+<<<<<<< HEAD
 <caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Annexure – 2 		Credit card batch closure</b></caption>
+=======
+<caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
+>>>>>>> 08aad30a78089dc3edcdd13fd447f01bc2b326a4
 <tr width="200px">
     <th>S. No.</th>
     <th  height="50">Type</th>
@@ -635,6 +643,7 @@ let htmlStr=`
 <div style="page-break-after: always;">&nbsp;</div>
 
 
+<<<<<<< HEAD
 <h4 style="background-color: #c3c1cf; width: 15%">Annexure – 3 	Explanation</h4>
 <div style="font-size:3.5vw; " >
 This is an auto generated Daily Sales Report of < Program Name>.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
@@ -657,6 +666,30 @@ This is an auto generated Daily Sales Report of < Program Name>.   Please do not
 16.	State Code – Two-digit code that appears before the PAN number in a GSTIN provided <br>
 17.	Remarks – Comments entered by the person enrolling a membership in the TLC CRM  <br>
 18.	Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate. <br> <br>
+=======
+<h4 style="background-color: #c3c1cf; width: 15%">Annexure – 3  Explanation</h4>
+<div style="font-size:3.5vw; " >
+This is an auto generated Daily Sales Report of < Program Name>.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
+
+1.  Member Name – The full name of the Member <br>
+2.  Membership Number – A Nine-digit unique number for every membership <br>
+3.  Type – New or Renewal Membership. N for New and R for Renewal  <br>
+4.  Enrolment Date – The date when the membership was enrolled or renewed <br>
+5.  Expiry Date – The date when the membership expires <br>
+6.  Payment Mode – The mode of payment through which a member pays the membership amount <br>
+7.  Online Transaction No. – A unique transaction number to identify a membership (Not the UTR number) <br>
+8.  CC Approval Code – An approval code that appears on the charge slip that gets printed from a credit/debit card charging machine <br>
+9.  CC Batch Number – Batch Number that appears on the charge slips that gets printed from a credit/debit card charging machine <br>
+10. Cash Receipt Number – The number that appears on a Cash receipt issued by the hotel/program <br>
+11. Cheque Details – Cheque number, Bank Name and Deposit Date  <br>
+12. Amount – Net Amount without Tax  <br>
+13. Tax – Goods and Services Tax  <br>
+14. Total Amount – The amount that the member has paid <br>
+15. GSTIN – The GST number that the member has provided  <br>
+16. State Code – Two-digit code that appears before the PAN number in a GSTIN provided <br>
+17. Remarks – Comments entered by the person enrolling a membership in the TLC CRM  <br>
+18. Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate. <br> <br>
+>>>>>>> 08aad30a78089dc3edcdd13fd447f01bc2b326a4
 
 Disclaimer <br><br>
 

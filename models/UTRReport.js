@@ -41,11 +41,11 @@ let findPaymentRule= async(req,fileName)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
         else if(req.property_sfid)
-        qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
         else if(req.customer_set_sfid)
-        qry = `select hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -307,7 +307,8 @@ let updateDataToUTRLog= async(values, header)=>{
 let UTRReport = async(userid,fileName,file)=>{
     return new Promise(async(resolve, reject)=>{
         try{            
-            let data = await uploadExcel(file,fileName)
+            // let data = await uploadExcel(file,fileName)
+            console.log(`filename -----------------------------------${fileName}`)
             let csvData = await readCsv(`reports/UTReport/${fileName}`,fileName)
             if(csvData == 'Format Issue')
             throw `CSV Format Issue!`
@@ -388,6 +389,7 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
             console.log(`---------propertyId =${value[0].property_id}----------`)
             let obj = {property_sfid: value[0].property_id}
             let emails = await findPaymentRule(obj,fileName)
+            console.log(emails)
             if(emails.length){
                 try{
                     let excelFile = await generateExcel.generateExcel(value,'PG Settlement Report');
