@@ -25,12 +25,6 @@ let style = wb.createStyle({
     font: {
       color: '#000000',
       size: 12,
-    },
-    fill: {
-      type: 'pattern',
-      patternType: 'solid',
-      bgColor: '#FFFF00',
-      fgColor: '#FFFF00',
     }
 
     // numberFormat: '$#,##0.00; ($#,##0.00); -',
@@ -39,13 +33,27 @@ let style = wb.createStyle({
   let myStyle = wb.createStyle({
     font: {
       bold: true,
-      size: 16,
+      size: 14,
     },
     alignment: {
       wrapText: true,
       horizontal: 'center',
     },
+    fill: {
+      type: 'pattern',
+      patternType: 'solid',
+      bgColor: '#C4B67E',
+      fgColor: '#C4B67E',
+    }
   });
+  let fillColor = wb.createStyle({
+    fill: {
+      type: 'pattern',
+      patternType: 'solid',
+      bgColor: '#C4B67E',
+      fgColor: '#C4B67E',
+    }
+  })
 
 
   let myStyle2 = wb.createStyle({
@@ -60,6 +68,37 @@ let style = wb.createStyle({
   });
   
   let myStyleAlignCenter = wb.createStyle({
+    font: {
+        bold: true,
+        size: 14,
+        color: '#FFFFFF',
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'center',
+    },
+    border:{
+        left: {
+            style: "thin" 
+          },
+          right: {
+            style: "thin" 
+          },
+          top: {
+            style: "thin" 
+          },
+          bottom: {
+            style: "thin" 
+          },
+    },
+    fill: {
+      type: 'pattern',
+      patternType: 'solid',
+      bgColor: '#C4B67E',
+      fgColor: '#C4B67E',
+    }
+  });
+  let myStyleAlignCenter2 = wb.createStyle({
     font: {
         bold: true,
         size: 10,
@@ -81,9 +120,23 @@ let style = wb.createStyle({
           bottom: {
             style: "thin" 
           },
+    },
+    fill: {
+      type: 'pattern',
+      patternType: 'solid',
+      bgColor: '#E3E3E3',
+      fgColor: '#E3E3E3',
     }
   });
-  
+  let myStyleAlignLeft4 = wb.createStyle({
+    font: {
+        size: 10,
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'left',
+    },
+  });
   let myStyleAlignLeft = wb.createStyle({
     font: {
         bold: true,
@@ -93,6 +146,22 @@ let style = wb.createStyle({
       wrapText: true,
       horizontal: 'left',
     },
+  });
+  let myStyleAlignLeft2 = wb.createStyle({
+    font: {
+        bold: true,
+        size: 10,
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'left',
+    },
+    fill: {
+      type: 'pattern',
+      patternType: 'solid',
+      bgColor: '#E3E3E3',
+      fgColor: '#E3E3E3',
+    }
   });
   let myStyleAlignCenterWithoutBold = wb.createStyle({
     font: {
@@ -115,6 +184,42 @@ let style = wb.createStyle({
           bottom: {
             style: "thin" 
           },
+        },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#F2F2F2',
+          fgColor: '#F2F2F2',
+        }
+  
+  });
+  let myStyleAlignCenterWithoutBold2 = wb.createStyle({
+    font: {
+        size: 10,
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'center',
+    },
+    border:{
+        left: {
+            style: "thin" 
+          },
+          right: {
+            style: "thin" 
+          },
+          top: {
+            style: "thin" 
+          },
+          bottom: {
+            style: "thin" 
+          },
+        },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#E3E3E3',
+          fgColor: '#E3E3E3',
         }
   
   });
@@ -139,10 +244,45 @@ let style = wb.createStyle({
           bottom: {
             style: "thin" 
           },
+        },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#F2F2F2',
+          fgColor: '#F2F2F2',
+        }
+  });
+  let myStyleAlignCenterWithoutBoldAlignLeft2 = wb.createStyle({
+    font: {
+        size: 10,
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'left',
+    },
+    border:{
+        left: {
+            style: "thin" 
+          },
+          right: {
+            style: "thin" 
+          },
+          top: {
+            style: "thin" 
+          },
+          bottom: {
+            style: "thin" 
+          },
+        },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#E3E3E3',
+          fgColor: '#E3E3E3',
         }
   });
 
-  let myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder = wb.createStyle({
+  let myStyleAlignCenterWithoutBoldAlignLeftWithourBorder = wb.createStyle({
     font: {
         size: 10,
       },
@@ -172,20 +312,20 @@ let style = wb.createStyle({
         row: 4,
         rowOff: 0,
         height:'5px',
-        width: '5px'
+        width: '4px'
       },
     },
   });
   let row = 3;
   let column = 2
 
-  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - Club Marriott                                                                    ${propertyName}`).style(myStyle);
+  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - Club Marriott                                                                      ${propertyName}`).style(myStyle);
   ws2.cell(row+=1, column,row, column + 17, true).string(`MON 14/12/2020 8:30 AM`).style(style);
 //table header
 console.log(`row = ${row}`)
 column = 2
 row++
-ws2.cell(row, column++).string(`S.N.`).style(myStyleAlignCenter)
+ws2.cell(row, column++).string(`S.N.`).style(myStyleAlignCenter,fillColor)
 ws2.cell(row, column++).string(`Member Name`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
@@ -217,9 +357,17 @@ let summaryObject = {};
 
 let NRCObject = {}
 let summaryByLevel = {}
-
+let className1 = myStyleAlignCenterWithoutBold
+let className2 = myStyleAlignCenterWithoutBoldAlignLeft
 for(obj of dsrValues){
-
+    if(slNo % 2 != 0) 
+    {
+      className1=myStyleAlignCenterWithoutBold2
+      className2=myStyleAlignCenterWithoutBoldAlignLeft2
+    }else{
+      className1=myStyleAlignCenterWithoutBold
+      className2=myStyleAlignCenterWithoutBoldAlignLeft   
+    }
     
     //summary calculation
     if(obj.payment_mode__c){
@@ -251,32 +399,32 @@ for(obj of dsrValues){
     slNo++;
     row++;
     column=2
-                    ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.name)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+                    ws2.cell(row, column++).number(slNo).style(className1)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.name)}`).style(className2)
                     obj.membership_number__c ?                    
-                    ws2.cell(row, column++).number(parseInt(obj.membership_number__c)).style(myStyleAlignCenterWithoutBold)
+                    ws2.cell(row, column++).number(parseInt(obj.membership_number__c)).style(className1)
                     :
-                    ws2.cell(row, column++).string(`${(obj.membership_number__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.customer_set_name)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+                    ws2.cell(row, column++).string(`${(obj.membership_number__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.customer_set_name)}`).style(className2)
 
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.type_n_r__c)}`).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).string(`${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c: obj.membership_enrollment_date__c)) : '')}`).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).string(`${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}`).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.promocode__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull((obj.payment_mode__c=='Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c?obj.credit_card__c : '')}`: `${obj.payment_mode__c}`))}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.type_n_r__c)}`).style(className1)
+                    ws2.cell(row, column++).string(`${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c: obj.membership_enrollment_date__c)) : '')}`).style(className1)
+                    ws2.cell(row, column++).string(`${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}`).style(className1)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.promocode__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull((obj.payment_mode__c=='Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c?obj.credit_card__c : '')}`: `${obj.payment_mode__c}`))}`).style(className2)
 
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.authorization_number__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.batch_number__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.receipt_no__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.cheque_details)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.authorization_number__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.batch_number__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.receipt_no__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.cheque_details)}`).style(className2)
 
-                    ws2.cell(row, column++).number((obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).number((obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).number((obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)).style(myStyleAlignCenterWithoutBold)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.gstin__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.state_code__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.remarks__c)}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+                    ws2.cell(row, column++).number((obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)).style(className1)
+                    ws2.cell(row, column++).number((obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0).style(className1)
+                    ws2.cell(row, column++).number((obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)).style(className1)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.gstin__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.state_code__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.remarks__c)}`).style(className2)
 }
 
 
@@ -294,19 +442,28 @@ ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Payment Mode`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`No. of Enrolments`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Net Revenue`).style(myStyleAlignCenter)
-slNo =1;
+slNo =0;
 
 let totalSummarySales = 0;
 let totalSummaryReveneu =0;
 for([key,value] of Object.entries(summaryObject)){
+  if(slNo % 2 != 0) 
+  {
+    className1=myStyleAlignCenterWithoutBold2
+    className2=myStyleAlignCenterWithoutBoldAlignLeft2
+  }else{
+    className1=myStyleAlignCenterWithoutBold
+    className2=myStyleAlignCenterWithoutBoldAlignLeft   
+  }
      totalSummarySales +=value.count;
  totalSummaryReveneu += value.reveneu;
+ slNo++
 row+=1;
 column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`${key}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).number(value.count).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).number(value.reveneu).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).number(value.count).style(className1)
+ws2.cell(row, column++).number(value.reveneu).style(className1)
 }
 // row+=1;
 // column = 2
@@ -387,18 +544,27 @@ ws2.cell(row, column++).string(`Payment Mode`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`No. of Enrolments`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Net Revenue`).style(myStyleAlignCenter)
 
-slNo =1;
+slNo =0;
 let NRCCount = 0;
 let totalNRC= 0;
 for([key,value] of Object.entries(NRCObject)){
+  if(slNo % 2 != 0) 
+  {
+    className1=myStyleAlignCenterWithoutBold2
+    className2=myStyleAlignCenterWithoutBoldAlignLeft2
+  }else{
+    className1=myStyleAlignCenterWithoutBold
+    className2=myStyleAlignCenterWithoutBoldAlignLeft   
+  }
 NRCCount += value.count;
 totalNRC += value.reveneu;
+slNo++;
 row+=1;
 column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`${key}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).number(value.count).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).number(value.reveneu).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).number(value.count).style(className1)
+ws2.cell(row, column++).number(value.reveneu).style(className1)
 }
 // row+=1;
 // column = 2
@@ -412,12 +578,20 @@ ws2.cell(row, column++).number(value.reveneu).style(myStyleAlignCenterWithoutBol
 // ws2.cell(row, column++).string(`Cancellation (C)`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 // ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 // ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
 row+=1;
 column = 2
-ws2.cell(row, column,row, column+1, true).string(`Total (N+R-C)`).style(myStyleAlignCenterWithoutBoldAlignLeft);
+ws2.cell(row, column,row, column+1, true).string(`Total (N+R-C)`).style(className2);
 column+=2
-ws2.cell(row, column++).number(NRCCount).style(myStyleAlignCenterWithoutBold);
-ws2.cell(row, column++ ).number(totalNRC).style(myStyleAlignCenterWithoutBold);
+ws2.cell(row, column++).number(NRCCount).style(className1);
+ws2.cell(row, column++ ).number(totalNRC).style(className1);
 
 //Summary by levels table
 
@@ -431,15 +605,23 @@ ws2.cell(row, column++).string(`Payment Mode`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`No. of Enrolments`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Net Revenue`).style(myStyleAlignCenter)
 
-slNo =1;
+slNo =0;
 for([key,value] of Object.entries(summaryByLevel)){
-
+  if(slNo % 2 != 0) 
+  {
+    className1=myStyleAlignCenterWithoutBold2
+    className2=myStyleAlignCenterWithoutBoldAlignLeft2
+  }else{
+    className1=myStyleAlignCenterWithoutBold
+    className2=myStyleAlignCenterWithoutBoldAlignLeft   
+  }
+slNo++;
 row+=1;
 column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`${key}`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).number(value.count).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).number(value.reveneu).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).number(value.count).style(className1)
+ws2.cell(row, column++).number(value.reveneu).style(className1)
 }
 // row+=1;
 // column = 2
@@ -459,38 +641,96 @@ ws2.cell(row, column++).number(value.reveneu).style(myStyleAlignCenterWithoutBol
 // ws2.cell(row, column++).string(`Level 4`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 // ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 // ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
 row+=1;
 column = 2
-ws2.cell(row, column,row, column+1, true).string(`Sub Total of Paid Enrolments`).style(myStyleAlignCenterWithoutBold);
+ws2.cell(row, column,row, column+1, true).string(`Sub Total of Paid Enrolments`).style(className1);
 column+=2
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft);
-ws2.cell(row, column++ ).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft);
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`Spouse Complimentary`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`Other Complimentary (Include Referrals)`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`Reissue (INR 500)`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(`Wedding Bundling`).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).string(``).style(className2);
+ws2.cell(row, column++ ).string(``).style(className2);
+slNo++
 
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+row+=1;
+column = 2
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`Spouse Complimentary`).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+slNo++
+
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+row+=1;
+column = 2
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`Other Complimentary (Include Referrals)`).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+slNo++
+
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+row+=1;
+column = 2
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`Reissue (INR 500)`).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+slNo++
+
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+
+row+=1;
+column = 2
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`Wedding Bundling`).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).string(``).style(className2)
+slNo++
+
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+slNo++
 row+=1;
 column = 2
 ws2.cell(row, column,row, column+1, true).string(`Total`).style(myStyleAlignCenterWithoutBoldAlignLeft);
@@ -512,16 +752,25 @@ ws2.cell(row, column++).string(`Member Name`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Certificate Number Issued`).style(myStyleAlignCenter)
-slNo =1;
+slNo =0;
 for(d of certificateIssuedArr){
+  if(slNo % 2 != 0) 
+  {
+    className1=myStyleAlignCenterWithoutBold2
+    className2=myStyleAlignCenterWithoutBoldAlignLeft2
+  }else{
+    className1=myStyleAlignCenterWithoutBold
+    className2=myStyleAlignCenterWithoutBoldAlignLeft   
+  }
+  slNo++
 row+=1;
 column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(d.createddate ? d.createddate : '').style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(d.membername ? d.membername : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
-ws2.cell(row, column++).string(d.certificatenumber ? d.certificatenumber : '').style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(d.createddate ? d.createddate : '').style(className1)
+ws2.cell(row, column++).string(d.membername ? d.membername : '').style(className2)
+ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)
+ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)
+ws2.cell(row, column++).string(d.certificatenumber ? d.certificatenumber : '').style(className2)
 }
 // row+=1;
 // column = 2
@@ -560,11 +809,11 @@ ws2.cell(row, column++).string(`Document Reference Number`).style(myStyleAlignCe
 slNo =1;
 row+=1;
 column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenter)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
 ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
 ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 //This is an auto generated Daily Sales Report 
 
@@ -573,94 +822,94 @@ column = 2;
 
 
 ws2.cell(row, column,row, column+19, true).string(`This is an auto generated Daily Sales Report of < Program Name>.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.`).style(myStyleAlignLeft);
-row+=1;
+row+=2;
 column = 2;
-ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
-ws2.cell(row, column++,row, column+19, true).string(`Description`).style(myStyleAlignCenter)
+ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter2)
+ws2.cell(row, column++,row, column+19, true).string(`Description`).style(myStyleAlignLeft2)
 slNo = 1;
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Member Name – The full name of the Member`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Member Name – The full name of the Member`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Membership Number – A Nine-digit unique number for every membership`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Membership Number – A Nine-digit unique number for every membership`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Level-  Membership Type name`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Level-  Membership Type name`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Type – New or Renewal Membership. N for New and R for Renewal`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Type – New or Renewal Membership. N for New and R for Renewal`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Enrolment Date – The date when the membership was enrolled or renewed`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Enrolment Date – The date when the membership was enrolled or renewed`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Valid Till – The date when the membership expires`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Valid Till – The date when the membership expires`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Promo code - Promocode to avail extra benefit`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Promo code - Promocode to avail extra benefit`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Payment Mode – The mode of payment through which a member pays the membership amount`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Payment Mode – The mode of payment through which a member pays the membership amount`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Online Transaction No. – A unique transaction number to identify a membership (Not the UTR number)`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Online Transaction No. – A unique transaction number to identify a membership (Not the UTR number)`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`CC Approval Code – An approval code that appears on the charge slip that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`CC Approval Code – An approval code that appears on the charge slip that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`CC Batch Number – Batch Number that appears on the charge slips that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`CC Batch Number – Batch Number that appears on the charge slips that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Cash Receipt Number – The number that appears on a Cash receipt issued by the hotel/program`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Cash Receipt Number – The number that appears on a Cash receipt issued by the hotel/program`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Cheque Details – Cheque number, Bank Name and Deposit Date`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Cheque Details – Cheque number, Bank Name and Deposit Date`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Amount – Net Amount without Tax`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Amount – Net Amount without Tax`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Tax – Goods and Services Tax`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Tax – Goods and Services Tax`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Total Amount – The amount that the member has paid`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Total Amount – The amount that the member has paid`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`GSTIN – The GST number that the member has provided`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`GSTIN – The GST number that the member has provided`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`State Code – Two-digit code that appears before the PAN number in a GSTIN provided`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`State Code – Two-digit code that appears before the PAN number in a GSTIN provided`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Remarks – Comments entered by the person enrolling a membership in the TLC CRM`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Remarks – Comments entered by the person enrolling a membership in the TLC CRM`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
+ws2.cell(row, column++,row, column+19, true).string(`Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate`).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
 
 //Disclaimer
@@ -669,7 +918,7 @@ column = 2;
 ws2.cell(row, column,row, column+2, true).string(`Disclaimer`).style(myStyle1);
 row +=1;
 column = 2;
-ws2.cell(row, column,row+2, column+10, true).string(`While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."`).style(myStyleAlignCenterWithoutBoldAlignLeft);
+ws2.cell(row, column,row+2, column+10, true).string(`While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."`).style(myStyleAlignLeft4);
 // let pdfName = `./reports/DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.pdf`
 
 let fileName = `./reports/DSRReport/DSR_Repoprt_${propertyId}_${Date.now()}.xlsx`
