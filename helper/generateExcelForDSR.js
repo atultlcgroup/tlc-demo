@@ -26,6 +26,13 @@ let style = wb.createStyle({
       color: '#000000',
       size: 12,
     },
+    fill: {
+      type: 'pattern',
+      patternType: 'solid',
+      bgColor: '#FFFF00',
+      fgColor: '#FFFF00',
+    }
+
     // numberFormat: '$#,##0.00; ($#,##0.00); -',
   });
 

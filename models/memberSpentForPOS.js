@@ -1,8 +1,8 @@
 const pool = require("../databases/db").pool;
 let getMemnershipNumberForPOSCD= async()=>{
     try{
-    //   let qry =await pool.query(`select distinct membership__r_membership_number__c from tlcsalesforce.pos_cheque_details__c  where TO_DATE(created_time__c,'YYYY-MM-DD') = TO_DATE(TO_CHAR(CURRENT_DATE - interval '1 day','YYYY-MM-DD'),'YYYY-MM-DD') and created_time__c NOT IN('51:49.4')`)
-    let qry =await pool.query(`select distinct membership__r_membership_number__c from tlcsalesforce.pos_cheque_details__c  where TO_DATE(created_time__c,'YYYY-MM-DD') = '2020-12-15' and created_time__c NOT IN('51:49.4')`)
+      let qry =await pool.query(`select distinct membership__r_membership_number__c from tlcsalesforce.pos_cheque_details__c  where TO_DATE(created_time__c,'YYYY-MM-DD') = TO_DATE(TO_CHAR(CURRENT_DATE - interval '1 day','YYYY-MM-DD'),'YYYY-MM-DD') and created_time__c NOT IN('51:49.4')`)
+    // let qry =await pool.query(`select distinct membership__r_membership_number__c from tlcsalesforce.pos_cheque_details__c  where TO_DATE(created_time__c,'YYYY-MM-DD') = '2020-12-15' and created_time__c NOT IN('51:49.4')`)
     let data =qry ?  qry.rows : []
     let memberShipArr = []
     data.map(d=>{
