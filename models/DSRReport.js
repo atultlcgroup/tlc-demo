@@ -77,7 +77,6 @@ let DSRReport = async()=>{
             let DSRCertificateIssued =await getCertificateIssuedByPropertyId(dataObj.propertyArr[ind] , ``)
             console.log(`DSRCertificateIssued`)
              console.log(DSRCertificateIssued)
-             return
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                    

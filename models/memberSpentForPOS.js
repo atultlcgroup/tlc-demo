@@ -27,16 +27,25 @@ let getMembershipDetails = async()=>{
             if(daily){
                 console.log(`------Daily = ${daily}-----------`)
                 let memberShipArr = await getMemnershipNumberForPOSCD()
+                if(memberShipArr.length){
                 console.log(`select membership_status__C,expiry_date__c,member__c,membership_number__c,sfid from tlcsalesforce.membership__c where membership_number__c IN (${memberShipArr})`)
                 let getMembershipDataForDay=await pool.query(`select membership_status__C,expiry_date__c,member__c,membership_number__c,sfid from tlcsalesforce.membership__c where membership_number__c IN (${memberShipArr})`)
                 resultDay= getMembershipDataForDay ? getMembershipDataForDay.rows : [];
+               }else{
+                resultDay=[]
+               }
             }else{
                 console.log(`------Daily = ${daily}-----------`)
                 let memberShipArr = await getMemnershipNumberForPOSCD()
+                if(memberShipArr.length){
                 let getMembershipDataForDay=await pool.query(`select membership_status__C,expiry_date__c,member__c,membership_number__c,sfid from tlcsalesforce.membership__c where membership_number__c IN (${memberShipArr})`)
                 resultDay= getMembershipDataForDay ? getMembershipDataForDay.rows : [];
                 let getMembershipDataForMonth=await pool.query(`select membership_status__C,expiry_date__c,member__c,membership_number__c,sfid from tlcsalesforce.membership__c`)
                 resultMonth= getMembershipDataForMonth ? getMembershipDataForMonth.rows : [];
+               }else{
+                resultMonth=[]
+                resultDay =[] 
+               }
             }
         
             console.log(resultDay.length);
