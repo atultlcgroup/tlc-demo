@@ -223,7 +223,7 @@ let getDSRReport=async(property_sfid)=>{
         membership__c.expiry_date__c,
         Membership__c.Membership_Enrollment_Date__c,    
         membership__c.membership_renewal_date__c,
-        --CC_CheqNo_Online_Trn_No__c,
+        
         case
         when payment__c.payment_mode__c='Cheque'then payment__c.cheque_number__c
         when payment__c.payment_mode__c='Credit Card' then payment__c.credit_number__c
@@ -234,14 +234,19 @@ let getDSRReport=async(property_sfid)=>{
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
         account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c,
         membershiptype__c.sfid as customer_set_sfid,
-        membershiptype__c.customer_set_program_level__c customer_set_name
+        membershiptype__c.name customer_set_name,
+        membershiptype__c.customer_set_program_level__c customer_set_level_name,
+        payment__c.bank_name__c || ' ' || payment__c.cheque_number__c || ' ' || payment__c.createddate cheque_details
+        ,program__c.name as program_name,
+        payment__c.promocode__c
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
-        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c limit 10
-        `)
+        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
+        Inner Join tlcsalesforce.program__c
+        On membershiptype__c.program__c = program__c.sfid limit 20 `)
         let qry =(`
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
@@ -276,7 +281,7 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         membership__c.expiry_date__c,
         Membership__c.Membership_Enrollment_Date__c,    
         membership__c.membership_renewal_date__c,
-        --CC_CheqNo_Online_Trn_No__c,
+        
         case
         when payment__c.payment_mode__c='Cheque'then payment__c.cheque_number__c
         when payment__c.payment_mode__c='Credit Card' then payment__c.credit_number__c
@@ -287,13 +292,19 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         Amount__c*membershiptype__c.tax_1__c/100+Amount__c as Total_Amount__c,
         account.gstin__c,remarks__c,city__c.state_code__c,property__c.name as property_name,payment__c,credit_card__c,
         membershiptype__c.sfid as customer_set_sfid,
-        membershiptype__c.name customer_set_name
+        membershiptype__c.name customer_set_name,
+        membershiptype__c.customer_set_program_level__c customer_set_level_name,
+        payment__c.bank_name__c || ' ' || payment__c.cheque_number__c || ' ' || payment__c.createddate cheque_details
+        ,program__c.name as program_name,
+        payment__c.promocode__c
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
+        Inner Join tlcsalesforce.program__c
+        On membershiptype__c.program__c = program__c.sfid
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         

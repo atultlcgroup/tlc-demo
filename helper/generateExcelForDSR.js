@@ -319,7 +319,7 @@ let style = wb.createStyle({
   let row = 3;
   let column = 2
 
-  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - Club Marriott                                                                      ${propertyName}`).style(myStyle);
+  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - ${dsrValues[0].program_name}                                                                      ${propertyName}`).style(myStyle);
   ws2.cell(row+=1, column,row, column + 17, true).string(`MON 14/12/2020 8:30 AM`).style(style);
 //table header
 console.log(`row = ${row}`)
@@ -405,7 +405,7 @@ for(obj of dsrValues){
                     ws2.cell(row, column++).number(parseInt(obj.membership_number__c)).style(className1)
                     :
                     ws2.cell(row, column++).string(`${(obj.membership_number__c)}`).style(className2)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.customer_set_name)}`).style(className2)
+                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.customer_set_level_name)}`).style(className2)
 
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.type_n_r__c)}`).style(className1)
                     ws2.cell(row, column++).string(`${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c: obj.membership_enrollment_date__c)) : '')}`).style(className1)
