@@ -81,11 +81,11 @@ let DSRReport = async()=>{
                 if(DSRRecords.length){
                    
                   if(emails.length){
-                    // let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued1);
+                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
                     let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
                     console.log(excelFile)
                     console.log(`------------------------------------------------------------`)
-                    //   sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
+                      sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{

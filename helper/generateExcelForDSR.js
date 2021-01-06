@@ -325,7 +325,7 @@ let style = wb.createStyle({
 console.log(`row = ${row}`)
 column = 2
 row++
-ws2.cell(row, column++).string(`S.N.`).style(myStyleAlignCenter,fillColor)
+ws2.cell(row, column++).string(`S.N.`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Member Name`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
@@ -353,10 +353,13 @@ let getEmptyIfNull = (val) => {
     return val?val:'';
 }
 
+
 let summaryObject = {};
 
 let NRCObject = {}
 let summaryByLevel = {}
+let spouseComplementry={ cnt : 0, revenue: 0};
+let otherComplementry = { cnt : 0, revenue: 0};
 let className1 = myStyleAlignCenterWithoutBold
 let className2 = myStyleAlignCenterWithoutBoldAlignLeft
 for(obj of dsrValues){
@@ -388,14 +391,24 @@ for(obj of dsrValues){
    }
 
       //Summary By Level Calculation
-      if(obj.customer_set_name){
-        if(summaryByLevel[obj.customer_set_name]){
-            summaryByLevel[obj.customer_set_name] = {'count': summaryByLevel[obj.customer_set_name].count +1 , 'reveneu': summaryByLevel[obj.customer_set_name]. reveneu + (obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}
+      if(obj.customer_set_level_name && obj.payment_mode__c != 'Complimentary'){
+        if(summaryByLevel[obj.customer_set_level_name]){
+            summaryByLevel[obj.customer_set_level_name] = {'count': summaryByLevel[obj.customer_set_level_name].count +1 , 'reveneu': summaryByLevel[obj.customer_set_level_name]. reveneu + (obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}
         }else{
-            summaryByLevel[obj.customer_set_name] = {'count':1,'reveneu':(obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}; 
+            summaryByLevel[obj.customer_set_level_name] = {'count':1,'reveneu':(obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)}; 
         }   
        }
  
+       //Spouse complementry 
+       if(obj.payment_for__c == 'Add-On' && obj.payment_mode__c == 'Complimentary'){
+        spouseComplementry.cnt = spouseComplementry.cnt + 1;
+        spouseComplementry.revenue = spouseComplementry.revenue + (obj.total_amount__c ? obj.total_amount__c : 0);
+       }
+       //other complementry
+       if(obj.payment_for__c != 'Add-On' && obj.payment_mode__c == 'Complimentary'){
+        otherComplementry.cnt = otherComplementry.cnt + 1;
+        otherComplementry.revenue = otherComplementry.revenue + (obj.total_amount__c ? obj.total_amount__c : 0);
+       }
     slNo++;
     row++;
     column=2
@@ -588,7 +601,7 @@ if(slNo % 2 != 0)
 }
 row+=1;
 column = 2
-ws2.cell(row, column,row, column+1, true).string(`Total (N+R-C)`).style(className2);
+ws2.cell(row, column,row, column+1, true).string(`Total (N+R-C)`).style(className1);
 column+=2
 ws2.cell(row, column++).number(NRCCount).style(className1);
 ws2.cell(row, column++ ).number(totalNRC).style(className1);
@@ -606,6 +619,8 @@ ws2.cell(row, column++).string(`No. of Enrolments`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Net Revenue`).style(myStyleAlignCenter)
 
 slNo =0;
+let paidSalesCnt=0;
+let paidSalesReveneu =0;
 for([key,value] of Object.entries(summaryByLevel)){
   if(slNo % 2 != 0) 
   {
@@ -618,6 +633,8 @@ for([key,value] of Object.entries(summaryByLevel)){
 slNo++;
 row+=1;
 column = 2
+paidSalesCnt+=value.count;
+paidSalesReveneu+=value.reveneu
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`${key}`).style(className2)
 ws2.cell(row, column++).number(value.count).style(className1)
@@ -653,8 +670,8 @@ row+=1;
 column = 2
 ws2.cell(row, column,row, column+1, true).string(`Sub Total of Paid Enrolments`).style(className1);
 column+=2
-ws2.cell(row, column++).string(``).style(className2);
-ws2.cell(row, column++ ).string(``).style(className2);
+ws2.cell(row, column++).number(paidSalesCnt).style(className1);
+ws2.cell(row, column++ ).number(paidSalesReveneu).style(className1);
 slNo++
 
 if(slNo % 2 != 0) 
@@ -667,10 +684,12 @@ if(slNo % 2 != 0)
 }
 row+=1;
 column = 2
+paidSalesCnt+=spouseComplementry.cnt;
+paidSalesReveneu+=spouseComplementry.cnt
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Spouse Complimentary`).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).number(spouseComplementry.cnt).style(className1)
+ws2.cell(row, column++).number(spouseComplementry.revenue).style(className1)
 slNo++
 
 if(slNo % 2 != 0) 
@@ -683,10 +702,12 @@ if(slNo % 2 != 0)
 }
 row+=1;
 column = 2
+paidSalesCnt+=otherComplementry.cnt;
+paidSalesReveneu+=otherComplementry.cnt
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Other Complimentary (Include Referrals)`).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).number(otherComplementry.cnt).style(className1)
+ws2.cell(row, column++).number(otherComplementry.revenue).style(className1)
 slNo++
 
 if(slNo % 2 != 0) 
@@ -701,8 +722,8 @@ row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Reissue (INR 500)`).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).number(0).style(className1)
+ws2.cell(row, column++).number(0).style(className1)
 slNo++
 
 if(slNo % 2 != 0) 
@@ -718,8 +739,8 @@ row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Wedding Bundling`).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
-ws2.cell(row, column++).string(``).style(className2)
+ws2.cell(row, column++).number(0).style(className1)
+ws2.cell(row, column++).number(0).style(className1)
 slNo++
 
 if(slNo % 2 != 0) 
@@ -733,10 +754,10 @@ if(slNo % 2 != 0)
 slNo++
 row+=1;
 column = 2
-ws2.cell(row, column,row, column+1, true).string(`Total`).style(myStyleAlignCenterWithoutBoldAlignLeft);
+ws2.cell(row, column,row, column+1, true).string(`Total`).style(myStyleAlignCenterWithoutBold);
 column+=2
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft);
-ws2.cell(row, column++ ).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft);
+ws2.cell(row, column++).number(paidSalesCnt).style(myStyleAlignCenterWithoutBold);
+ws2.cell(row, column++ ).number(paidSalesReveneu).style(myStyleAlignCenterWithoutBold);
 
 //Annexure – 1 Certificate Numbers Issued for Audit purpose table 
 
