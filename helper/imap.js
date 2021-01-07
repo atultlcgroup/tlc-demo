@@ -4,12 +4,13 @@ const fs = require('fs')
 const simpleParser = require('mailparser').simpleParser;
 const schedule = require('node-schedule');
 let  dotenv = require('dotenv');
-let UTRModel = require('./models/UTRReport')
+let UTRModel = require('../models/UTRReport')
 
 dotenv.config();
 let config = process.env
-var replyParser = require("node-email-reply-parser");
-var imap = new Imap({
+let replyParser = require("node-email-reply-parser");
+let IMAP_FROM_EMAIL_IDS = (process.env.IMAP_FROM_EMAIL_IDS || '').split(',')
+let imap = new Imap({
     user: config.EMAIL,
     password: config.PASSWORD,
     host: config.HOST,
@@ -120,11 +121,11 @@ let isRunning = false;
                                             var subjects =mail.subject;
                                             console.log(`====================================================================================================================`)
                                             console.log(`${ JSON.stringify(mail.from.value[0].address)}`)
-                                            if((mail.from.value[0].address == 'atul.srivastava@tlcgroup.com' || mail.from.value[0].address == 'atul.srivastava@tlcgroup.com') && (subjects.indexOf('Mis report for L358369_Tlc Relationship Management Pvt Ltd') > -1 || subjects.indexOf('UTR Report - L358369_TLC RELATIONSHIP MANAGEMENT PVT LTD') > -1) ){
+                                            if(IMAP_FROM_EMAIL_IDS.includes(mail.from.value[0].address) > -1  && (subjects.indexOf('Mis report for L358369_Tlc Relationship Management Pvt Ltd') > -1 || subjects.indexOf('UTR Report - L358369_TLC RELATIONSHIP MANAGEMENT PVT LTD') > -1) ){
                                                 for(file of attachmentsARR){
                                                     let fileName = createtFileName(file.filename,'1234')
                                                     fs.writeFileSync("./reports/UTReport/"+fileName,new Buffer(file.content))
-                                                     UTRModel.UTRReport('1234',`${fileName}`,``)
+                                                     UTRModel.UTRReportFromImap('1234',`${fileName}`,``)
                                                 }
                                             }
 
@@ -224,7 +225,11 @@ let createtFileName = (fileName,userid)=>{
     return fileName;
 
 }
-schedulerForImap('* * * * *');
+schedulerForImap(process.env.SCHEDULER_TIME_FOR_POS_IMAP || '* * * * *');
+
+// module.exports={
+//     schedulerForImap
+// }
 
 
 

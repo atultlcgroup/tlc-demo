@@ -307,6 +307,48 @@ let updateDataToUTRLog= async(values, header)=>{
 let UTRReport = async(userid,fileName,file)=>{
     return new Promise(async(resolve, reject)=>{
         try{            
+            let data = await uploadExcel(file,fileName)
+            console.log(`filename -----------------------------------${fileName}`)
+            let csvData = await readCsv(`reports/UTReport/${fileName}`,fileName)
+            if(csvData == 'Format Issue')
+            throw `CSV Format Issue!`
+            if(csvData.utr=='NO'){
+                let lastInsertedId = await createLogForUTRReport(fileName,'STARTED',false,'',userid)
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                await createLogForUTRReport(fileName,'UPLOADED',false,'')
+                await insertDataToLogTable(csvData,lastInsertedId , fileName)
+                await moveFileToArchiveFolder(fileName)
+                unlinkFiles(`reports/UTReport/${fileName}`)
+            }else{
+                let excelToFTPServer = await uploadExcelToFTP(fileName, userid)
+                unlinkFiles(`reports/UTReport/${fileName}`)
+                let UTRData = await updateDataToUTRLog(csvData.values,csvData.header)
+                console.log(`From Yes!!!!`)
+                console.log(UTRData)
+                if(!UTRData['UTRLogArr'].length){
+                    resolve(`Total number of record import= ${UTRData['totalRecords']} \n Total number of UTR update= ${UTRData['totalUpdatedRecords']} \n  Total number of pending record= ${UTRData['totalPendingRecords']} \n Please check following Transaction ids \n ${UTRData['slNoArr']}`)
+                    unlinkFiles(`reports/UTReport/${fileName}`)
+                    return
+                  }
+
+                await moveFileToArchiveFolder(fileName)  
+                let resultOfUTR =await UTRReport2(UTRData, fileName, userid)
+                resolve(resultOfUTR)
+            }
+            // console.log(lastInsertedId)
+            resolve(`Success`)
+        }catch(e){
+            await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+            console.log(`${e}`)
+            reject(`${e}`)
+        }
+    
+    })
+}
+
+let UTRReportFromImap = async(userid,fileName,file)=>{
+    return new Promise(async(resolve, reject)=>{
+        try{            
             // let data = await uploadExcel(file,fileName)
             console.log(`filename -----------------------------------${fileName}`)
             let csvData = await readCsv(`reports/UTReport/${fileName}`,fileName)
@@ -714,5 +756,6 @@ let uploadExcel = async (file, fileName) => {
 }
 
 module.exports={
-    UTRReport
+    UTRReport,
+    UTRReportFromImap
 }
