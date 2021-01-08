@@ -123,9 +123,9 @@ let isRunning = false;
                                             console.log(`${ JSON.stringify(mail.from.value[0].address)}`)
                                             if(IMAP_FROM_EMAIL_IDS.includes(mail.from.value[0].address) > -1  && (subjects.indexOf('Mis report for L358369_Tlc Relationship Management Pvt Ltd') > -1 || subjects.indexOf('UTR Report - L358369_TLC RELATIONSHIP MANAGEMENT PVT LTD') > -1) ){
                                                 for(file of attachmentsARR){
-                                                    let fileName = createtFileName(file.filename,'1234')
+                                                    let fileName = createtFileName(file.filename,'IMAP')
                                                     fs.writeFileSync("./reports/UTReport/"+fileName,new Buffer(file.content))
-                                                     UTRModel.UTRReportFromImap('1234',`${fileName}`,``)
+                                                     UTRModel.UTRReportFromImap('IMAP(auto email)',`${fileName}`,``)
                                                 }
                                             }
 
