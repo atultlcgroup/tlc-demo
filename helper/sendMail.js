@@ -102,7 +102,7 @@ let unlinkFiles = (files)=>{
 
 
 
-const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,fileName) => {
+const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,file2,fileName) => {
     console.log(`----------------------------`)
     console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
     console.log(`----------------------------`)    // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
@@ -118,6 +118,11 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,file
         },{
             filename: `${fileName}.xlsx`,
             path: `${excelFile}`
+        },
+        {
+            filename: `${fileName}2.pdf`,
+            path: `${file2}`
+
         }
         ,{
             filename: `logo-cm.png`,
@@ -371,7 +376,7 @@ exports.smtp = (to, from, subject, text, html) => sendMail(to, from, subject, te
 exports.smtpAttachment = (to, from, subject, text, html,file,pdf,fileName) => sendMailAttachment(to, from, subject, text, html, file,pdf,fileName);
 
 
-exports.smtpAttachmentDSR = (to, from, subject, text, html,file,excelFile,fileName) => sendMailAttachmentDSR(to, from, subject, text, html, file,excelFile,fileName);
+exports.smtpAttachmentDSR = (to, from, subject, text, html,file,excelFile,file2,fileName) => sendMailAttachmentDSR(to, from, subject, text, html, file,excelFile,file2,fileName);
 exports.smtpAttachmentUTR = (to, from, subject, text, html,file,fileName) => sendMailAttachmentUTR(to, from, subject, text, html, file,fileName);
 exports.smtpAttachmentPOSError = (to, from, subject, text, html,file,fileName,logoNmae) => sendMailAttachmentPOSError(to, from, subject, text, html, file,fileName,logoNmae);
 exports.smtpAttachmentFR = (to, from, subject, text, html,file,fileName) => sendMailAttachmentFR(to, from, subject, text, html, file,fileName);

@@ -77,16 +77,16 @@ let DSRReport = async()=>{
             let DSRCertificateIssued =await getCertificateIssuedByPropertyId(dataObj.propertyArr[ind] , ``)
             console.log(`DSRCertificateIssued`)
              console.log(DSRCertificateIssued)
-            
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
                 if(DSRRecords.length){
                    
                   if(emails.length){
-                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
+                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
+                    let pdfFile2= await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
                     let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
                     console.log(excelFile)
                     console.log(`------------------------------------------------------------`)
-                    //   sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
+                      sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${pdfFile2}`,'Daily Sales Report',emails) 
                       updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
@@ -247,8 +247,7 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 50
-        `)
+        On membershiptype__c.program__c = program__c.sfid limit 20 `)
         let qry =(`
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
@@ -308,8 +307,8 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
         On membershiptype__c.program__c = program__c.sfid
-       -- where
-        --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        where
+        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
           -- or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
            --and
@@ -331,9 +330,8 @@ let getDSRReportCS=async(customer_set_sfid)=>{
 }
 
 
-
 DSRReport().then(d=>{
-    console.log
+    console.log(d);
 }).catch(e=>{console.log(e)})
     
    
