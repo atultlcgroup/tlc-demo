@@ -113,15 +113,15 @@ let isRunning = false;
                                             }
                                         }
                                             
-                                            var email = replyParser(mail.text);
+                                            // var email = replyParser(mail.text);
     
-                                            var myRegex =/[On]\s[A-Z][a-z]{2}[,]\s[A-Z][a-z]{2}\s[0-9]{2}[,]\s*[0-9]{4}\s*[a-z]{2}\s*[0-9]{1}[:][0-9]{2}\s*[A-Z]{2}/;
+                                            // var myRegex =/[On]\s[A-Z][a-z]{2}[,]\s[A-Z][a-z]{2}\s[0-9]{2}[,]\s*[0-9]{4}\s*[a-z]{2}\s*[0-9]{1}[:][0-9]{2}\s*[A-Z]{2}/;
 
-                                            var emailContent =  mail.text.split(myRegex)[0];
+                                            // var emailContent =  mail.text.split(myRegex)[0];
                                             var subjects =mail.subject;
                                             console.log(`====================================================================================================================`)
                                             console.log(`${ JSON.stringify(mail.from.value[0].address)}`)
-                                            console.log(IMAP_FROM_EMAIL_IDS)
+                                            console.log()
                                             if(IMAP_FROM_EMAIL_IDS.includes(mail.from.value[0].address) > -1  && (subjects.indexOf('Mis report for L358369_Tlc Relationship Management Pvt Ltd') > -1 || subjects.indexOf('UTR Report - L358369_TLC RELATIONSHIP MANAGEMENT PVT LTD') > -1) ){
                                                 for(file of attachmentsARR){
                                                     let fileName = createtFileName(file.filename,'IMAP')
