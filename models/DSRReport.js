@@ -177,6 +177,18 @@ let convertDateFormat = () => {
    return today    
 }
 
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -197,6 +209,9 @@ let DSRReport = async()=>{
                 if(DSRRecords.length){
                    
                   if(emails.length){
+
+                    //get brand Id
+                    let brandId = await getBrandId(dataObj.propertyArr[ind],``)
                       //get dsr file from SFDC
                     let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                     let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
@@ -232,7 +247,9 @@ let DSRReport = async()=>{
         // //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
         //       if(DSRRecords1.length){
         //         if(emails1.length){
-                  //get dsr file from SFDC
+            //get brand id 
+            // let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
+            //get dsr file from SFDC
                 //   let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
         //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1); 
