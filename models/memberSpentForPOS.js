@@ -68,7 +68,6 @@ let getMembershipDetails = async()=>{
                }else{
                 resultMonth = []   
                }
-        
               }
         
             console.log(resultDay.length);
