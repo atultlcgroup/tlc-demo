@@ -25,14 +25,16 @@ let convertDateFormat = (date1) => {
 let getEmptyIfNull = (val) => {
     return val ? val : '';
 }
-let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
+let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues) => {
     let pyamnetObj = {}
 
     let summaryTotalSale = 0
     let summaryTotalAmount = 0
     propertyName = `${dsrValues[0].property_name}`;
     programName = dsrValues[0].program_name;
-    console.log("dsr values",dsrValues)
+    console.log("dsr values",dsrValues);
+    console.log("dynamicValuesPDF",dynamicValues)
+    console.log("logo",dynamicValues.tlc_logo__c)
     let summaryData = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
     let summaryDataNRC = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
 
@@ -46,7 +48,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 </table>
 <table class="page-break tftable1" align="center" border="1" >
 <tr height="60px"></tr>
-<tr style="margin-top:10px; height="50"">
+<tr style="margin-top:10px; background-color:#C4B67E; color:white;" height="50">
 <th width="2%">S.N.</th>
 <th width="15%" >Member Name</th>
 <th width="3%">Membership Number</th>
@@ -77,15 +79,15 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
     let certifiacateIssued = ``;
     let indexForPage = 0;
 
-    certificateIssuedArr = [
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
-        , { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }];
+    // certificateIssuedArr = [
+    //     { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
+    //     , { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+    //     { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+    //     { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }];
 
     for (obj of dsrValues) {
         dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
-                    <td >${getEmptyIfNull(obj.name)}</td>
+                    <td align="left" >${getEmptyIfNull(obj.name)}</td>
                     <td >${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td >${getEmptyIfNull(obj.customer_set_level_name)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
@@ -147,7 +149,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
         // For Sumaary by level count 
        console.log(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        console.log("obj",obj);
+        //console.log("obj",obj);
         console.log("obj",obj.payment_mode__c);
         if(obj.payment_mode__c == 'Complimentary' && obj.payment_for__c == 'Add-On' ){
             console.log("in Complimentary Add-on",summaryDataLevel[4].noOfSale)
@@ -191,7 +193,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
     }
     let sN = 1;
-    for (d of certificateIssuedArr) {
+    for (d of certificateIssuedAr) {
 
 
         
@@ -226,35 +228,12 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
     for (let [key, value] of Object.entries(pyamnetObj)) {
         summaryHtml += ` <tr height="50" align="center">`
         summaryHtml += `<td> ${serialNumber++}</td>`
-        summaryHtml += `<td >${key}</td>`
+        summaryHtml += `<td style="text-align: left;">${key}</td>`
         summaryHtml += `<td >${value.noOfSale}</td>`
         summaryHtml += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
         summaryHtml += `</tr>`
     }
 
-    // <td>${summaryData[0].key}</td>
-    // <td style="text-align: right;">${summaryData[0].noOfSale}</td>
-    // <td style="text-align: right;">${summaryData[0].amount}</td>
-    // </tr>
-    // <tr>
-    // <td>${summaryData[1].key}</td>
-    // <td style="text-align: right;">${summaryData[1].noOfSale}</td>
-    // <td style="text-align: right;">${summaryData[1].amount}</td>
-    // </tr>
-    // <tr>
-    // <td>${summaryData[2].key}</td>
-    // <td style="text-align: right;">${summaryData[2].noOfSale}</td>
-    // <td style="text-align: right;">${summaryData[2].amount}</td>
-    // </tr>
-    // <tr>
-    // <td>${summaryData[3].key}</td>
-    // <td style="text-align: right;">${summaryData[3].noOfSale}</td>
-    // <td style="text-align: right;">${summaryData[3].amount}</td>
-    // </tr>
-    // <tr>
-    // <td>${summaryData[4].key}</td>
-    // <td style="text-align: right;">${summaryData[4].noOfSale}</td>
-    // <td style="text-align: right;">${summaryData[4].amount}</td>
 
 
 
@@ -284,6 +263,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
           }
           .tftable th {
               font-size: 8px;
+              color:white;
               background-color: #bfa57d;
               border: 1px solid black;
               padding: 6px;
@@ -306,23 +286,22 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
           .border-none  td{
             font-size:12px!important;   
             height:30px!important;   
-            border:1px solid white!important;
+            border:1px solid!important;
            }
         .border-none th{
             font-size: 12px!important;
+            text-align: left;
             color:white!important;
             height:30px!important;
-            background-color: #4472C4!important;
-            border:1px solid white!important;
+            background-color: #C4B67E!important;
+            
         }
         .border-none tr{
             font-size: 12px!important;
             height:30px!important;
-            border:1px solid white!important;
+            border:1px solid!important;
         }
        
-       
-
 
           .tftable1 {
             font-size: 8px;
@@ -333,10 +312,10 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
         }
         .tftable1 th {
             font-size: 8px;
-            background-color: #bfa57d;
+            background-color: #C4B67E;
             border: 1px solid black;
             padding: 6px;
-            text-align: center;
+            text-align: left;
         }
         .tftable1 td {
             font-size: 8px;
@@ -368,8 +347,11 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
             margin-right: auto;
           }
         
-        .tftable tr:nth-child(even) {background-color: #C7CAF7;}
+        .tftable tr:nth-child(even) {background-color: #E3E3E3;}
         .tftable tr:nth-child(odd) {background-color: #F2F2F2;}
+
+        .tftable1 tr:nth-child(even) {background-color: #E3E3E3;}
+        .tftable1 tr:nth-child(odd) {background-color: #F2F2F2;}
 
         .arilFont {
             font-family: Arial, Helvetica, sans-serif;
@@ -383,16 +365,16 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
   <body style="font-family:sans-serif;" >
   
   <div>
-  <table style="width: 100%;">
+  <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
         <tbody>
-            <tr>
-                <td align="left" style="font-size: 25px;color: #808000;  width: 30%"><img src="file:///D:/referralDemo/tlc-demo/helper/logo-tlc.png" alt=""  height=70 width=160></img></td>
-                <td align="center" style="font-size: 25px;color: #808000;  width: 30%">Daily Sales report-${programName}</td>
-                <td align="right"style="font-size: 23px;color: #438282; width: 30%"></td>
+            <tr >
+                <td align="left" style="font-size: 20px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img><br><span style="font-size: 12px; color:black;">www.tlcgroup.com</span></td>
+                <td align="center" style="font-size: 18px; width: 30%; color:black;">Daily Sales report-${programName}</td>
+                <td align="right"style="font-size: 18px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
         </tbody>
     </table>
-    <table style="width: 100%;">
+    <!--table style="width: 100%;">
         
         <tr style="width: 100%">
             <td > 
@@ -403,12 +385,12 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
             <td  align="right" style="font-size: 23px;color: #438282; width:30%"> ${propertyName}</td>
 
         </tr>
-    </table>
+    </table-->
   
-      <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 4px; margin-bottom: 10px; color:white;">
+      <table style="width: 100%; font-size: 12px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
           <tr>
               
-              <td style="text-align: right">
+              <td style="text-align: left; color:black">
               ${today}
               </td>
           </tr>
@@ -416,7 +398,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
      
           <table class="tftable1" align="center" border="1" >
-              <tr height="50">
+              <tr height="50" style="background-color:#C4B67E; color:white;">
                   <th width="2%">S.N.</th>
                   <th width="15%" >Member Name</th>
                   <th width="3%">Membership Number</th>
@@ -462,7 +444,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
           <div style="page-break-after: always;">&nbsp; </div>
 
       <table class="tftable border-none" style="margin-top:50px; ">
-      <caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Summary By Payment Mode</b></caption>
+      <caption align="left" style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Summary By Payment Mode</b></caption>
           <tr width="200px">
               <th>S. No. </th>
               <th  height="50">Type</th>
@@ -487,7 +469,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
   
 
       <table class="tftable   border-none"  style="margin-top:50px;">
-      <caption  style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Break-up of sales </b></caption>
+      <caption  style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Break-up of sales </b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
@@ -497,20 +479,20 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
       <tr>
           <td>1</td>
-          <td>New(N)</td>
+          <td style="text-align: left;">New(N)</td>
           <td>${summaryDataNRC[0].noOfSale}</td>
           <td>${summaryDataNRC[0].amount}</td>
       </tr>
       <tr>
           <td>2</td>
-          <td>Renewal(R)(N)</td>
+          <td style="text-align: left;">Renewal(R)</td>
           <td>${summaryDataNRC[1].noOfSale}</td>
           <td>${summaryDataNRC[1].amount}</td>
          
       </tr>
       <tr>
           <td>3</td>
-          <td>Cancellation (C)</td>
+          <td style="text-align: left;">Cancellation (C)</td>
           <td>${summaryDataNRC[2].noOfSale}</td>
           <td>${summaryDataNRC[2].amount}</td>
       </tr>
@@ -527,7 +509,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
     <div style="page-break-after: always;">&nbsp; </div>
   
       <table class="tftable border-none"  style="margin-top:50px; ">
-      <caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Summary By Level</b></caption>
+      <caption align="left" style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Summary By Level</b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
@@ -537,58 +519,57 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
       
       <tr>
          <td>1</td>   
-          <td>Level 1</td>
+          <td style="text-align: left;">Level 1</td>
           <td>${summaryDataLevel[0].noOfSale}</td>
           <td>${summaryDataLevel[0].amount}</td>
       </tr>
       <tr>
           <td>2</td>
-          <td>Level 2</td>
+          <td style="text-align: left;">Level 2</td>
           <td>${summaryDataLevel[1].noOfSale}</td>
           <td>${summaryDataLevel[1].amount}</td>
       </tr>
       <tr>
           <td>3</td>
-          <td>Level 3</td>
+          <td style="text-align: left;">Level 3</td>
           <td>${summaryDataLevel[2].noOfSale}</td>
           <td>${summaryDataLevel[2].amount}</td>
       </tr>
       <tr>
           <td>4</td>
-          <td>Level 4</td>
+          <td style="text-align: left;">Level 4</td>
           <td>${summaryDataLevel[3].noOfSale}</td>
           <td>${summaryDataLevel[3].amount}</td>
       </tr>s
       <tr>
-      <td colspan="2">Sub Total of Paid sales</td>
+      <td colspan="2" >Sub Total of Paid sales</td>
       <td>${summaryTotalSalesByLevl}</td>
       <td>${summaryTotalAmountByLevl}</td>
       </tr>
       <tr>
       <td>5</td>
-      <td>Spouse Complimentry</td>
+      <td style="text-align: left;">Spouse Complimentry</td>
       <td>${summaryDataLevel[4].noOfSale}</td>
       <td>${summaryDataLevel[4].amount}</td>
       </tr>
       <tr>
-      <td>6</td>
-      <td>Other Complimentry (includes MGM)</td>
+      <td >6</td>
+      <td style="text-align: left;">Other Complimentry (includes MGM)</td>
       <td>${summaryDataLevel[5].noOfSale}</td>
       <td>${summaryDataLevel[5].amount}</td>
       </tr>
       <tr>
       <td>7</td>
-      <td>Reissue (INR 500)</td>
+      <td style="text-align: left;">Reissue (INR 500)</td>
       <td>2</td>
       <td>4000</td>
       </tr>
       <td>8</td>
-      <td>Wedding Bunding</td>
+      <td style="text-align: left;">Wedding Bunding</td>
       <td>2</td>
       <td>4000</td>
       </tr>
       
-        <!-- ${summaryHtml} -->
 
       <tr height="50"  align="center">
           <td colspan="2">Total</td>
@@ -599,11 +580,11 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
 
   <table class="tftable border-none" style="margin-top:50px; width: 45%">
-  <caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
+  <caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
   <tr width="200px">
       <th>S. No.</th>
       <th>Date</th>
-      <th>Member Name</th>
+      <th >Member Name</th>
       <th  height="50">Membership Number</th>
       <th>Level</th>
       <th>Certificate Number issued</th>
@@ -621,7 +602,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
 
 <table class="tftable border-none" style="margin-top:50px; ">
-<caption align="left" style="font-size: 16px; margin-top:12px; background-color: #c3c1cf; text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
+<caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
 <tr width="200px">
     <th>S. No.</th>
     <th  height="50">Type</th>
@@ -647,9 +628,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 <div style="page-break-after: always;">&nbsp;</div>
 
 
-<h4 style="background-color: #c3c1cf; width: 15%">Annexure – 3  Explanation</h4>
-<div style="font-size:3.5vw; " >
-This is an auto generated Daily Sales Report of < Program Name>.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
+<h4 style="width: 15%; font-size: 13px;" >Annexure – 3  Explanation</h4>
+<div style="font-size: 13px; " >
+This is an auto generated Daily Sales Report of ${programName}.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
 
 1.  Member Name – The full name of the Member <br>
 2.  Membership Number – A Nine-digit unique number for every membership <br>
@@ -674,10 +655,10 @@ Disclaimer <br><br>
 
 While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."
 
-    <div class="arilFont" id="pageFooter" style="font-size: 13px; height:500px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter" style="font-size: 11px; height:500px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
-    <p align="left"> MARRIOTT CONFIDENTIAL & PROPRIETARY INFORMATION </p>
-    <p>The contents of the document are confidential and proprietary to Marriott International, Inc. and may not be reproduced, disclosed, distributed or used without the express permission of an authorised representative of Marriott. Any other use is expressly prohibited</p>
+    <p align="left"> ${dynamicValues.page_footer_1_dsr__c} </p>
+    <p>${dynamicValues.page_footer_2_dsr__c}</p>
     </div>
     
   </body>

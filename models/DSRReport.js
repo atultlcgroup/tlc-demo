@@ -189,6 +189,17 @@ let getBrandId = async(property__c, customer_set__c)=>{
     }
 }
 
+let getDynamicValues=async(brandId)=>{
+    try{
+        let query=await pool.query(`select name dsr_subject_name,brand_name__c,brand_logo__c,tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
+        column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let result = query ? query.rows : [];
+        return result;
+    }catch(e){
+        return [];
+    } 
+}
+
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -212,14 +223,21 @@ let DSRReport = async()=>{
 
                     //get brand Id
                     let brandId = await getBrandId(dataObj.propertyArr[ind],``)
+                    console.log(`brand id = ${brandId}`)
+                    let dynamicValues=await getDynamicValues(brandId);
+                    console.log(dynamicValues)
+                       if(dynamicValues.length){
                       //get dsr file from SFDC
-                    let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
-                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
-                    let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
-                    console.log(excelFile)
-                    console.log(`------------------------------------------------------------`)
-                      sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails) 
-                      updateLog(insertedId, true ,'Success', '' , pdfFile)
+                      let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+                      let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
+                      let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
+                      console.log(excelFile)
+                      console.log(`------------------------------------------------------------`)
+                        sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
+                        updateLog(insertedId, true ,'Success', '' , pdfFile)
+                       }else{
+                        updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                       }
                   }
                   else{
                       updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
@@ -249,17 +267,22 @@ let DSRReport = async()=>{
         //         if(emails1.length){
             //get brand id 
             // let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
+            // let dynamicValues1=await getDynamicValues(brandId);
+            // if(dynamicValues1.length){
             //get dsr file from SFDC
                 //   let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
-        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1); 
-        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1);
+        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]); 
+        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]);
                
-        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1)
+        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
         //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
         //           }else{
         //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
         //           }
+        //     }else{
+        //     updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+        // }
         //           console.log(`From Model`)
         //       }else{
         //         updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )

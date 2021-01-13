@@ -30,7 +30,7 @@ let convertDateFormat= (date1)=>{
       }
       return dateTime
 }
-let generateExcel = async(dsrValues,propertyId, certificateIssuedArr)=>{
+let generateExcel = async(dsrValues,propertyId, certificateIssuedArr , dynamicValues)=>{
 let     propertyName = `${dsrValues[0].property_name}`;
 
 let wb = new xl.Workbook();
@@ -410,6 +410,7 @@ let style = wb.createStyle({
 
   ws2.addImage({
     path: './helper/logo-tlc-small.jpg',
+    // path: dynamicValues[0].tlc_logo__c,
     type: 'picture',
     position: {
       type: 'oneCellAnchor',

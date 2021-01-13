@@ -118,11 +118,7 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
                 filename: `Cheque Details.pdf`,
                 path: `${sfdcFile}`
             }
-            ,{
-                filename: `logo-cm.png`,
-                path: `./helper/logo-cm.png`,
-                cid:'logocm'
-            }]
+            ]
         };
       
     }else{

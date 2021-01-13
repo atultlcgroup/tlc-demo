@@ -12,7 +12,6 @@ const from=process.env.FROM_MAIL || "";
 const to=process.env.TO_MAIL || ""
 const subject =process.env.MAIL_SUBJECT || "";
 let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
-const fromEmailForDSR = process.env.FROM_EMAIL_FOR_DSR || "";
 const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
 const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
 const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
@@ -194,7 +193,7 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
 }
 
 
-let sendDSRReport=(file,excelFile,sfdcFile,fileName,emails)=>{
+let sendDSRReport=(file,excelFile,sfdcFile,fileName,emails , dynamicValues , program_name)=>{
     try{
         readHTMLFile(__dirname + `/DSR_Report.html`, function(err, html) {
             console.log('hi')
@@ -202,12 +201,15 @@ let sendDSRReport=(file,excelFile,sfdcFile,fileName,emails)=>{
             console.log(err)
             let dateForDSRReport= new Date();
             dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
-            let subjectForDSRReport = `Club Marriott | Daily Sales Report`
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_dsr__c , "brandLogo": dynamicValues[0].brand_logo__c};
            let htmlToSend = template(replacements);
+           const displayName = dynamicValues[0].display_name_dsr__c || '';
+           const fromEmailForDSR = dynamicValues[0].from_email_id_dsr__c || '';
+           const subjectForDSRReport = dynamicValues[0].dsr_subject_name || '';
+
             console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentDSR(emails, `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,`${sfdcFile}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentDSR(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,`${sfdcFile}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
