@@ -104,9 +104,6 @@ let getDRRData =async(property_id)=>{
         on a.sfid=reservation__c.assigned_staff_member__c
         Inner Join tlcsalesforce.program__c
         On membershiptype__c.program__c = program__c.sfid 
-        limit 20
-        `;
-        let qry1 =`
         where 
         (
             membershiptype__c.property__c='${property_id}' 
