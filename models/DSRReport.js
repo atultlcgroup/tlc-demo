@@ -6,6 +6,112 @@ const e = require("express");
 const pool = require("../databases/db").pool;
 const fs = require('fs');
 
+const axios = require('axios');
+const qs = require('qs');
+var request = require("request");
+
+let token= ``
+
+// let saveSfdcFile = async(data, propertyId)=>{
+//     try{
+//         console.log(data)
+//         let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${Date.now()}.pdf`;
+//         console.log(`------------------------------${fileName}`)
+//         fs.writeFileSync(fileName , data.toString('base64'), {encoding:'base64'});
+//     }catch(e){
+//         console.log(e)
+//         return e;
+//     }
+// }
+let loginApiCall = async ()=>{
+    let data = qs.stringify({
+        'grant_type': 'password',
+       'client_id': '3MVG9iLRabl2Tf4gLB3z_w8GAMoTJ8p3kvePpMe8g0PWDQt0oRSGvs5E3baRAO.wRKVapH3EFDIvUmNLXz68r',
+       'client_secret': '5C175EFED053E9E2C72E6B8816D7A181796BEE68A547DB3F8AC07A731D4CDA67',
+       'username': 'apiintegrationuser@tlcgroup.com.devpro',
+       'password': 'tlcgroup123' 
+       });
+       let config = {
+         method: 'post',
+         url: 'https://test.salesforce.com/services/oauth2/token',
+         data : data
+        };
+       try{
+           let data =await axios(config)
+            return {code: data.status ,msg : data.data}
+            // return (JSON.stringify(data.data))
+    }catch (error) {
+           throw {code: error.response.status, msg: error.response.data }
+       }
+}
+
+let getFileFromSFDC=(fileId, token , propertyId)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/sobjects/ContentVersion/${fileId}/VersionData`,
+        headers: 
+         {
+           authorization  : `Bearer ${token}` } 
+          };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                     let parseData = JSON.parse(body.toString())
+                     if( parseData[0].errorCode == 'INVALID_AUTH_HEADER' &&  parseData[0].message == 'INVALID_HEADER_TYPE' ){
+                      resolve({code: parseData[0].errorCode, msg: parseData[0].message})
+                   }else{
+                      reject({code: parseData[0].errorCode, msg: parseData[0].message})
+                   }
+                   }catch(e){
+                    //    console.log(e)
+                       //wirte file from sfdc 
+                   let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${Date.now()}.pdf`;
+                     fs.writeFileSync(fileName , body.toString('base64'), {encoding:'base64'});
+                      resolve({code: 200, msg: {fileName: fileName}})
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+        
+}
+let sfdcApiCall =  async(propertyId, date)=>{
+    try {
+        console.log(`------------property id = ${propertyId}---Date= ${date}---------`)
+        let fileId = `0681y000000PkNXAA0`;
+        //get file id here by date and property id
+        console.log(`----------------------token =${token} ------------------------`)
+        let fileData =await getFileFromSFDC(fileId , token , propertyId);
+        console.log(fileData)
+        if(fileData.code == 'INVALID_AUTH_HEADER'){
+            //call login api 
+            console.log(`-----Login API called---------`)
+            let data = await loginApiCall()
+              token = data.msg.access_token  || ``;
+              fileData =await getFileFromSFDC(fileId , token , propertyId);
+        }
+        if(fileData.code== 200){
+            console.log(`yes! file exists for given fileId`)
+            // let fileName = await saveSfdcFile(fileData.msg, propertyId)
+            return fileData.msg.fileName || ``
+        }
+    } catch (error) {
+        console.log(`++++++++++++=+++++++++++++++++++++`)
+        return ``;
+    }
+}
+
+
+
+
 let findPaymentRule= async(req)=>{
     try{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
@@ -61,6 +167,28 @@ let unlinkFiles = (files)=>{
             return(`${err}`);
     })
 }
+
+
+
+let convertDateFormat = () => {
+    let today = new Date();
+    today.setDate(today.getDate() - 1); 
+    today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
+   return today    
+}
+
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -81,12 +209,20 @@ let DSRReport = async()=>{
                 if(DSRRecords.length){
                    
                   if(emails.length){
-                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
-                   // let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
+
+                    //get brand Id
+                    let brandId = await getBrandId(dataObj.propertyArr[ind],``);
+                    console.log("brandId",brandId);
+                    let dynamicValues=await getDynamicValues(brandId);
+                    console.log("dynamicValues",dynamicValues)
+                      //get dsr file from SFDC
+                    //let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued,dynamicValues);
+                    //let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
                     //console.log(excelFile)
                     console.log(`------------------------------------------------------------`)
-                      //sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,'Daily Sales Report',emails) 
-                      updateLog(insertedId, true ,'Success', '' , pdfFile)
+                      //sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails) 
+                      //updateLog(insertedId, true ,'Success', '' , pdfFile)
                   }
                   else{
                       updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
@@ -114,10 +250,15 @@ let DSRReport = async()=>{
         // //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
         //       if(DSRRecords1.length){
         //         if(emails1.length){
+            //get brand id 
+            // let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
+            //get dsr file from SFDC
+                //   let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+                   
         //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1); 
-        //           let excelFile = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1);
+        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1);
                
-        //          sendMail.sendDSRReport(`${pdfFile1}`,'Daily Sales Report',emails1)
+        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1)
         //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
         //           }else{
         //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
@@ -327,6 +468,27 @@ let getDSRReportCS=async(customer_set_sfid)=>{
 
     }
 }
+
+
+let getDynamicValues=async(brandId)=>{
+    try{
+        console.log(`select brand_name__c,brand_logo__c, tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
+        column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let query=await pool.query(`select brand_name__c,brand_logo__c, tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
+        column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        
+        
+        let result = query ? query.rows[0] : [];
+        console.log("query",result);
+        return result;
+
+        
+        return result;
+    }catch(e){
+
+    }
+}
+
 
 module.exports={
     DSRReport

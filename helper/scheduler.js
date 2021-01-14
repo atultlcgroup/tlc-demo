@@ -11,8 +11,6 @@ const RReport = require('../models/RReport')
 
 
 
-
-// POS Scheduler
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
     console.log(`=================   SCHEDULER START POS   ========================`)
     await posModel.getPosData()
@@ -167,4 +165,27 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_RR_REPORT == true || process.env.IS_SCHE
 }
 
 
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_POS_TOTAL_SPENT_REPORT == 'TRUE')
+{
+  console.log(`schedule Tasks For Member Spent Report `);
+  scheduleTasksForMemberSpentReport(process.env.SCHEDULER_TIME_FOR_POS_TOTAL_SPENT_REPORT);
+}
 
+
+
+
+//Scedule for IMAP 
+// let scheduleForUtrReport=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+//   console.log(`=================   SCHEDULER START IMAP | UTR Report  ========================`)
+//  let data= imapForUTR.schedulerForImap(scheduledTime)
+//  console.log(data) 
+//  console.log(`================= IMAP | UTR Report: Success=============`)
+// });
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_IMAP == true || process.env.IS_SCHEDULER_ALLOWED_FOR_IMAP == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_IMAP == 'TRUE')
+{
+  console.log(`schedule Tasks For IMAP | UTR Report`);
+  // scheduleForUtrReport(process.env.SCHEDULER_TIME_FOR_IMAP);
+  const imapForUTR = require('./imap')
+
+}

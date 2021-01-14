@@ -1,4 +1,19 @@
 let xl = require('excel4node');
+let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+let convertDateFormatForExcel = (date1) => {
+    if (date1) {
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${String(days[today1.getDay()] || '')} ${String(today1.getDate()).padStart(2, '0')}/${today1.getMonth() +1}/${today1.getFullYear()} ${strTime}`
+    }
+    return dateTime
+}
 
 
 let convertDateFormat= (date1)=>{
@@ -37,7 +52,8 @@ let style = wb.createStyle({
     },
     alignment: {
       wrapText: true,
-      horizontal: 'center',
+      horizontal: 'right',
+      vertical: 'center'
     },
     fill: {
       type: 'pattern',
@@ -46,6 +62,15 @@ let style = wb.createStyle({
       fgColor: '#C4B67E',
     }
   });
+
+  let myStyleForLogo = wb.createStyle({
+    font: {
+      bold: true,
+      size: 14,
+    },
+   
+  });
+  
   let fillColor = wb.createStyle({
     fill: {
       type: 'pattern',
@@ -64,6 +89,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'center',
+      vertical: 'center'
     },
   });
   
@@ -76,6 +102,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'center',
+      vertical: 'center'
     },
     border:{
         left: {
@@ -106,10 +133,11 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'center',
+      vertical: 'center'
     },
     border:{
         left: {
-            style: "thin" 
+            style: "thin",
           },
           right: {
             style: "thin" 
@@ -135,6 +163,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
   });
   let myStyleAlignLeft = wb.createStyle({
@@ -145,6 +174,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
   });
   let myStyleAlignLeft2 = wb.createStyle({
@@ -155,6 +185,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
     fill: {
       type: 'pattern',
@@ -170,6 +201,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'center',
+      vertical: 'center'
     },
     border:{
         left: {
@@ -193,6 +225,41 @@ let style = wb.createStyle({
         }
   
   });
+  let myStyleAlignCenterWithoutBoldWithoutBorder = wb.createStyle({
+    font: {
+        size: 10,
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'center',
+      vertical: 'center'
+    },
+    border:{
+        left: {
+            style: "thin",
+            color: '#F2F2F2'
+          },
+          right: {
+            style: "thin",
+            color: '#F2F2F2'
+          },
+          top: {
+            style: "thin",
+            color: '#F2F2F2'
+          },
+          bottom: {
+            style: "thin",
+            color: '#F2F2F2' 
+          },
+        },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#F2F2F2',
+          fgColor: '#F2F2F2',
+        }
+  
+  });
   let myStyleAlignCenterWithoutBold2 = wb.createStyle({
     font: {
         size: 10,
@@ -200,6 +267,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'center',
+      vertical: 'center'
     },
     border:{
         left: {
@@ -230,6 +298,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
     border:{
         left: {
@@ -252,6 +321,40 @@ let style = wb.createStyle({
           fgColor: '#F2F2F2',
         }
   });
+  let myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder = wb.createStyle({
+    font: {
+        size: 10,
+      },
+    alignment: {
+      wrapText: true,
+      horizontal: 'left',
+      vertical: 'center'
+    },
+    border:{
+      left: {
+          style: "thin",
+          color: '#F2F2F2'
+        },
+        right: {
+          style: "thin",
+          color: '#F2F2F2'
+        },
+        top: {
+          style: "thin",
+          color: '#F2F2F2'
+        },
+        bottom: {
+          style: "thin",
+          color: '#F2F2F2' 
+        },
+      },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#F2F2F2',
+          fgColor: '#F2F2F2',
+        }
+  });
   let myStyleAlignCenterWithoutBoldAlignLeft2 = wb.createStyle({
     font: {
         size: 10,
@@ -259,6 +362,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
     border:{
         left: {
@@ -289,6 +393,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
     });
   let myStyle1 = wb.createStyle({
@@ -299,6 +404,7 @@ let style = wb.createStyle({
     alignment: {
       wrapText: true,
       horizontal: 'left',
+      vertical: 'center'
     },
   });
 
@@ -318,9 +424,10 @@ let style = wb.createStyle({
   });
   let row = 3;
   let column = 2
-
-  ws2.cell(row, column,row+=2, column+19, true).string(`Daily Sales Report - ${dsrValues[0].program_name}                                                                      ${propertyName}`).style(myStyle);
-  ws2.cell(row+=1, column,row, column + 17, true).string(`MON 14/12/2020 8:30 AM`).style(style);
+  ws2.cell(row, column ,row+2, column+1, true).string(``).style(myStyle);
+  ws2.cell(row, column + 2,row+2, column+10, true).string(`Daily Sales Report - ${dsrValues[0].program_name}`).style(myStyle);
+  ws2.cell(row, column + 11,row+=2, column+19, true).string(`${propertyName}`).style(myStyle);
+  ws2.cell(row+=1, column,row, column + 17, true).string(`${convertDateFormatForExcel(new Date())}`).style(style);
 //table header
 console.log(`row = ${row}`)
 column = 2
@@ -826,16 +933,16 @@ ws2.cell(row, column,row, column+4, true).string(`Credit Card Batch Closure`).st
 row+=1;
 column = 2;
 ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
-ws2.cell(row, column++).string(`Document Reference Number`).style(myStyleAlignCenter)
+ws2.cell(row, column++, row , column+ 3,true).string(`Document Reference Number`).style(myStyleAlignCenter)
 slNo =1;
 row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++, row , column+ 3,true).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++ , row , column+ 3,true).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 //This is an auto generated Daily Sales Report 
 
 row +=4;
@@ -851,86 +958,86 @@ slNo = 1;
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Member Name – The full name of the Member`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Member Name – The full name of the Member`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Membership Number – A Nine-digit unique number for every membership`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Membership Number – A Nine-digit unique number for every membership`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Level-  Membership Type name`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Level-  Membership Type name`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Type – New or Renewal Membership. N for New and R for Renewal`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Type – New or Renewal Membership. N for New and R for Renewal`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Enrolment Date – The date when the membership was enrolled or renewed`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Enrolment Date – The date when the membership was enrolled or renewed`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Valid Till – The date when the membership expires`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Valid Till – The date when the membership expires`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Promo code - Promocode to avail extra benefit`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Promo code - Promocode to avail extra benefit`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Payment Mode – The mode of payment through which a member pays the membership amount`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Payment Mode – The mode of payment through which a member pays the membership amount`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Online Transaction No. – A unique transaction number to identify a membership (Not the UTR number)`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Online Transaction No. – A unique transaction number to identify a membership (Not the UTR number)`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`CC Approval Code – An approval code that appears on the charge slip that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`CC Approval Code – An approval code that appears on the charge slip that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`CC Batch Number – Batch Number that appears on the charge slips that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`CC Batch Number – Batch Number that appears on the charge slips that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Cash Receipt Number – The number that appears on a Cash receipt issued by the hotel/program`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Cash Receipt Number – The number that appears on a Cash receipt issued by the hotel/program`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Cheque Details – Cheque number, Bank Name and Deposit Date`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Cheque Details – Cheque number, Bank Name and Deposit Date`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Amount – Net Amount without Tax`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Amount – Net Amount without Tax`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Tax – Goods and Services Tax`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Tax – Goods and Services Tax`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Total Amount – The amount that the member has paid`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Total Amount – The amount that the member has paid`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`GSTIN – The GST number that the member has provided`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`GSTIN – The GST number that the member has provided`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`State Code – Two-digit code that appears before the PAN number in a GSTIN provided`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`State Code – Two-digit code that appears before the PAN number in a GSTIN provided`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Remarks – Comments entered by the person enrolling a membership in the TLC CRM`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Remarks – Comments entered by the person enrolling a membership in the TLC CRM`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
 ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++,row, column+19, true).string(`Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate`).style(myStyleAlignCenterWithoutBoldAlignLeft)
+ws2.cell(row, column++,row, column+19, true).string(`Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 
 //Disclaimer

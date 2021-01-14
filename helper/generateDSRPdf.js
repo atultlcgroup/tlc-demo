@@ -25,14 +25,16 @@ let convertDateFormat = (date1) => {
 let getEmptyIfNull = (val) => {
     return val ? val : '';
 }
-let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
+let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues) => {
     let pyamnetObj = {}
 
     let summaryTotalSale = 0
     let summaryTotalAmount = 0
     propertyName = `${dsrValues[0].property_name}`;
     programName = dsrValues[0].program_name;
-    console.log("dsr values",dsrValues)
+    console.log("dsr values",dsrValues);
+    console.log("dynamicValuesPDF",dynamicValues)
+    console.log("logo",dynamicValues.tlc_logo__c)
     let summaryData = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
     let summaryDataNRC = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
 
@@ -147,7 +149,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
         // For Sumaary by level count 
        console.log(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        console.log("obj",obj);
+        //console.log("obj",obj);
         console.log("obj",obj.payment_mode__c);
         if(obj.payment_mode__c == 'Complimentary' && obj.payment_for__c == 'Add-On' ){
             console.log("in Complimentary Add-on",summaryDataLevel[4].noOfSale)
@@ -191,7 +193,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
 
     }
     let sN = 1;
-    for (d of certificateIssuedArr) {
+    for (d of certificateIssuedAr) {
 
 
         
@@ -366,7 +368,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedArr) => {
   <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
         <tbody>
             <tr >
-                <td align="left" style="font-size: 20px;color: #808000;  width: 30%"><img src="file:///D:/referralDemo/tlc-demo/helper/logo-tlc.png" alt=""  height=60 width=140></img><br><span style="font-size: 10px; color:black;">www.tlcgroup.com</span></td>
+                <td align="left" style="font-size: 20px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img><br><span style="font-size: 12px; color:black;">www.tlcgroup.com</span></td>
                 <td align="center" style="font-size: 18px; width: 30%; color:black;">Daily Sales report-${programName}</td>
                 <td align="right"style="font-size: 18px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
@@ -655,8 +657,8 @@ While we have taken every precaution to ensure that the data presented here is a
 
     <div class="arilFont" id="pageFooter" style="font-size: 11px; height:500px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
-    <p align="left"> MARRIOTT CONFIDENTIAL & PROPRIETARY INFORMATION </p>
-    <p>The contents of the document are confidential and proprietary to Marriott International, Inc. and may not be reproduced, disclosed, distributed or used without the express permission of an authorised representative of Marriott. Any other use is expressly prohibited</p>
+    <p align="left"> ${dynamicValues.page_footer_1_dsr__c} </p>
+    <p>${dynamicValues.page_footer_2_dsr__c}</p>
     </div>
     
   </body>
