@@ -80,7 +80,7 @@ let getDRRData =async(property_id)=>{
         membership__c.membership_number__c,membership_offers__c.certifcate_number__c,
         reservation__c.redemption_transaction_code__c,reservation__c.assigned_staff_member__c,
         pos_cheque_details__c.net_amount__c,property__c.name as hotel_name,outlet__c.name as outlet_name,
-        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c
+        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c,program__c.name as program_name
         from tlcsalesforce.redemption_log__c
         inner join tlcsalesforce.membership_offers__c
         on membership_offers__c.sfid=redemption_log__c.membership_offer__c
@@ -102,6 +102,11 @@ let getDRRData =async(property_id)=>{
         on reservation__c.outlet__c=outlet__c.sfid
         Left join  tlcsalesforce.account a
         on a.sfid=reservation__c.assigned_staff_member__c
+        Inner Join tlcsalesforce.program__c
+        On membershiptype__c.program__c = program__c.sfid 
+        limit 20
+        `;
+        let qry1 =`
         where 
         (
             membershiptype__c.property__c='${property_id}' 
@@ -125,7 +130,7 @@ let getDRRDataCS =async(customer_set__c)=>{
         membership__c.membership_number__c,membership_offers__c.certifcate_number__c,
         reservation__c.redemption_transaction_code__c,reservation__c.assigned_staff_member__c,
         pos_cheque_details__c.net_amount__c,property__c.name as hotel_name,outlet__c.name as outlet_name,
-        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c
+        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c,program__c.name as program_name
         from tlcsalesforce.redemption_log__c
         inner join tlcsalesforce.membership_offers__c
         on membership_offers__c.sfid=redemption_log__c.membership_offer__c
@@ -147,6 +152,8 @@ let getDRRDataCS =async(customer_set__c)=>{
         on reservation__c.outlet__c=outlet__c.sfid
         Left join  tlcsalesforce.account a
         on a.sfid=reservation__c.assigned_staff_member__c
+        Inner Join tlcsalesforce.program__c
+        On membershiptype__c.program__c = program__c.sfid 
         where 
         (
         --membershiptype__c.property__c='a0D0k000009PPsEEAW' or 
@@ -181,49 +188,97 @@ let insertLog = async(propertyId,customerSetId, emails)=>
     }
 }
 
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+let getDynamicValues=async(brandId)=>{
+    try{
+        let query=await pool.query(`select  subject_drr__c drr_subject_name,brand_name__c,brand_logo__c,tlc_logo__c,page_footer_2_drr__c,page_footer_1_drr__c,footer_drr__c,from_email_id_drr__c,
+        column_1_drr__c,column_2_drr__c,column_3_drr__c,display_name_drr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let result = query ? query.rows : [];
+        return result;
+    }catch(e){
+        return [];
+    } 
+}
+
+
 let DRReport= ()=>{
     console.log(`-From DRR Report-`)
     return new Promise(async(resolve, reject)=>{
         try{
             console.log(`-------------`)
             let getEmailandPropertyArr = await getDRRSfid()
-            console.log(getEmailandPropertyArr)
+            // console.log(getEmailandPropertyArr)
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
                 let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind];
-                ind++;
                 let dataPropertyWise = await getDRRData(propertyId)
+
                 console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
                     if(e.length){
+                    //get brand Id
+                    console.log(`Property Id = ${getEmailandPropertyArr.propertyArr[ind]}`)
+                    let brandId = await getBrandId(getEmailandPropertyArr.propertyArr[ind],``)
+                    let dynamicValues=await getDynamicValues(brandId);
+                    console.log(dynamicValues)
+                    if(dynamicValues.length){
+                      //get DRR file from SFDC
+         
                     let pdfFile = await generatePdf.generateDRRPDF(dataPropertyWise);
                     console.log(pdfFile)
-                    sendMail.sendDRReport(`${pdfFile}`,'Daily Redemption Report',e)
+                    sendMail.sendDRReport(`${pdfFile}`,'Daily Redemption Report',e, dynamicValues , dataPropertyWise[0].program_name)
                     updateLog(insertedId, true ,'Success', '' , pdfFile)
                     console.log(`From Model`)
+                    }else{
+                        updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                    }
                     }else{
                         updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
                     }
                 }else{
                     updateLog(insertedId, false ,'Error', 'Record not found!', '' )
                 }
+                ind++;
+
             }
             let getEmailandCSArr = await getDRRSfidCS();
             let ind1 = 0;
             for(let e of getEmailandCSArr.emailArr){
                 let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
                 let csId = getEmailandCSArr.customerSetArr[ind1];
-                ind1++
+                ind1++;
                 let dataCSWise = await getDRRDataCS(csId)
                 console.log(dataCSWise)
                 if(dataCSWise.length){
                 if(e.length){
-                let pdfFile = await generatePdf.generateDRRPDF(dataCSWise);
-                console.log(pdfFile)
-                sendMail.sendDRReport(`${pdfFile}`,'Daily Redemption Report',e)
-                console.log(`From Model`)
-                updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                        //get brand Id
+                        console.log(`Property Id = ${getEmailandCSArr.propertyArr[ind]}`)
+                        let brandId1 = await getBrandId(getEmailandCSArr.propertyArr[ind],``)
+                        let dynamicValues1=await getDynamicValues(brandId1);
+                        console.log(dynamicValues1)
+                           if(dynamicValues1.length){
+                          //get DRR file from SFDC
+
+                        let pdfFile = await generatePdf.generateDRRPDF(dataCSWise);
+                        console.log(pdfFile)
+                        sendMail.sendDRReport(`${pdfFile}`,'Daily Redemption Report',e,dynamicValues1 , dataCSWise[0].program_name)
+                        console.log(`From Model`)
+                        updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                        }else{
+                            updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                        }
                 }else{
                     updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
                 }

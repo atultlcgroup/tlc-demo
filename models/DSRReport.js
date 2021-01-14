@@ -362,7 +362,7 @@ let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
        if(property_sfid)
        qry+=` (Property__c.sfid='${property_sfid}') `
        else
-       qry+=` membership__c.customer_set__c IN ('customer_set_sfid') `
+       qry+=` membership__c.customer_set__c IN ('${customer_set_sfid}') `
        qry+=`group by payment__c.createddate, account.name,
         membership__c.membership_number__c, membershiptype__c.name`
         let result  = await pool.query(qry)
@@ -407,8 +407,7 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 20 `)
-        let qry =(`
+        On membershiptype__c.program__c = program__c.sfid 
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
