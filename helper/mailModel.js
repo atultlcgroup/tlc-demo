@@ -155,7 +155,7 @@ let sendEOMPaymentReport=(file,pdf,fileName,emails,transactionIdsArr)=>{
     }
 }
 
-let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>{
+let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id, dynamicValues)=>{
     try{
         readHTMLFile(__dirname + `/Payment_Report_For_Each_Payment.html`, function(err, html) {
             console.log('hi')
@@ -168,9 +168,12 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
             if(formatDate){
                 dateTime1 = formatDate(dateFormat1)
             }
-            let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_amount?req.membership_amount:0),"fee":(req.membership_fee?req.membership_fee:0),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
+            let displayName = dynamicValues[0].display_name_epr__c || ''
+            let fromEmailForPyament = dynamicValues[0].from_email_id_epr__c || ''
+            let replacements={"footer" : dynamicValues[0].footer_epr__c , "brandLogo" : dynamicValues[0].brand_logo__c ,name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_amount?req.membership_amount:0),"fee":(req.membership_fee?req.membership_fee:0),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
             let htmlToSend = template(replacements);
-            sendmail.smtp(toEmails, `Club Marriott <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
+            console.log(`toEmails : ${toEmails}`)
+            sendmail.smtp(toEmails, `${displayName} <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
                 pool.query(`UPDATE tlcsalesforce.payment_report_log
                 SET  email_status='SUCCESS' 
                 WHERE transaction_id='${transaction_id}'`)  

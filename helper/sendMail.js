@@ -30,11 +30,7 @@ const sendMail = (to, from, subject, text, html) => {
         subject,
         text,
         html,
-        attachments:[{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
-        }]
+        attachments:[]
     };
     return new Promise((resolve, reject) => {
          SMTPConfiguration(newMail).then((res) => {
