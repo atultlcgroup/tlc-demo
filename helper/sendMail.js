@@ -124,11 +124,7 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
                 filename: `Cheque Details.pdf`,
                 path: `${sfdcFile}`
             }
-            ,{
-                filename: `logo-cm.png`,
-                path: `./helper/logo-cm.png`,
-                cid:'logocm'
-            }]
+            ]
         };
       
     }else{
@@ -253,10 +249,6 @@ const sendMailAttachmentDRR = (to, from, subject, text, html,file,fileName) => {
         attachments:[{
             filename: `${fileName}.pdf`,
             path: `${file}`
-        },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {

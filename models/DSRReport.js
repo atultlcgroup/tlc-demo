@@ -189,6 +189,7 @@ let getBrandId = async(property__c, customer_set__c)=>{
     }
 }
 
+
 let DSRReport = async()=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -211,18 +212,23 @@ let DSRReport = async()=>{
                   if(emails.length){
 
                     //get brand Id
-                    let brandId = await getBrandId(dataObj.propertyArr[ind],``);
-                    console.log("brandId",brandId);
+                    let brandId = await getBrandId(dataObj.propertyArr[ind],``)
+                    console.log(`brand id = ${brandId}`)
                     let dynamicValues=await getDynamicValues(brandId);
-                    console.log("dynamicValues",dynamicValues)
+                    console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length)
+                       if(dynamicValues.length){
                       //get dsr file from SFDC
-                    //let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
-                    let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued,dynamicValues);
-                    //let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued);
-                    //console.log(excelFile)
-                    console.log(`------------------------------------------------------------`)
-                      //sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails) 
-                      //updateLog(insertedId, true ,'Success', '' , pdfFile)
+                      console.log("Calling sfdc")
+                      let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+                      let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
+                      let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
+                      console.log(excelFile)
+                      console.log(`------------------------------------------------------------`)
+                        sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
+                        pdateLog(insertedId, true ,'Success', '' , pdfFile)
+                       }else{
+                        updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                       }
                   }
                   else{
                       updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
@@ -252,17 +258,22 @@ let DSRReport = async()=>{
         //         if(emails1.length){
             //get brand id 
             // let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
+            // let dynamicValues1=await getDynamicValues(brandId);
+            // if(dynamicValues1.length){
             //get dsr file from SFDC
                 //   let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
-        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1); 
-        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1);
+        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]); 
+        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]);
                
-        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1)
+        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
         //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
         //           }else{
         //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
         //           }
+        //     }else{
+        //     updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+        // }
         //           console.log(`From Model`)
         //       }else{
         //         updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
@@ -342,7 +353,7 @@ let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
        if(property_sfid)
        qry+=` (Property__c.sfid='${property_sfid}') `
        else
-       qry+=` membership__c.customer_set__c IN ('customer_set_sfid') `
+       qry+=` membership__c.customer_set__c IN ('${customer_set_sfid}') `
        qry+=`group by payment__c.createddate, account.name,
         membership__c.membership_number__c, membershiptype__c.name`
         let result  = await pool.query(qry)
@@ -387,18 +398,17 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 20 `)
-        let qry =(`
-        where
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        On membershiptype__c.program__c = program__c.sfid limit 20 
+        --where
+        --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-           or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-           and
-           Membership__c is not Null and Membership_Offer__c is null
-           and
-           (Property__c.sfid='${property_sfid}'
-           or membership__c.customer_set__c IN ('')
-            )
+          -- or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+          -- and
+           --Membership__c is not Null and Membership_Offer__c is null
+           --and
+           --(Property__c.sfid='${property_sfid}'
+           --or membership__c.customer_set__c IN ('')
+            --)
             
          `)
         console.log(`hiiiSS`)
@@ -446,9 +456,9 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid
-        where
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        On membershiptype__c.program__c = program__c.sfid limit 20
+        --where
+       -- (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
           -- or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
            --and
@@ -478,12 +488,12 @@ let getDynamicValues=async(brandId)=>{
         column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
         
         
-        let result = query ? query.rows[0] : [];
+        let result = query ? query.rows : [];
         console.log("query",result);
         return result;
 
         
-        return result;
+        
     }catch(e){
 
     }

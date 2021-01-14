@@ -150,7 +150,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         // For Sumaary by level count 
        console.log(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         //console.log("obj",obj);
-        console.log("obj",obj.payment_mode__c);
+        //console.log("obj",obj.payment_mode__c);
         if(obj.payment_mode__c == 'Complimentary' && obj.payment_for__c == 'Add-On' ){
             console.log("in Complimentary Add-on",summaryDataLevel[4].noOfSale)
             summaryDataLevel[4].amount += obj.total_amount__c;
