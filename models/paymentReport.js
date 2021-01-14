@@ -188,7 +188,7 @@ let paymentReport =async (req)=>{
         Left Join tlcsalesforce.payment_report_log
         On payment__c.transaction_id__c = payment_report_log.transaction_id
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid  limit 1
+        On membershiptype__c.program__c = program__c.sfid  
         where (
         (payment__c.createddate >=  current_timestamp - interval '15 minutes'
         AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
