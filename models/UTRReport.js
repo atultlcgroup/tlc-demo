@@ -413,6 +413,42 @@ let getFileName = async(logId)=>{
         return {id: 0,file_name__c:''}
     }
 }
+
+
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+let getDynamicValues=async(brandId)=>{
+    try{
+        let query=await pool.query(`select  subject_utr__c utr_subject_name,brand_name__c,brand_logo__c,tlc_logo__c,page_footer_2_utr__c,page_footer_1_utr__c,footer_utr__c,from_email_id_utr__c,
+        column_1_utr__c,column_2_utr__c,column_3_utr__c,display_name_utr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let result = query ? query.rows : [];
+        return result;
+    }catch(e){
+        return [];
+    } 
+}
+
+
+let getProgramIdByMemberShip = async(membership_type_id)=>{
+    try{
+        console.log(`select program__c.name program_name from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+            let data = await pool.query(`select program__c.name program_name from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+            return data.rows ? data.rows[0].program_name : ``
+    }catch(e){
+        return ``;
+    }
+}
+
 let UTRReport2=async(UTRData,fileName,userid)=>{
     console.log(`UTRData=${UTRData}`)
     return new Promise(async(resolve, reject)=>{
@@ -434,10 +470,22 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
             console.log(emails)
             if(emails.length){
                 try{
+                //get brand Id
+                console.log(`Property Id = ${value[0].property_id}`)
+                let brandId = await getBrandId(value[0].property_id,``)
+                let dynamicValues=await getDynamicValues(brandId);
+                console.log(dynamicValues)
+                if(dynamicValues.length){
+                    console.log(`hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh`)
                     let excelFile = await generateExcel.generateExcel(value,'PG Settlement Report');
-                    await sendMail.sendUTRReport(`${excelFile}`,'PG Settlement Report',emails)
+                    let programName = await getProgramIdByMemberShip(value[0].membership_type_id)
+                    console.log(`programName: ${programName}`)
+                    await sendMail.sendUTRReport(`${excelFile}`,'PG Settlement Report',emails , dynamicValues , programName)
                     // await sendMail.sendUTRReport(`${excelFile}`,'UTR Report',['atul.srivastava@tlcgroup.com'])
                    await updateUTRLogStatus(key,UTRTrackingId, true,'Completed','')
+                }else{
+                    await updateUTRLogStatus(key,UTRTrackingId, false,'Error',`No record found for given brand in dynamic report object!`)
+                }
                 }catch(e){
                     await updateUTRLogStatus(key,UTRTrackingId, false,'Error',`${e}`)
                 }

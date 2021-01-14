@@ -12,7 +12,6 @@ const from=process.env.FROM_MAIL || "";
 const to=process.env.TO_MAIL || ""
 const subject =process.env.MAIL_SUBJECT || "";
 let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
-const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
 const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
 const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
 
@@ -335,7 +334,7 @@ let sendRReport=(file,fileName,emails)=>{
 }  
 
 
-let sendUTRReport=(file,fileName,emails)=>{
+let sendUTRReport=(file,fileName,emails, dynamicValues, program_name)=>{
     try{
         readHTMLFile(__dirname + `/UTR_Report.html`, function(err, html) {
             console.log('hi')
@@ -343,12 +342,14 @@ let sendUTRReport=(file,fileName,emails)=>{
             console.log(err)
             let dateForDSRReport= new Date();
             dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
-            let subjectForUTRReport = `Club Marriott | PG Settlement Report`
+            let subjectForUTRReport = dynamicValues[0].utr_subject_name || '';
+            const fromEmailForUTR = dynamicValues[0].from_email_id_utr__c || '';
+            let displayName = dynamicValues[0].display_name_utr__c
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_utr__c , "brandLogo": dynamicValues[0].brand_logo__c};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForUTR : ${fromEmailForUTR} to ${emails} subject ${subjectForUTRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentUTR(emails, `Club Marriott <${fromEmailForUTR}>` , subjectForUTRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentUTR(emails, `${displayName} <${fromEmailForUTR}>` , subjectForUTRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
