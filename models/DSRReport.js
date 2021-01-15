@@ -8,10 +8,17 @@ const fs = require('fs');
 
 const axios = require('axios');
 const qs = require('qs');
-var request = require("request");
+let request = require("request");
 
 let token= ``
-
+let logInApiURLOfSfdc = process.env.SFDC_LOGIN_API_URL || '';
+let sfdcFileApisURL = process.env.SFDC_FILE_APIS_URL || '';
+let sfdcGrandType = process.env.SFDC_LOGIN_GRAND_TYPE || '';
+let sfdcLoginClientSecret = process.env.SFDC_LOGIN_CLIENT_SECRET || '';
+let sfdcLoginClientId = process.env.SFDC_LOGIN_CLIENT_ID || '';
+let sfdcLoginUserName = process.env.SFDC_LOGIN_USER_NAME || '';
+let sfdcLoginPassword = process.env.SFDC_LOGIN_PASSWORD || '';
+console.log(`${logInApiURLOfSfdc}--${sfdcFileApisURL}--${sfdcGrandType}--${sfdcLoginClientSecret}--${sfdcLoginClientId}--${sfdcLoginUserName}--${sfdcLoginPassword}`)
 // let saveSfdcFile = async(data, propertyId)=>{
 //     try{
 //         console.log(data)
@@ -25,15 +32,15 @@ let token= ``
 // }
 let loginApiCall = async ()=>{
     let data = qs.stringify({
-        'grant_type': 'password',
-       'client_id': '3MVG9iLRabl2Tf4gLB3z_w8GAMoTJ8p3kvePpMe8g0PWDQt0oRSGvs5E3baRAO.wRKVapH3EFDIvUmNLXz68r',
-       'client_secret': '5C175EFED053E9E2C72E6B8816D7A181796BEE68A547DB3F8AC07A731D4CDA67',
-       'username': 'apiintegrationuser@tlcgroup.com.devpro',
-       'password': 'tlcgroup123' 
+        'grant_type':  `${sfdcGrandType}`,
+       'client_id': `${sfdcLoginClientId}`,
+       'client_secret': `${sfdcLoginClientSecret}`,
+       'username': `${sfdcLoginUserName}`,
+       'password': `${sfdcLoginPassword}` 
        });
        let config = {
          method: 'post',
-         url: 'https://test.salesforce.com/services/oauth2/token',
+         url: `${logInApiURLOfSfdc}/services/oauth2/token`,
          data : data
         };
        try{
@@ -51,7 +58,7 @@ let getFileFromSFDC=(fileURL, token , propertyId , fileName1, fileExtension)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `https://prod-tlc--devpro.my.salesforce.com${fileURL}`,
+        url: `${sfdcFileApisURL}${fileURL}`,
         headers: 
          {
            authorization  : `Bearer ${token}` } 
@@ -87,8 +94,8 @@ let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        // url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
-        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
+        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
 
         headers: 
          {
@@ -111,6 +118,7 @@ let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
                         reject({code: response.statusCode , msg: parseData})
                    }
                    }catch(e){
+                       console.log(e)
                        reject({code: response.statusCode, msg:`${e}` })
                    }     
                  });
@@ -146,7 +154,7 @@ let getQueryContentVersionFromSFDC=async(contentDocumentId)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/query?q=select versionData from ContentVersion where contentdocumentId = '${contentDocumentId}' and isLatest = TRUE`,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select versionData from ContentVersion where contentdocumentId = '${contentDocumentId}' and isLatest = TRUE`,
         headers: 
          {
            authorization  : `Bearer ${token}` 
@@ -184,7 +192,7 @@ let getQueryContentVersionURLDetailsFromSFDC=async(contentVersionURL)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `https://prod-tlc--devpro.my.salesforce.com${contentVersionURL}`,
+        url: `${sfdcFileApisURL}${contentVersionURL}`,
         headers: 
          {
            authorization  : `Bearer ${token}` 
@@ -427,12 +435,12 @@ let DSRReport = async()=>{
             // let dynamicValues1=await getDynamicValues(brandId);
             // if(dynamicValues1.length){
             //get dsr file from SFDC
-                //   let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+                //   let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
         //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]); 
         //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]);
                
-        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
+        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
         //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
         //           }else{
         //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
