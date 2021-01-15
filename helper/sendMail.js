@@ -97,6 +97,21 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
     console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
     console.log(`----------------------------`)    // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
     let newMail=``
+    let attachments = [{
+        filename: `${fileName}.pdf`,
+        path: `${file}`
+    },{
+        filename: `${fileName}.xlsx`,
+        path: `${excelFile}`
+    }
+    ]
+    console.log(`-----------`)
+    console.log(JSON.stringify(sfdcFile))
+    for(d of sfdcFile){
+        attachments.push({filename: `${d.name}.${d.extension}` ,
+       path: `${d.url}`})
+    }
+    // console.log(attachments)
     if(sfdcFile){
          newMail = {
             to,
@@ -104,17 +119,7 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
             subject,
             text,
             html,
-            attachments:[{
-                filename: `${fileName}.pdf`,
-                path: `${file}`
-            },{
-                filename: `${fileName}.xlsx`,
-                path: `${excelFile}`
-            },{
-                filename: `Cheque Details.pdf`,
-                path: `${sfdcFile}`
-            }
-            ]
+            attachments:attachments
         };
       
     }else{
@@ -144,14 +149,18 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
              unlinkFiles(file)
              unlinkFiles(excelFile)
              if(sfdcFile){
-                unlinkFiles(sfdcFile)
-             }
+                for(d of sfdcFile){
+                    unlinkFiles(d.url)
+                }             
+            }
             resolve(res);
         }).catch((err) => {
             unlinkFiles(file)
             unlinkFiles(excelFile)
             if(sfdcFile){
-                unlinkFiles(sfdcFile)
+                for(d of sfdcFile){
+                    unlinkFiles(d.url)
+                }
             }
             reject(err);
         });    

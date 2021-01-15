@@ -210,7 +210,7 @@ let sendDSRReport=(file,excelFile,sfdcFile,fileName,emails , dynamicValues , pro
            const subjectForDSRReport = dynamicValues[0].dsr_subject_name || '';
 
             console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentDSR(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,`${sfdcFile}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentDSR(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,sfdcFile,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')

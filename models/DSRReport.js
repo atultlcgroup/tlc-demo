@@ -45,11 +45,13 @@ let loginApiCall = async ()=>{
        }
 }
 
-let getFileFromSFDC=(fileId, token , propertyId)=>{
+
+
+let getFileFromSFDC=(fileURL, token , propertyId , fileName1, fileExtension)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/sobjects/ContentVersion/${fileId}/VersionData`,
+        url: `https://prod-tlc--devpro.my.salesforce.com${fileURL}`,
         headers: 
          {
            authorization  : `Bearer ${token}` } 
@@ -58,23 +60,19 @@ let getFileFromSFDC=(fileId, token , propertyId)=>{
             try {
                 request(options,  async(error, response, body) =>{
                    console.log(`hihhhh`)
-                   if (error) reject(error);
+                   if (error) reject({code: respose.statusCode , msg: error});
                    // console.log(response)
-                   try{
-                     let parseData = JSON.parse(body.toString())
-                     if( parseData[0].errorCode == 'INVALID_AUTH_HEADER' &&  parseData[0].message == 'INVALID_HEADER_TYPE' ){
-                      resolve({code: parseData[0].errorCode, msg: parseData[0].message})
-                   }else{
-                      reject({code: parseData[0].errorCode, msg: parseData[0].message})
-                   }
-                   }catch(e){
+                     let parseData = body.toString()
                     //    console.log(e)
                        //wirte file from sfdc 
-                   let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${Date.now()}.pdf`;
-                     fs.writeFileSync(fileName , body.toString('base64'), {encoding:'base64'});
-                      resolve({code: 200, msg: {fileName: fileName}})
-                   }     
-                 });
+                       if(response.statusCode == 200){
+                        let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${fileName1}_${Date.now()}.${fileExtension}`;
+                        fs.writeFileSync(fileName , body.toString('base64'), {encoding:'base64'});
+                         resolve({code: 200, msg: {fileName: fileName}})
+                       }else{
+                           reject({code: response.statusCode })
+                       }
+                })
              } catch (error) {
                  console.log(error)
                  reject(error)
@@ -83,28 +81,193 @@ let getFileFromSFDC=(fileId, token , propertyId)=>{
         })
         
 }
+
+
+let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        // url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
+        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
+
+        headers: 
+         {
+           authorization  : `Bearer ${token}` 
+        } 
+       };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                     let parseData = JSON.parse(body.toString())
+                     if( response.statusCode == 401 ){
+                      resolve({code:  response.statusCode})
+                   }else if(response.statusCode == 200){
+                      resolve({code: response.statusCode , msg: parseData})
+                   }else{
+                        reject({code: response.statusCode , msg: parseData})
+                   }
+                   }catch(e){
+                       reject({code: response.statusCode, msg:`${e}` })
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+      
+}
+
+
+let convertDate= () => {
+    let date1 = new Date()
+    if (date1) {
+        date1.setDate(date1.getDate() - 1); 
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${today1.getFullYear()}-${String(today1.getMonth() +1).padStart(2, '0')}-${String(today1.getDate()).padStart(2, '0')}`
+    }
+    return dateTime
+}
+
+
+let getQueryContentVersionFromSFDC=async(contentDocumentId)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/query?q=select versionData from ContentVersion where contentdocumentId = '${contentDocumentId}' and isLatest = TRUE`,
+        headers: 
+         {
+           authorization  : `Bearer ${token}` 
+        } 
+       };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                     let parseData = JSON.parse(body.toString())
+                     if( response.statusCode == 401 ){
+                      resolve({code:  response.statusCode})
+                   }else if(response.statusCode == 200){
+                      resolve({code: response.statusCode , msg: parseData})
+                   }else{
+                        reject({code: response.statusCode , msg: parseData})
+                   }
+                   }catch(e){
+                       reject({code: response.statusCode, msg:`${e}` })
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+      
+}
+
+let getQueryContentVersionURLDetailsFromSFDC=async(contentVersionURL)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        url: `https://prod-tlc--devpro.my.salesforce.com${contentVersionURL}`,
+        headers: 
+         {
+           authorization  : `Bearer ${token}` 
+        } 
+       };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                     let parseData = JSON.parse(body.toString())
+                     if( response.statusCode == 401 ){
+                      resolve({code:  response.statusCode})
+                   }else if(response.statusCode == 200){
+                      resolve({code: response.statusCode , msg: parseData})
+                   }else{
+                        reject({code: response.statusCode , msg: parseData})
+                   }
+                   }catch(e){
+                       reject({code: response.statusCode, msg:`${e}` })
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+      
+}
+
 let sfdcApiCall =  async(propertyId, date)=>{
     try {
         console.log(`------------property id = ${propertyId}---Date= ${date}---------`)
-        let fileId = `0681y000000PkNXAA0`;
-        //get file id here by date and property id
-        console.log(`----------------------token =${token} ------------------------`)
-        let fileData =await getFileFromSFDC(fileId , token , propertyId);
-        console.log(fileData)
-        if(fileData.code == 'INVALID_AUTH_HEADER'){
+
+        //let getcontentdocument id 
+        let ContentDocumentIdData=await getContentDocumentIdFromSFDC(propertyId ,token, date);
+        if(ContentDocumentIdData.code == 401){
             //call login api 
             console.log(`-----Login API called---------`)
             let data = await loginApiCall()
               token = data.msg.access_token  || ``;
-              fileData =await getFileFromSFDC(fileId , token , propertyId);
+              console.log(`-------token----------`)
+              console.log(token)
+              ContentDocumentIdData =await getContentDocumentIdFromSFDC(propertyId ,token, date);
         }
-        if(fileData.code== 200){
-            console.log(`yes! file exists for given fileId`)
-            // let fileName = await saveSfdcFile(fileData.msg, propertyId)
-            return fileData.msg.fileName || ``
+
+        if(ContentDocumentIdData.msg.totalSize > 0){
+            let fileArr = [];
+           for(d of ContentDocumentIdData.msg.records){
+               let contentDocumentId = d.ContentDocumentId || '';
+           //get query content version 
+           let contentVersionData =await getQueryContentVersionFromSFDC(contentDocumentId)
+           console.log(`from here`)
+            if(contentVersionData.msg.totalSize > 0){
+                let contentVersionUrl  = contentVersionData.msg.records[0].attributes.url || ``
+                let contentVersionDataUrl =contentVersionData.msg.records[0].VersionData || ``;
+                console.log(`content-----------------`)
+                console.log(contentVersionUrl)
+                console.log(contentVersionDataUrl)
+                //get content version url details
+                let contentversionURLData = await getQueryContentVersionURLDetailsFromSFDC(contentVersionUrl)
+                let fileName  =  contentversionURLData.msg.Title || ``
+                let fileExtension = contentversionURLData.msg.FileExtension || ``        
+                console.log(`fileName : ${fileName} , fileExtension : ${fileExtension}`)
+                let fileData =await getFileFromSFDC(contentVersionDataUrl , token , propertyId , fileName, fileExtension);
+                if(fileData.code== 200){
+                    console.log(`yes! file exists for given fileId`)
+                    // let fileName = await saveSfdcFile(fileData.msg, propertyId)
+                    fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName })
+                }else{
+                    console.log(fileData)
+                }
+            }
+            
+            }
+            return fileArr;
         }
     } catch (error) {
         console.log(`++++++++++++=+++++++++++++++++++++`)
+        console.log(error)
         return ``;
     }
 }
@@ -170,12 +333,6 @@ let unlinkFiles = (files)=>{
 
 
 
-let convertDateFormat = () => {
-    let today = new Date();
-    today.setDate(today.getDate() - 1); 
-    today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
-   return today    
-}
 
 let getBrandId = async(property__c, customer_set__c)=>{
     try{
@@ -225,15 +382,15 @@ let DSRReport = async()=>{
                     let brandId = await getBrandId(dataObj.propertyArr[ind],``)
                     console.log(`brand id = ${brandId}`)
                     let dynamicValues=await getDynamicValues(brandId);
-                    console.log(dynamicValues)
                        if(dynamicValues.length){
                       //get dsr file from SFDC
-                      let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+                      let sfdcFiles = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
+                      console.log(`from drs attachment`)
+                      console.log(sfdcFiles)
                       let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
                       let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
-                      console.log(excelFile)
                       console.log(`------------------------------------------------------------`)
-                        sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
+                        sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,sfdcFiles,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
                        }else{
                         updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
@@ -407,7 +564,8 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid 
+        On membershiptype__c.program__c = program__c.sfid limit 10`)
+        let qry12=(` 
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
