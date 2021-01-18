@@ -25,7 +25,7 @@ let convertDateFormat = (date1) => {
 let getEmptyIfNull = (val) => {
     return val ? val : '';
 }
-let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues) => {
+let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues , sfdcFile) => {
     let pyamnetObj = {}
 
     let summaryTotalSale = 0
@@ -235,7 +235,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     }
 
 
-
+    let creditCardBatchClosureStr = ``
+    serialNumber = 1;
+    for (let d of sfdcFile) {
+        creditCardBatchClosureStr += ` <tr height="50" align="center">`
+        creditCardBatchClosureStr += `<td> ${serialNumber++}</td>`
+        creditCardBatchClosureStr += `<td style="text-align: left;">${d.sequenceNumber}</td>`
+        creditCardBatchClosureStr += `</tr>`
+    }
 
     let htmlStr = `
  <html>
@@ -605,9 +612,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 <caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
 <tr width="200px">
     <th>S. No.</th>
-    <th  height="50">Type</th>
-    <th>No. Of Sales</th>
-    <th>Amount</th>
+    <th  height="50">Document Reference Number</th>
+
 </tr>
 
     <!--tr>
@@ -616,13 +622,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     <td style="text-align: right;">{!summary['recordCount']}</td>
     <td style="text-align: right;">{!summary['amount']}</td>
 </tr-->
-  ${summaryHtml}
+  ${creditCardBatchClosureStr}
 
-<tr height="50"  align="center">
-    <td colspan="2">Total</td>
-    <td >${summaryTotalSale}</td>
-    <td >${(summaryTotalAmount ? (Math.floor(summaryTotalAmount * 100) / 100) : 0)}</td>
-</tr>
+
 </table>
 
 <div style="page-break-after: always;">&nbsp;</div>

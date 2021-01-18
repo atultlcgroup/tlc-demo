@@ -403,6 +403,7 @@ let DSRReport = async()=>{
                       let sfdcFiles = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
                       console.log(`from drs attachment`)
                       console.log(sfdcFiles)
+                    
                       let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       console.log(`------------------------------------------------------------`)
