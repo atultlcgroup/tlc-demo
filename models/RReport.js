@@ -106,14 +106,14 @@ Left join tlcsalesforce.membershiptype__c
 on membershiptype__c.property__c=property__c.sfid
 Left join tlcsalesforce.membershiptypeoffer__c
 on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c 
-inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid 
-where
-date(reservation__c.createddate) = (current_date-1)
-and
-(outlet__c.property__c='${property_id}' 
+inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 50
+--where
+--date(reservation__c.createddate) = (current_date-1)
+--and
+--(outlet__c.property__c='${property_id}' 
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
-)
+--)
 `
 // console.log(qry)
 let data = await pool.query(qry)
@@ -146,10 +146,10 @@ let getRRDataCS=async(customer_set__c)=>{
  Left join tlcsalesforce.membershiptypeoffer__c
  on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
 Inner Join tlcsalesforce.program__c
- On membershiptype__c.program__c = program__c.sfid 
- where
- date(reservation__c.createddate) = (current_date-1)
- and (
+ On membershiptype__c.program__c = program__c.sfid limit 20
+ --where
+ --date(reservation__c.createddate) = (current_date-1)
+ --and (
      --outlet__c.property__c='a0D0k000009PPsEEAW' or 
      membershiptype__c.sfid='${customer_set__c}'
      --membershiptype__c.sfid='a0f0k000002bjhGAAQ'
@@ -204,11 +204,18 @@ let RReport= ()=>{
                         let brandId = await getBrandId(dataPropertyWise[0].property_id,``)
                         console.log(`brand id = ${brandId}`)
                         let dynamicValues=await getDynamicValues(brandId);
-                        console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
+                        if(dynamicValues.length){
+                            console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
                         let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
                         console.log(pdfFile)
                         sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues,dataPropertyWise[0].program_name)
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
+
+                        }
+                        else{
+                            updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  ;
+                        }
+                        
                     }else{
                         updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
                     }
@@ -234,11 +241,15 @@ let RReport= ()=>{
                         console.log(`brand id = ${brandId1}`)
                         let dynamicValues1=await getDynamicValues(brandId);
                         console.log("dynamicValuesdynamicValues",dynamicValues1,dynamicValues1.length);
-                        
-                        let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
+                        if(dynamicValues.length){
+                            let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
                         console.log(pdfFile)
                         sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues1 , dataCSWise[0].program_name)
                         updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                        }else{
+                            updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  ;
+                        }
+                        
                     }else{
                         updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
                     }

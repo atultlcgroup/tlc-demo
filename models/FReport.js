@@ -212,8 +212,14 @@ let FReport= ()=>{
                     console.log("brandId",brandId);
                     let dynamicValues=await getDynamicValues(brandId);
                     console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
-                    sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataPropertyWise[0].program_name)
+                    if(dynamicValues.length){
+                        sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataPropertyWise[0].program_name)
                     updateLog(insertedId, true ,'Success', '' , pdfFile)
+
+                    }else{
+                        updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                    }
+                    
                         }else{
                             updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
                         }
@@ -237,10 +243,16 @@ let FReport= ()=>{
                     let pdfFile = await generateFRPdf.generateFRPDF(dataCSWise,customersetName,csId)
                     let brandId = await getBrandId(dataCSWise[0].property_id,``);
                     console.log("brandId",brandId);
-                    let dynamicValues=await getDynamicValues(brandId);
-                    console.log("dynamicValuesdynamicValuesCS",dynamicValues,dynamicValues.length);
-                            sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataCSWise[0].program_name)
+                    let dynamicValues1=await getDynamicValues(brandId);
+                    if(dynamicValues1.length){
+                        console.log("dynamicValuesdynamicValuesCS",dynamicValues1,dynamicValues1.length);
+                            sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues1,dataCSWise[0].program_name)
                             updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                        
+                    }else{
+                        updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                    }
+                    
                     }else{
                         updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
                     }

@@ -11,11 +11,13 @@ const pool = require("../databases/db").pool;
 const from=process.env.FROM_MAIL || "";
 const to=process.env.TO_MAIL || ""
 const subject =process.env.MAIL_SUBJECT || "";
-let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
-const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
+//let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
+//const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
 //const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
 //const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
 
+//const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
+//const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
 
 
 
@@ -156,7 +158,7 @@ let sendEOMPaymentReport=(file,pdf,fileName,emails,transactionIdsArr)=>{
     }
 }
 
-let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>{
+let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id, dynamicValues)=>{
     try{
         readHTMLFile(__dirname + `/Payment_Report_For_Each_Payment.html`, function(err, html) {
             console.log('hi')
@@ -169,9 +171,12 @@ let sendMailForEachPayment = async(req,toEmails, emailSubject, transaction_id)=>
             if(formatDate){
                 dateTime1 = formatDate(dateFormat1)
             }
-            let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_amount?req.membership_amount:0),"fee":(req.membership_fee?req.membership_fee:0),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
+            let displayName = dynamicValues[0].display_name_epr__c || ''
+            let fromEmailForPyament = dynamicValues[0].from_email_id_epr__c || ''
+            let replacements={"footer" : dynamicValues[0].footer_epr__c , "brandLogo" : dynamicValues[0].brand_logo__c ,name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number__c ?req.membership_number__c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_amount?req.membership_amount:0),"fee":(req.membership_fee?req.membership_fee:0),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
             let htmlToSend = template(replacements);
-            sendmail.smtp(toEmails, `Club Marriott <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
+            console.log(`toEmails : ${toEmails}`)
+            sendmail.smtp(toEmails, `${displayName} <${fromEmailForPyament}>` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
                 pool.query(`UPDATE tlcsalesforce.payment_report_log
                 SET  email_status='SUCCESS' 
                 WHERE transaction_id='${transaction_id}'`)  
@@ -209,7 +214,7 @@ let sendDSRReport=(file,excelFile,sfdcFile,fileName,emails , dynamicValues , pro
            const subjectForDSRReport = dynamicValues[0].dsr_subject_name || '';
 
             console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentDSR(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,`${sfdcFile}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentDSR(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,sfdcFile,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
@@ -341,7 +346,7 @@ let sendRReport=(file,fileName,emails,dynamicValues,program_name)=>{
 }  
 
 
-let sendUTRReport=(file,fileName,emails)=>{
+let sendUTRReport=(file,fileName,emails, dynamicValues, program_name)=>{
     try{
         readHTMLFile(__dirname + `/UTR_Report.html`, function(err, html) {
             console.log('hi')
@@ -349,12 +354,14 @@ let sendUTRReport=(file,fileName,emails)=>{
             console.log(err)
             let dateForDSRReport= new Date();
             dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
-            let subjectForUTRReport = `Club Marriott | PG Settlement Report`
+            let subjectForUTRReport = dynamicValues[0].utr_subject_name || '';
+            const fromEmailForUTR = dynamicValues[0].from_email_id_utr__c || '';
+            let displayName = dynamicValues[0].display_name_utr__c
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_utr__c , "brandLogo": dynamicValues[0].brand_logo__c};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForUTR : ${fromEmailForUTR} to ${emails} subject ${subjectForUTRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentUTR(emails, `Club Marriott <${fromEmailForUTR}>` , subjectForUTRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentUTR(emails, `${displayName} <${fromEmailForUTR}>` , subjectForUTRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')

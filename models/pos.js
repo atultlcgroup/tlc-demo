@@ -675,7 +675,13 @@ let uploadErrorFileToFTP = async (fileName,email,posSource,posTrackingId) => {
                 console.log("brandId",brandId.sfid);
                 let dynamicValues=await getDynamicValues(brandId.sfid);
                 console.log("dynamicValues",dynamicValues);
-            await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName,dynamicValues,brandId.program_name__c);
+                if(dynamicValues.length){
+                    await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName,dynamicValues,brandId.program_name__c);
+
+                }else{
+                    updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                }
+           
             }
             else{
                 fs.unlink(`uploads/${fileName}`, (err, da) => {

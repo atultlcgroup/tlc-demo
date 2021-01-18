@@ -122,6 +122,31 @@ let findPaymentRule= async(req)=>{
     }
 }
 
+
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+let getDynamicValues=async(brandId)=>{
+    try{
+        let query=await pool.query(`select subject_epr__c,brand_name__c,brand_logo__c,tlc_logo__c,page_footer_2_epr__c,page_footer_1_epr__c,footer_epr__c,from_email_id_epr__c,
+        column_1_epr__c,column_2_epr__c,column_3_epr__c,display_name_epr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let result = query ? query.rows : [];
+        return result;
+    }catch(e){
+        return [];
+    } 
+}
+
+
 let paymentReport =async (req)=>{
     try{
         // console.log(idenLastRunTime)
@@ -141,7 +166,7 @@ let paymentReport =async (req)=>{
          payment__c.createddate,
          payment__c.payment_mode__c,
          payment__c.payment_gateway__c as source, 
-        payment__c.email__c
+        payment__c.email__c,program__c.name as program_name
         from 
         tlcsalesforce.payment__c
         Inner Join tlcsalesforce.account
@@ -162,6 +187,8 @@ let paymentReport =async (req)=>{
         On payment_email_rule__c.customer_set__c = membershiptype__c.sfid
         Left Join tlcsalesforce.payment_report_log
         On payment__c.transaction_id__c = payment_report_log.transaction_id
+        Inner Join tlcsalesforce.program__c
+        On membershiptype__c.program__c = program__c.sfid  
         where (
         (payment__c.createddate >=  current_timestamp - interval '15 minutes'
         AND payment_bifurcation__c.account_number__c NOT IN (${tlcAccountNumber})
@@ -186,22 +213,27 @@ let paymentReport =async (req)=>{
         let emails = await findPaymentRule(req);
        
         if(emails.length > 0){
+                      //get brand Id
+            let brandId = await getBrandId(req.property_sfid,``)
+            console.log(`brand id = ${brandId}`)
+            let dynamicValues=await getDynamicValues(brandId);
+            if(dynamicValues.length){
             let emailRuleId = await getEmailRuleId(req)
             insertUpdateLogsForPayments(req.transaction_id__c,"PENING","EPR",emails.join(","), process.env.EMAIL_FOR_PAYMENT_REPORT,emailRuleId)
         let hotelName = req.hotel_name ? req.hotel_name : '';
         // let subject = `Notification - Payment Confirmation - ${hotelName}`;
-        let subject = `Membership Fee Confirmation`
+        let subject = dynamicValues[0].subject_epr__c
         // let dateFormat1 = (req.createddate?req.createddate:  "")
         // let dateTime1 = ``
         // if(formatDate){
         //     dateTime1 = formatDate(dateFormat1)
         // }
         // let replacements={name: (req.member_name ? req.member_name : ''),"membership_number":(req.membership_number_c ?membership_number_c:""),"membership_type":(req.membership_type_name ? req.membership_type_name:""),"email":(req.email__c ?req.email__c : ""),"amount":(req.membership_fee?req.membership_fee:""),"transaction_code":(req.transcationcode__c ? req.transcationcode__c :""),"date_time":dateTime1,"payment_mode":(req.payment_mode__c ? req.payment_mode__c: ""),"source":(req.source? req.source:"")};
-        if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
-                 console.log(`Please define EMAIL_FOR_PAYMENT_REPORT from heroku`)
-        }else{
+        // if(!process.env.EMAIL_FOR_PAYMENT_REPORT){
+        //          console.log(`Please define EMAIL_FOR_PAYMENT_REPORT from heroku`)
+        // }else{
              if(req.membership_amount > 0)
-            sendMail.sendMailForEachPayment(req,emails , subject , req.transaction_id__c)
+            sendMail.sendMailForEachPayment(req,emails , subject , req.transaction_id__c, dynamicValues)
         // sendGridMailer.sendgridAttachement(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd',fileArr).then(data=>{
        //use to send mail for each payment by sendgrid
         //     sendGridMailer.sendgrid(emails,process.env.EMAIL_FOR_PAYMENT_REPORT,`${subject}`,`${subject}`,`${subject}`,replacements,'fdb678c6-b2c3-4856-91f2-0f8bcce613bd').then(data=>{
@@ -209,7 +241,10 @@ let paymentReport =async (req)=>{
         //     }).catch(err=>{
         //     console.log(err)
         //  })
-        }
+        // }
+            }else{
+                console.log('Error', 'No record found for given brand in dynamic report object!' , '' )  
+            }
         }else{
             console.log(`Hotel/TLC emails not found!`)
         }

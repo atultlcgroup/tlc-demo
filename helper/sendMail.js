@@ -36,11 +36,7 @@ const sendMail = (to, from, subject, text, html) => {
         subject,
         text,
         html,
-        attachments:[{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
-        }]
+        attachments:[]
     };
     return new Promise((resolve, reject) => {
          SMTPConfiguration(newMail).then((res) => {
@@ -107,24 +103,30 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
     console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
     console.log(`----------------------------`)    // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
     let newMail=``
+ 
+    // console.log(attachments)
     if(sfdcFile){
+        let attachments = [{
+            filename: `${fileName}.pdf`,
+            path: `${file}`
+        },{
+            filename: `${fileName}.xlsx`,
+            path: `${excelFile}`
+        }
+        ]
+        console.log(`-----------`)
+        console.log(JSON.stringify(sfdcFile))
+        for(d of sfdcFile){
+            attachments.push({filename: `${d.sequenceNumber}.${d.extension}` ,
+           path: `${d.url}`})
+        }
          newMail = {
             to,
             from: from ,
             subject,
             text,
             html,
-            attachments:[{
-                filename: `${fileName}.pdf`,
-                path: `${file}`
-            },{
-                filename: `${fileName}.xlsx`,
-                path: `${excelFile}`
-            },{
-                filename: `Cheque Details.pdf`,
-                path: `${sfdcFile}`
-            }
-            ]
+            attachments:attachments
         };
       
     }else{
@@ -140,11 +142,6 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
             },{
                 filename: `${fileName}.xlsx`,
                 path: `${excelFile}`
-            }
-            ,{
-                filename: `logo-cm.png`,
-                path: `./helper/logo-cm.png`,
-                cid:'logocm'
             }]
         };
       
@@ -154,14 +151,18 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
              unlinkFiles(file)
              unlinkFiles(excelFile)
              if(sfdcFile){
-                unlinkFiles(sfdcFile)
-             }
+                for(d of sfdcFile){
+                    unlinkFiles(d.url)
+                }             
+            }
             resolve(res);
         }).catch((err) => {
             unlinkFiles(file)
             unlinkFiles(excelFile)
             if(sfdcFile){
-                unlinkFiles(sfdcFile)
+                for(d of sfdcFile){
+                    unlinkFiles(d.url)
+                }
             }
             reject(err);
         });    
@@ -269,10 +270,6 @@ const sendMailAttachmentUTR = (to, from, subject, text, html,file,fileName) => {
         attachments:[{
             filename: `${fileName}.xlsx`,
             path: `${file}`
-        },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {

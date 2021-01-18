@@ -8,10 +8,17 @@ const fs = require('fs');
 
 const axios = require('axios');
 const qs = require('qs');
-var request = require("request");
+let request = require("request");
 
 let token= ``
-
+let logInApiURLOfSfdc = process.env.SFDC_LOGIN_API_URL || '';
+let sfdcFileApisURL = process.env.SFDC_FILE_APIS_URL || '';
+let sfdcGrandType = process.env.SFDC_LOGIN_GRAND_TYPE || '';
+let sfdcLoginClientSecret = process.env.SFDC_LOGIN_CLIENT_SECRET || '';
+let sfdcLoginClientId = process.env.SFDC_LOGIN_CLIENT_ID || '';
+let sfdcLoginUserName = process.env.SFDC_LOGIN_USER_NAME || '';
+let sfdcLoginPassword = process.env.SFDC_LOGIN_PASSWORD || '';
+console.log(`${logInApiURLOfSfdc}--${sfdcFileApisURL}--${sfdcGrandType}--${sfdcLoginClientSecret}--${sfdcLoginClientId}--${sfdcLoginUserName}--${sfdcLoginPassword}`)
 // let saveSfdcFile = async(data, propertyId)=>{
 //     try{
 //         console.log(data)
@@ -25,15 +32,15 @@ let token= ``
 // }
 let loginApiCall = async ()=>{
     let data = qs.stringify({
-        'grant_type': 'password',
-       'client_id': '3MVG9iLRabl2Tf4gLB3z_w8GAMoTJ8p3kvePpMe8g0PWDQt0oRSGvs5E3baRAO.wRKVapH3EFDIvUmNLXz68r',
-       'client_secret': '5C175EFED053E9E2C72E6B8816D7A181796BEE68A547DB3F8AC07A731D4CDA67',
-       'username': 'apiintegrationuser@tlcgroup.com.devpro',
-       'password': 'tlcgroup123' 
+        'grant_type':  `${sfdcGrandType}`,
+       'client_id': `${sfdcLoginClientId}`,
+       'client_secret': `${sfdcLoginClientSecret}`,
+       'username': `${sfdcLoginUserName}`,
+       'password': `${sfdcLoginPassword}` 
        });
        let config = {
          method: 'post',
-         url: 'https://test.salesforce.com/services/oauth2/token',
+         url: `${logInApiURLOfSfdc}/services/oauth2/token`,
          data : data
         };
        try{
@@ -45,11 +52,13 @@ let loginApiCall = async ()=>{
        }
 }
 
-let getFileFromSFDC=(fileId, token , propertyId)=>{
+
+
+let getFileFromSFDC=(fileURL, token , propertyId , fileName1, fileExtension , sequenceNumber)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/sobjects/ContentVersion/${fileId}/VersionData`,
+        url: `${sfdcFileApisURL}${fileURL}`,
         headers: 
          {
            authorization  : `Bearer ${token}` } 
@@ -58,23 +67,19 @@ let getFileFromSFDC=(fileId, token , propertyId)=>{
             try {
                 request(options,  async(error, response, body) =>{
                    console.log(`hihhhh`)
-                   if (error) reject(error);
+                   if (error) reject({code: respose.statusCode , msg: error});
                    // console.log(response)
-                   try{
-                     let parseData = JSON.parse(body.toString())
-                     if( parseData[0].errorCode == 'INVALID_AUTH_HEADER' &&  parseData[0].message == 'INVALID_HEADER_TYPE' ){
-                      resolve({code: parseData[0].errorCode, msg: parseData[0].message})
-                   }else{
-                      reject({code: parseData[0].errorCode, msg: parseData[0].message})
-                   }
-                   }catch(e){
+                     let parseData = body.toString()
                     //    console.log(e)
                        //wirte file from sfdc 
-                   let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${Date.now()}.pdf`;
-                     fs.writeFileSync(fileName , body.toString('base64'), {encoding:'base64'});
-                      resolve({code: 200, msg: {fileName: fileName}})
-                   }     
-                 });
+                       if(response.statusCode == 200){
+                        let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${sequenceNumber}_${fileName1}_${Date.now()}.${fileExtension}`;
+                        fs.writeFileSync(fileName , body.toString('base64'), {encoding:'base64'});
+                         resolve({code: 200, msg: {fileName: fileName}})
+                       }else{
+                           reject({code: response.statusCode })
+                       }
+                })
              } catch (error) {
                  console.log(error)
                  reject(error)
@@ -83,28 +88,202 @@ let getFileFromSFDC=(fileId, token , propertyId)=>{
         })
         
 }
+
+
+let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
+        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
+
+        headers: 
+         {
+           authorization  : `Bearer ${token}` 
+        } 
+       };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                     let parseData = JSON.parse(body.toString())
+                     if( response.statusCode == 401 ){
+                      resolve({code:  response.statusCode})
+                   }else if(response.statusCode == 200){
+                      resolve({code: response.statusCode , msg: parseData})
+                   }else{
+                        reject({code: response.statusCode , msg: parseData})
+                   }
+                   }catch(e){
+                       console.log(e)
+                       reject({code: response.statusCode, msg:`${e}` })
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+      
+}
+
+
+let convertDate= () => {
+    let date1 = new Date()
+    if (date1) {
+        date1.setDate(date1.getDate() - 1); 
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${today1.getFullYear()}-${String(today1.getMonth() +1).padStart(2, '0')}-${String(today1.getDate()).padStart(2, '0')}`
+    }
+    return dateTime
+}
+
+
+let getQueryContentVersionFromSFDC=async(contentDocumentId)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select versionData, Title, FileExtension, sequence_number__c from ContentVersion where contentdocumentId = '${contentDocumentId}' and isLatest = TRUE`,
+        headers: 
+         {
+           authorization  : `Bearer ${token}` 
+        } 
+       };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                     let parseData = JSON.parse(body.toString())
+                     if( response.statusCode == 401 ){
+                      resolve({code:  response.statusCode})
+                   }else if(response.statusCode == 200){
+                      resolve({code: response.statusCode , msg: parseData})
+                   }else{
+                        reject({code: response.statusCode , msg: parseData})
+                   }
+                   }catch(e){
+                       reject({code: response.statusCode, msg:`${e}` })
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+      
+}
+
+let getQueryContentVersionURLDetailsFromSFDC=async(contentVersionURL)=>{
+    let options = {
+        method: 'GET',
+        encoding: null,
+        url: `${sfdcFileApisURL}${contentVersionURL}`,
+        headers: 
+         {
+           authorization  : `Bearer ${token}` 
+        } 
+       };
+        return new Promise((resolve, reject)=>{
+            try {
+                request(options,  async(error, response, body) =>{
+                   console.log(`hihhhh`)
+                   if (error) reject(error);
+                   // console.log(response)
+                   try{
+                        let parseData = JSON.parse(body.toString())
+                        if( response.statusCode == 401 ){
+                        resolve({code:  response.statusCode})
+                    }else if(response.statusCode == 200){
+                        resolve({code: response.statusCode , msg: parseData})
+                    }else{
+                            reject({code: response.statusCode , msg: parseData})
+                    }
+                   }catch(e){
+                       reject({code: response.statusCode, msg:`${e}` })
+                   }     
+                 });
+             } catch (error) {
+                 console.log(error)
+                 reject(error)
+             }
+    
+        })
+      
+}
+
 let sfdcApiCall =  async(propertyId, date)=>{
     try {
         console.log(`------------property id = ${propertyId}---Date= ${date}---------`)
-        let fileId = `0681y000000PkNXAA0`;
-        //get file id here by date and property id
-        console.log(`----------------------token =${token} ------------------------`)
-        let fileData =await getFileFromSFDC(fileId , token , propertyId);
-        console.log(fileData)
-        if(fileData.code == 'INVALID_AUTH_HEADER'){
+
+        //let getcontentdocument id 
+        let ContentDocumentIdData=await getContentDocumentIdFromSFDC(propertyId ,token, date);
+        if(ContentDocumentIdData.code == 401){
             //call login api 
             console.log(`-----Login API called---------`)
             let data = await loginApiCall()
               token = data.msg.access_token  || ``;
-              fileData =await getFileFromSFDC(fileId , token , propertyId);
+              console.log(`-------token----------`)
+              console.log(token)
+              ContentDocumentIdData =await getContentDocumentIdFromSFDC(propertyId ,token, date);
         }
-        if(fileData.code== 200){
-            console.log(`yes! file exists for given fileId`)
-            // let fileName = await saveSfdcFile(fileData.msg, propertyId)
-            return fileData.msg.fileName || ``
+
+        if(ContentDocumentIdData.msg.totalSize > 0){
+            let fileArr = [];
+           for(d of ContentDocumentIdData.msg.records){
+               let contentDocumentId = d.ContentDocumentId || '';
+           //get query content version 
+           let contentVersionData =await getQueryContentVersionFromSFDC(contentDocumentId)
+           console.log(JSON.stringify(contentVersionData))
+           console.log(`from here`)
+            if(contentVersionData.msg.totalSize > 0){
+                let contentVersionUrl  = contentVersionData.msg.records[0].attributes.url || ``
+                let contentVersionDataUrl =contentVersionData.msg.records[0].VersionData || ``;
+                let fileName = contentVersionData.msg.records[0].Title || '';
+                let fileExtension = contentVersionData.msg.records[0].FileExtension || '';
+                let sequenceNumber = contentVersionData.msg.records[0].Sequence_Number__c || '';
+                console.log(`content-----------------`)
+                console.log(contentVersionUrl)
+                console.log(contentVersionDataUrl)
+                //get content version url details
+                // let contentversionURLData = await getQueryContentVersionURLDetailsFromSFDC(contentVersionUrl)
+                // let fileName  =  contentversionURLData.msg.Title || ``
+                // let fileExtension = contentversionURLData.msg.FileExtension || ``        
+                console.log(`fileName : ${fileName} , fileExtension : ${fileExtension}`)
+                let fileData =await getFileFromSFDC(contentVersionDataUrl , token , propertyId , fileName, fileExtension , sequenceNumber);
+                if(fileData.code== 200){
+                    console.log(`yes! file exists for given fileId`)
+                    // let fileName = await saveSfdcFile(fileData.msg, propertyId)
+                    fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber })
+                    // fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber + '1' })
+                    // fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber + '2' })
+
+
+                }else{
+                    console.log(fileData)
+                }
+            }
+            
+            }
+            return fileArr;
         }
     } catch (error) {
         console.log(`++++++++++++=+++++++++++++++++++++`)
+        console.log(error)
         return ``;
     }
 }
@@ -170,12 +349,6 @@ let unlinkFiles = (files)=>{
 
 
 
-let convertDateFormat = () => {
-    let today = new Date();
-    today.setDate(today.getDate() - 1); 
-    today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
-   return today    
-}
 
 let getBrandId = async(property__c, customer_set__c)=>{
     try{
@@ -215,17 +388,17 @@ let DSRReport = async()=>{
                     let brandId = await getBrandId(dataObj.propertyArr[ind],``)
                     console.log(`brand id = ${brandId}`)
                     let dynamicValues=await getDynamicValues(brandId);
-                    console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length)
                        if(dynamicValues.length){
                       //get dsr file from SFDC
-                      console.log("Calling sfdc")
-                      let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
-                      let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
-                      let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
-                      console.log(excelFile)
+                      let sfdcFiles = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
+                      console.log(`from drs attachment`)
+                      console.log(sfdcFiles)
+                    
+                      let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
+                      let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       console.log(`------------------------------------------------------------`)
-                        sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,`${sfdcFile}`,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
-                        pdateLog(insertedId, true ,'Success', '' , pdfFile)
+                        sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,sfdcFiles,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
+                        updateLog(insertedId, true ,'Success', '' , pdfFile)
                        }else{
                         updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
                        }
@@ -241,46 +414,47 @@ let DSRReport = async()=>{
             
           }
 
-          //For customerset 
-        //   let dataObj1 = await getEPRSfidCS();
-        //   console.log(dataObj1)
-        //   let ind1 = 0;
-        //    for(let e of dataObj1.emailArr){
-        //     let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
-        //   let emails1 = e;
-        //   // req.property_sfid = 'a0Y1y000000EFBNEA4';
-        //   console.log("getting DSR report");
-        //    let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
-        //    let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1])
-
-        // //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
-        //       if(DSRRecords1.length){
-        //         if(emails1.length){
-            //get brand id 
-            // let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
-            // let dynamicValues1=await getDynamicValues(brandId);
-            // if(dynamicValues1.length){
-            //get dsr file from SFDC
-                //   let sfdcFile = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+        //   For customerset 
+          let dataObj1 = await getEPRSfidCS();
+          console.log(dataObj1)
+          let ind1 = 0;
+           for(let e of dataObj1.emailArr){
+            let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
+          let emails1 = e;
+          // req.property_sfid = 'a0Y1y000000EFBNEA4';
+          console.log("getting DSR report");
+           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
+           
+           let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1])
+           console.log("DSRCertificateIssued1",DSRCertificateIssued1);
+        //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
+              if(DSRRecords1.length){
+                if(emails1.length){
+            // get brand id 
+            let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
+            let dynamicValues1=await getDynamicValues(brandId1);
+            if(dynamicValues1.length){
+            // get dsr file from SFDC
+                  let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
                    
-        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]); 
-        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]);
+                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
+                  let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
                
-        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,`${sfdcFile1}`,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
-        //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
-        //           }else{
-        //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
-        //           }
-        //     }else{
-        //     updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
-        // }
-        //           console.log(`From Model`)
-        //       }else{
-        //         updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
-        //       }
-        //   ind1++;
+                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile1}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
+                  updateLog(insertedId1, true ,'Success', '' , pdfFile1)
+                  }else{
+                    updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+                  }
+            }else{
+            updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+        }
+                  console.log(`From Model`)
+              }else{
+                updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
+              }
+          ind1++;
         
-        // }
+        }
 
         }catch(e){
             console.log(`${e}`)
@@ -398,9 +572,10 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 20 
-        --where
-        --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        On membershiptype__c.program__c = program__c.sfid limit 10`)
+        let qry12=(` 
+        where
+        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
           -- or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
           -- and
@@ -464,8 +639,8 @@ let getDSRReportCS=async(customer_set_sfid)=>{
            --and
            --Membership__c is not Null and Membership_Offer__c is null
            --and
-          -- (
-           --    Property__c.sfid='${property_sfid}'
+           --(
+           --Property__c.sfid=''
            --or 
            --membership__c.customer_set__c IN ('${customer_set_sfid}')
             --)
