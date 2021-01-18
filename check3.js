@@ -1,6 +1,10 @@
-let summaryByLevel = {
-    "Name":'Atul',
-    "Wedding Bundling":2837
+let sum =(a, b)=>{
+    console.log(a+b)
 }
-if(summaryByLevel["Wedding Bundling"] || summaryByLevel[("Wedding Bundling").toLocaleLowerCase()])
-console.log(summaryByLevel["Wedding Bundling"])
+
+let sub =(c,d)=>{
+     let a = c-d;
+     let b = 10
+     sum(a,b) 
+}
+sub(6,2)

@@ -111,7 +111,7 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
         console.log(`-----------`)
         console.log(JSON.stringify(sfdcFile))
         for(d of sfdcFile){
-            attachments.push({filename: `${d.name}.${d.extension}` ,
+            attachments.push({filename: `${d.sequenceNumber}.${d.extension}` ,
            path: `${d.url}`})
         }
          newMail = {

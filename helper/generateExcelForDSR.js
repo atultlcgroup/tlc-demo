@@ -30,7 +30,7 @@ let convertDateFormat= (date1)=>{
       }
       return dateTime
 }
-let generateExcel = async(dsrValues,propertyId, certificateIssuedArr , dynamicValues)=>{
+let generateExcel = async(dsrValues,propertyId, certificateIssuedArr , dynamicValues , sfdcFiles)=>{
 let     propertyName = `${dsrValues[0].property_name}`;
 
 let wb = new xl.Workbook();
@@ -940,14 +940,24 @@ column = 2;
 ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
 ws2.cell(row, column++, row , column+ 3,true).string(`Document Reference Number`).style(myStyleAlignCenter)
 slNo =1;
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++, row , column+ 3,true).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
-row+=1;
-column = 2
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
-ws2.cell(row, column++ , row , column+ 3,true).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
+for(let d of sfdcFiles){
+  if(slNo % 2 != 0) 
+  {
+    className1=myStyleAlignCenterWithoutBold2
+    className2=myStyleAlignCenterWithoutBoldAlignLeft2
+  }else{
+    className1=myStyleAlignCenterWithoutBold
+    className2=myStyleAlignCenterWithoutBoldAlignLeft   
+  }
+  row+=1;
+  column = 2
+  ws2.cell(row, column++).number(slNo++).style(className1)
+  ws2.cell(row, column++, row , column+ 3,true).string(`${d.sequenceNumber}`).style(className2)  
+}
+// row+=1;
+// column = 2
+// ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+// ws2.cell(row, column++ , row , column+ 3,true).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 //This is an auto generated Daily Sales Report 
 
 row +=4;

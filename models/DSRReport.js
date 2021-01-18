@@ -54,7 +54,7 @@ let loginApiCall = async ()=>{
 
 
 
-let getFileFromSFDC=(fileURL, token , propertyId , fileName1, fileExtension)=>{
+let getFileFromSFDC=(fileURL, token , propertyId , fileName1, fileExtension , sequenceNumber)=>{
     let options = {
         method: 'GET',
         encoding: null,
@@ -73,7 +73,7 @@ let getFileFromSFDC=(fileURL, token , propertyId , fileName1, fileExtension)=>{
                     //    console.log(e)
                        //wirte file from sfdc 
                        if(response.statusCode == 200){
-                        let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${fileName1}_${Date.now()}.${fileExtension}`;
+                        let fileName = `./reports/DSRReport/SFDCFILES/SFDC_DSR_${propertyId}_${sequenceNumber}_${fileName1}_${Date.now()}.${fileExtension}`;
                         fs.writeFileSync(fileName , body.toString('base64'), {encoding:'base64'});
                          resolve({code: 200, msg: {fileName: fileName}})
                        }else{
@@ -94,8 +94,8 @@ let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
-        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
+        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
 
         headers: 
          {
@@ -154,7 +154,7 @@ let getQueryContentVersionFromSFDC=async(contentDocumentId)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select versionData from ContentVersion where contentdocumentId = '${contentDocumentId}' and isLatest = TRUE`,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select versionData, Title, FileExtension, sequence_number__c from ContentVersion where contentdocumentId = '${contentDocumentId}' and isLatest = TRUE`,
         headers: 
          {
            authorization  : `Bearer ${token}` 
@@ -205,14 +205,14 @@ let getQueryContentVersionURLDetailsFromSFDC=async(contentVersionURL)=>{
                    if (error) reject(error);
                    // console.log(response)
                    try{
-                     let parseData = JSON.parse(body.toString())
-                     if( response.statusCode == 401 ){
-                      resolve({code:  response.statusCode})
-                   }else if(response.statusCode == 200){
-                      resolve({code: response.statusCode , msg: parseData})
-                   }else{
-                        reject({code: response.statusCode , msg: parseData})
-                   }
+                        let parseData = JSON.parse(body.toString())
+                        if( response.statusCode == 401 ){
+                        resolve({code:  response.statusCode})
+                    }else if(response.statusCode == 200){
+                        resolve({code: response.statusCode , msg: parseData})
+                    }else{
+                            reject({code: response.statusCode , msg: parseData})
+                    }
                    }catch(e){
                        reject({code: response.statusCode, msg:`${e}` })
                    }     
@@ -248,23 +248,31 @@ let sfdcApiCall =  async(propertyId, date)=>{
                let contentDocumentId = d.ContentDocumentId || '';
            //get query content version 
            let contentVersionData =await getQueryContentVersionFromSFDC(contentDocumentId)
+           console.log(JSON.stringify(contentVersionData))
            console.log(`from here`)
             if(contentVersionData.msg.totalSize > 0){
                 let contentVersionUrl  = contentVersionData.msg.records[0].attributes.url || ``
                 let contentVersionDataUrl =contentVersionData.msg.records[0].VersionData || ``;
+                let fileName = contentVersionData.msg.records[0].Title || '';
+                let fileExtension = contentVersionData.msg.records[0].FileExtension || '';
+                let sequenceNumber = contentVersionData.msg.records[0].Sequence_Number__c || '';
                 console.log(`content-----------------`)
                 console.log(contentVersionUrl)
                 console.log(contentVersionDataUrl)
                 //get content version url details
-                let contentversionURLData = await getQueryContentVersionURLDetailsFromSFDC(contentVersionUrl)
-                let fileName  =  contentversionURLData.msg.Title || ``
-                let fileExtension = contentversionURLData.msg.FileExtension || ``        
+                // let contentversionURLData = await getQueryContentVersionURLDetailsFromSFDC(contentVersionUrl)
+                // let fileName  =  contentversionURLData.msg.Title || ``
+                // let fileExtension = contentversionURLData.msg.FileExtension || ``        
                 console.log(`fileName : ${fileName} , fileExtension : ${fileExtension}`)
-                let fileData =await getFileFromSFDC(contentVersionDataUrl , token , propertyId , fileName, fileExtension);
+                let fileData =await getFileFromSFDC(contentVersionDataUrl , token , propertyId , fileName, fileExtension , sequenceNumber);
                 if(fileData.code== 200){
                     console.log(`yes! file exists for given fileId`)
                     // let fileName = await saveSfdcFile(fileData.msg, propertyId)
-                    fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName })
+                    fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber })
+                    // fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber + '1' })
+                    // fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber + '2' })
+
+
                 }else{
                     console.log(fileData)
                 }
@@ -395,8 +403,8 @@ let DSRReport = async()=>{
                       let sfdcFiles = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
                       console.log(`from drs attachment`)
                       console.log(sfdcFiles)
-                      let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
-                      let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0]);
+                      let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
+                      let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       console.log(`------------------------------------------------------------`)
                         sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,sfdcFiles,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
@@ -437,8 +445,8 @@ let DSRReport = async()=>{
             //get dsr file from SFDC
                 //   let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
-        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]); 
-        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0]);
+        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
+        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
                
         //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
         //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
