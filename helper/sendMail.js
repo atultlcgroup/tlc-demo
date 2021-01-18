@@ -164,6 +164,7 @@ const sendMailAttachmentDSR = (to, from, subject, text, html,file,excelFile,sfdc
       
 }
 
+//senf FR report started
 
 const sendMailAttachmentFR = (to, from, subject, text, html,file,fileName) => {
     console.log(`----------------------------`)
@@ -178,10 +179,6 @@ const sendMailAttachmentFR = (to, from, subject, text, html,file,fileName) => {
         attachments:[{
             filename: `${fileName}.pdf`,
             path: `${file}`
-        },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {
@@ -197,7 +194,10 @@ const sendMailAttachmentFR = (to, from, subject, text, html,file,fileName) => {
     })
       
 }
+//send FR report ended
 
+
+//Send RR report started
 const sendMailAttachmentRR = (to, from, subject, text, html,file,fileName) => {
     console.log(`----------------------------`)
     console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
@@ -211,10 +211,6 @@ const sendMailAttachmentRR = (to, from, subject, text, html,file,fileName) => {
         attachments:[{
             filename: `${fileName}.pdf`,
             path: `${file}`
-        },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {
@@ -230,6 +226,7 @@ const sendMailAttachmentRR = (to, from, subject, text, html,file,fileName) => {
     })
       
 }
+//Send RR report ended
 
 const sendMailAttachmentDRR = (to, from, subject, text, html,file,fileName) => {
     console.log(`----------------------------`)
@@ -302,10 +299,7 @@ const sendMailAttachmentPOSError = (to, from, subject, text, html,file,fileName,
         attachments:[{
             filename: `${fileName}.csv`,
             path: `${file}`
-        },{
-            filename: `${logoName}`,
-            path: `./helper/${logoName}`,
-            cid:'logocm'
+
         }]
     };
     return new Promise((resolve, reject) => {
