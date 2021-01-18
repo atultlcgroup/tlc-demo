@@ -423,46 +423,46 @@ let DSRReport = async()=>{
             
           }
 
-          //For customerset 
-        //   let dataObj1 = await getEPRSfidCS();
-        //   console.log(dataObj1)
-        //   let ind1 = 0;
-        //    for(let e of dataObj1.emailArr){
-        //     let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
-        //   let emails1 = e;
-        //   // req.property_sfid = 'a0Y1y000000EFBNEA4';
-        //   console.log("getting DSR report");
-        //    let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
-        //    let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1])
+        //   For customerset 
+          let dataObj1 = await getEPRSfidCS();
+          console.log(dataObj1)
+          let ind1 = 0;
+           for(let e of dataObj1.emailArr){
+            let insertedId1 = await insertLog('',dataObj1.customerSetArr[ind1],e)
+          let emails1 = e;
+          // req.property_sfid = 'a0Y1y000000EFBNEA4';
+          console.log("getting DSR report");
+           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
+           let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1])
 
-        // //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
-        //       if(DSRRecords1.length){
-        //         if(emails1.length){
-            //get brand id 
-            // let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
-            // let dynamicValues1=await getDynamicValues(brandId);
-            // if(dynamicValues1.length){
-            //get dsr file from SFDC
-                //   let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
+        //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
+              if(DSRRecords1.length){
+                if(emails1.length){
+            // get brand id 
+            let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
+            let dynamicValues1=await getDynamicValues(brandId);
+            if(dynamicValues1.length){
+            // get dsr file from SFDC
+                  let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
-        //           let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
-        //           let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
+                  let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
+                  let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
                
-        //          sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
-        //           updateLog(insertedId1, true ,'Success', '' , pdfFile1)
-        //           }else{
-        //             updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
-        //           }
-        //     }else{
-        //     updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
-        // }
-        //           console.log(`From Model`)
-        //       }else{
-        //         updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
-        //       }
-        //   ind1++;
+                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
+                  updateLog(insertedId1, true ,'Success', '' , pdfFile1)
+                  }else{
+                    updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
+                  }
+            }else{
+            updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
+        }
+                  console.log(`From Model`)
+              }else{
+                updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
+              }
+          ind1++;
         
-        // }
+        }
 
         }catch(e){
             console.log(`${e}`)
@@ -647,7 +647,7 @@ let getDSRReportCS=async(customer_set_sfid)=>{
            Membership__c is not Null and Membership_Offer__c is null
            and
            (
-           --    Property__c.sfid='${property_sfid}'
+           --Property__c.sfid=''
            --or 
            membership__c.customer_set__c IN ('${customer_set_sfid}')
             )
