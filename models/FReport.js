@@ -87,6 +87,7 @@ let getFRData=async(property__c)=>{
     try{
         console.log(`property__c:` , property__c)
         let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
+        ,program__c.name as program_name
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
         on member_feedback__c.member__c=account.sfid
@@ -97,13 +98,14 @@ let getFRData=async(property__c)=>{
         Left join tlcsalesforce.membershiptype__c
         on membershiptype__c.property__c=property__c.sfid
         Left join tlcsalesforce.case c
-        on c.sfid=member_feedback__c.case__c
-        where
+        on c.sfid=member_feedback__c.case__c 
+        inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 20
+       -- where
          --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        date(member_feedback__c.createddate) =(current_date-1)
-       and (outlet__c.property__c='${property__c}' 
+        --date(member_feedback__c.createddate) =(current_date-1)
+       --and (outlet__c.property__c='${property__c}' 
         --or membershiptype__c.sfid=''
-        )
+        --)
         `
         let data = await pool.query(qry)
         return data.rows? data.rows : []
@@ -117,6 +119,7 @@ let getFRDataCS=async( customer_set__c)=>{
     try{
         console.log(`customer_set__c:${customer_set__c}`)
         let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
+        ,program__c.name as program_name,property__c.sfid as property_id
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
         on member_feedback__c.member__c=account.sfid
@@ -127,18 +130,20 @@ let getFRDataCS=async( customer_set__c)=>{
         Left join tlcsalesforce.membershiptype__c
         on membershiptype__c.property__c=property__c.sfid
         Left join tlcsalesforce.case c
-        on c.sfid=member_feedback__c.case__c
-        where
+        on c.sfid=member_feedback__c.case__c 
+        inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 20
+        --where
         --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        date(member_feedback__c.createddate) =(current_date-1)
-        and 
-        (
+        --date(member_feedback__c.createddate) =(current_date-1)
+        --and 
+        --(
             --outlet__c.property__c='' or 
-        membershiptype__c.sfid='${customer_set__c}'
-        )
+        --membershiptype__c.sfid='${customer_set__c}'
+        --)
 
         `
         let data = await pool.query(qry)
+        
         return data.rows? data.rows : []
     }catch(e){
         console.log(e)
@@ -198,9 +203,16 @@ let FReport= ()=>{
                 if(dataPropertyWise.length){
                     let propertyName = await getPName(propertyId)
                     if(e.length){
+                        
                     let pdfFile = await generateFRPdf.generateFRPDF(dataPropertyWise, propertyName , propertyId)
                     console.log(pdfFile)
-                    sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e)
+                    console.log("program_name:",dataPropertyWise[0].program_name);
+                    console.log("propertyId",propertyId);
+                    let brandId = await getBrandId(propertyId,``);
+                    console.log("brandId",brandId);
+                    let dynamicValues=await getDynamicValues(brandId);
+                    console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
+                    sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataPropertyWise[0].program_name)
                     updateLog(insertedId, true ,'Success', '' , pdfFile)
                         }else{
                             updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
@@ -211,6 +223,7 @@ let FReport= ()=>{
                 }
             }
             let getEmailandCSArr = await getFRSfidCS();
+            
             let ind1 = 0;
             for(let e of getEmailandCSArr.emailArr){
                 let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
@@ -220,8 +233,13 @@ let FReport= ()=>{
                 if(dataCSWise.length){
                     let customersetName = await getCSName(csId)
                     if(e.length){
+                        console.log("dataCSWise :",dataCSWise[0].property_id)
                     let pdfFile = await generateFRPdf.generateFRPDF(dataCSWise,customersetName,csId)
-                            sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e)
+                    let brandId = await getBrandId(dataCSWise[0].property_id,``);
+                    console.log("brandId",brandId);
+                    let dynamicValues=await getDynamicValues(brandId);
+                    console.log("dynamicValuesdynamicValuesCS",dynamicValues,dynamicValues.length);
+                            sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataCSWise[0].program_name)
                             updateLog(insertedId1, true ,'Success', '' , pdfFile)
                     }else{
                         updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
@@ -238,6 +256,45 @@ let FReport= ()=>{
         }
     })
 }
+
+
+
+//getting brand ID
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        console.log(`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`)
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+
+
+//getting dynamic value 
+
+let getDynamicValues=async(brandId)=>{
+    try{
+        console.log(`select  brand_name__c,brand_logo__c,tlc_logo__c,display_name_fr__c,column_1_fr__c,column_2_fr__c,column_3_fr__c,
+        subject_fr__c,from_email_id_fr__c,footer_fr__c,page_footer_1_fr__c,page_footer_2_fr__c from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let query=await pool.query(`select  brand_name__c,brand_logo__c,tlc_logo__c,display_name_fr__c,column_1_fr__c,column_2_fr__c,column_3_fr__c,
+        subject_fr__c,from_email_id_fr__c,footer_fr__c,page_footer_1_fr__c,page_footer_2_fr__c from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        
+        
+        let result = query ? query.rows : [];
+        console.log("query",result);
+        return result;        
+    }catch(e){
+        console.log(e);
+
+    }
+}
+
+
 module.exports={
     FReport
 }

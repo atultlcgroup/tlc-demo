@@ -32,7 +32,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     let summaryTotalAmount = 0
     propertyName = `${dsrValues[0].property_name}`;
     programName = dsrValues[0].program_name;
-    console.log("dsr values",dsrValues);
+    //console.log("dsr values",dsrValues);
     console.log("dynamicValuesPDF",dynamicValues)
     console.log("logo",dynamicValues.tlc_logo__c)
     let summaryData = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]

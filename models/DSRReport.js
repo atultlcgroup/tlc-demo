@@ -482,9 +482,9 @@ let getDSRReportCS=async(customer_set_sfid)=>{
 
 let getDynamicValues=async(brandId)=>{
     try{
-        console.log(`select brand_name__c,brand_logo__c, tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
+        console.log(`select name as dsr_subject_name,brand_name__c,brand_logo__c, tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
         column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
-        let query=await pool.query(`select brand_name__c,brand_logo__c, tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
+        let query=await pool.query(`select name as dsr_subject_name,brand_name__c,brand_logo__c, tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
         column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
         
         
@@ -495,6 +495,7 @@ let getDynamicValues=async(brandId)=>{
         
         
     }catch(e){
+        console.log(e);
 
     }
 }

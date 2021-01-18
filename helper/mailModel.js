@@ -2,7 +2,7 @@ let  dotenv = require('dotenv');
 dotenv.config();
 const sendmail = require('./sendMail')
 const pool = require("../databases/db").pool;
-const fromEmailForPOSError=process.env.FROM_EMAIL_FOR_POS_ERROR || ''; 
+//const fromEmailForPOSError=process.env.FROM_EMAIL_FOR_POS_ERROR || ''; 
 
 
 
@@ -13,8 +13,8 @@ const to=process.env.TO_MAIL || ""
 const subject =process.env.MAIL_SUBJECT || "";
 let fromEmailForPyament =process.env.EMAIL_FOR_PAYMENT_REPORT || "";
 const fromEmailForUTR = process.env.FROM_EMAIL_FOR_UTR || "";
-const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
-const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
+//const fromEmailForFR = process.env.FROM_EMAIL_FOR_FR || "";
+//const fromEmailForRR = process.env.FROM_EMAIL_FOR_RR || "";
 
 
 
@@ -231,19 +231,23 @@ let sendDSRReport=(file,excelFile,sfdcFile,fileName,emails , dynamicValues , pro
 
 
 
-let sendFReport=(file,fileName,emails)=>{
+let sendFReport=(file,fileName,emails,dynamicValues,program_name)=>{
     try{
         readHTMLFile(__dirname + `/FR_Report.html`, function(err, html) {
             console.log('hi')
             if(err)
             console.log(err)
             let dateForFReport= new Date();
-            let subjectForFReport = `Club Marriott | Feedback Report`
+            console.log("sendFR report",dynamicValues)
+            //let subjectForFReport = `Club Marriott | Feedback Report`
+            let subjectForFReport = dynamicValues[0].subject_fr__c || '';
+            let fromEmailForFR =  dynamicValues[0].from_email_id_fr__c || '';
+            let displayName  = dynamicValues[0].display_name_fr__c || '';
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_fr__c , "brandLogo": dynamicValues[0].brand_logo__c};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForFR : ${fromEmailForFR} to ${emails} subject ${subjectForFReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentFR(emails, `Club Marriott <${fromEmailForFR}>` , subjectForFReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentFR(emails, `${displayName} <${fromEmailForFR}>` , subjectForFReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
@@ -300,19 +304,23 @@ let sendDRReport=(file,fileName,emails, dynamicValues, program_name)=>{
 }  
 
 
-let sendRReport=(file,fileName,emails)=>{
+let sendRReport=(file,fileName,emails,dynamicValues,program_name)=>{
     try{
         readHTMLFile(__dirname + `/RR_Report.html`, function(err, html) {
             console.log('hi')
             if(err)
             console.log(err)
             let dateForRReport= new Date();
-            let subjectForRReport = `Club Marriott | Todays Reservation Report`
+            console.log("dynamicValuesMail",dynamicValues);
+            let subjectForRReport = dynamicValues[0].subject_rr__c || '';
+            let fromEmailForRR =  dynamicValues[0].from_email_id_rr__c || '';
+            let displayName  = dynamicValues[0].display_name_rr__c || '';
+            //let subjectForRReport = `Club Marriott | Todays Reservation Report` 
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_rr__c , "brandLogo": dynamicValues[0].brand_logo__c};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForRR : ${fromEmailForRR} to ${emails} subject ${subjectForRReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentRR(emails, `Club Marriott <${fromEmailForRR}>` , subjectForRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+             sendmail.smtpAttachmentRR(emails, `${displayName} <${fromEmailForRR}>` , subjectForRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
@@ -368,7 +376,8 @@ let sendUTRReport=(file,fileName,emails)=>{
 
 
 // POS error report 
-let sendPOSErrorReport=(file,fileName,emails,logoName)=>{
+let sendPOSErrorReport=(file,fileName,emails,logoName,dynamicValues,program_name)=>{
+
     try{
         readHTMLFile(__dirname + `/posError.html`, function(err, html) {
             console.log('hi')
@@ -376,12 +385,16 @@ let sendPOSErrorReport=(file,fileName,emails,logoName)=>{
             console.log(err)
             let dateForPOSErrorReport= new Date();
             dateforEOMReport = `${dateForPOSErrorReport.toLocaleString('default', { month: 'short' })} ${dateForPOSErrorReport.getFullYear()}`
-            let subjectForPOSErrorReport = `POS Error Report`
+            //let subjectForPOSErrorReport = `POS Error Report`
+            let fromEmailForPOSError=dynamicValues[0].from_email_id_pos__c || `` ;
+            let subjectForPOSErrorReport=dynamicValues[0].subject_pos__c || ``;
+            let displayName=dynamicValues[0].display_name_pos__c || `` ;
+
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_pos__c , "brandLogo": dynamicValues[0].brand_logo__c};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForPOSError : ${fromEmailForPOSError} to ${emails} subject ${subjectForPOSErrorReport} File:${file} fileName:${fileName}`)
-             sendmail.smtpAttachmentPOSError(emails, `Club Marriott <${fromEmailForPOSError}>` , subjectForPOSErrorReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`,logoName).then((data)=>{
+             sendmail.smtpAttachmentPOSError(emails, `${displayName} <${fromEmailForPOSError}>` , subjectForPOSErrorReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`,logoName).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
 
                 // updatePayentLog(transactionIdsArr,'SUCCESS')

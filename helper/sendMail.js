@@ -183,10 +183,6 @@ const sendMailAttachmentFR = (to, from, subject, text, html,file,fileName) => {
         attachments:[{
             filename: `${fileName}.pdf`,
             path: `${file}`
-        },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {
@@ -216,10 +212,6 @@ const sendMailAttachmentRR = (to, from, subject, text, html,file,fileName) => {
         attachments:[{
             filename: `${fileName}.pdf`,
             path: `${file}`
-        },{
-            filename: `logo-cm.png`,
-            path: `./helper/logo-cm.png`,
-            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {
@@ -311,68 +303,7 @@ const sendMailAttachmentPOSError = (to, from, subject, text, html,file,fileName,
         attachments:[{
             filename: `${fileName}.csv`,
             path: `${file}`
-        // },
-        // {
-        //     filename: `${fileName}a.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}b.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}c.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}d.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}e.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}f.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}g.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}h.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}i.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}j.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}k.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}l.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}m.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}n.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}o.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}p.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}q.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}r.csv`,
-        //     path: `${file}`
-        // },{
-        //     filename: `${fileName}s.csv`,
-        //     path: `${file}`
-        },{
-            filename: `${logoName}`,
-            path: `./helper/${logoName}`,
-            cid:'logocm'
+
         }]
     };
     return new Promise((resolve, reject) => {
