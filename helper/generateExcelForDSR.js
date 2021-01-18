@@ -730,6 +730,7 @@ slNo =0;
 let paidSalesCnt=0;
 let paidSalesReveneu =0;
 for([key,value] of Object.entries(summaryByLevel)){
+  if(key.toLocaleLowerCase() != 'Wedding Bundling'.toLocaleLowerCase()){
   if(slNo % 2 != 0) 
   {
     className1=myStyleAlignCenterWithoutBold2
@@ -747,6 +748,7 @@ ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`${key}`).style(className2)
 ws2.cell(row, column++).number(value.count).style(className1)
 ws2.cell(row, column++).number(value.reveneu).style(className1)
+  }
 }
 // row+=1;
 // column = 2
@@ -843,13 +845,15 @@ if(slNo % 2 != 0)
   className2=myStyleAlignCenterWithoutBoldAlignLeft   
 }
 
+if(summaryByLevel["Wedding Bundling"] || summaryByLevel[("Wedding Bundling").toLocaleLowerCase()]){
 row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Wedding Bundling`).style(className2)
-ws2.cell(row, column++).number(0).style(className1)
-ws2.cell(row, column++).number(0).style(className1)
+ws2.cell(row, column++).number(summaryByLevel["Wedding Bundling"].count).style(className1)
+ws2.cell(row, column++).number(summaryByLevel["Wedding Bundling"].reveneu).style(className1)
 slNo++
+}
 
 if(slNo % 2 != 0) 
 {
