@@ -1,7 +1,5 @@
-var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-
-let convertDate= () => {
+let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let convertDateForDOCName= () => {
   let date1 = new Date()
   if (date1) {
       date1.setDate(date1.getDate() - 1); 

@@ -94,8 +94,8 @@ let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
-        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
+        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
 
         headers: 
          {
