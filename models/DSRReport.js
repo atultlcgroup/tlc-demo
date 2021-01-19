@@ -457,7 +457,7 @@ let DSRReport = async()=>{
                 if(emails1.length){
             // get brand id 
             let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
-            let dynamicValues1=await getDynamicValues(brandId);
+            let dynamicValues1=await getDynamicValues(brandId1);
             if(dynamicValues1.length){
             // get dsr file from SFDC
                   let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
@@ -465,7 +465,7 @@ let DSRReport = async()=>{
                   let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
                   let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
                
-                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
+                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile1}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
                   updateLog(insertedId1, true ,'Success', '' , pdfFile1)
                   }else{
                     updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
