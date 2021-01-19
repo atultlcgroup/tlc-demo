@@ -84,11 +84,13 @@ let getDRRData =async()=>{
 
 let getRRData = async(property_id)=>{
 try{
-let qry = `select  Distinct outlet__c.property__c property_id,property__c.name h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
-outlet__c.name outlet_name,
+let qry = `
+select  Distinct outlet__c.property__c property_id,property__c.name h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
+outlet__c.name outlet_name,membershiptype__c.name,
 membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
 reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
 reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name
+,program__c.name as program_name
 from tlcsalesforce.reservation__c
 inner join tlcsalesforce.account
 on reservation__c.member__c=account.sfid
@@ -103,14 +105,15 @@ on property__c.sfid=outlet__c.property__c
 Left join tlcsalesforce.membershiptype__c
 on membershiptype__c.property__c=property__c.sfid
 Left join tlcsalesforce.membershiptypeoffer__c
-on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
-where
-date(reservation__c.createddate) = (current_date-1)
-and
- (outlet__c.property__c='${property_id}' 
+on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c 
+inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 50
+--where
+--date(reservation__c.createddate) = (current_date-1)
+--and
+--(outlet__c.property__c='${property_id}' 
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
-)
+--)
 `
 // console.log(qry)
 let data = await pool.query(qry)
@@ -126,7 +129,7 @@ let getRRDataCS=async(customer_set__c)=>{
  outlet__c.name outlet_name,
  membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
  reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
- reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name
+ reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name,program__c.name as program_name
  from tlcsalesforce.reservation__c
  inner join tlcsalesforce.account
  on reservation__c.member__c=account.sfid
@@ -141,10 +144,12 @@ let getRRDataCS=async(customer_set__c)=>{
  Left join tlcsalesforce.membershiptype__c
  on membershiptype__c.property__c=property__c.sfid
  Left join tlcsalesforce.membershiptypeoffer__c
-on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
- where
- date(reservation__c.createddate) = (current_date-1)
- and (
+ on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
+Inner Join tlcsalesforce.program__c
+ On membershiptype__c.program__c = program__c.sfid limit 20
+ --where
+ --date(reservation__c.createddate) = (current_date-1)
+ --and (
      --outlet__c.property__c='a0D0k000009PPsEEAW' or 
      membershiptype__c.sfid='${customer_set__c}'
      --membershiptype__c.sfid='a0f0k000002bjhGAAQ'
@@ -182,9 +187,10 @@ let RReport= ()=>{
     return new Promise(async(resolve, reject)=>{
         try{
             let getEmailandPropertyArr = await getRRSfid()
-            console.log(getEmailandPropertyArr)
+           
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
+                 
                 let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind];
                 ind++
@@ -192,10 +198,24 @@ let RReport= ()=>{
                 // console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
                     if(e.length){
+                        console.log("dataPropertyWise",dataPropertyWise[0].property_id)
+                        
+                        //get brand Id
+                        let brandId = await getBrandId(dataPropertyWise[0].property_id,``)
+                        console.log(`brand id = ${brandId}`)
+                        let dynamicValues=await getDynamicValues(brandId);
+                        if(dynamicValues.length){
+                            console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
                         let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
                         console.log(pdfFile)
-                        sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
+                        sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues,dataPropertyWise[0].program_name)
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
+
+                        }
+                        else{
+                            updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  ;
+                        }
+                        
                     }else{
                         updateLog(insertedId, false ,'Error', 'Email not found!' , '' )
                     }
@@ -214,10 +234,22 @@ let RReport= ()=>{
                 // console.log(dataCSWise)
                 if(dataCSWise.length){
                     if(e.length){
-                        let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
+                        console.log(`Property Id = ${getEmailandCSArr.propertyArr[ind]}`)
+                        
+                        //get brand Id
+                        let brandId1 = await getBrandId(getEmailandCSArr.propertyArr[ind],``)
+                        console.log(`brand id = ${brandId1}`)
+                        let dynamicValues1=await getDynamicValues(brandId);
+                        console.log("dynamicValuesdynamicValues",dynamicValues1,dynamicValues1.length);
+                        if(dynamicValues.length){
+                            let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
                         console.log(pdfFile)
-                        sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e)
+                        sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues1 , dataCSWise[0].program_name)
                         updateLog(insertedId1, true ,'Success', '' , pdfFile)
+                        }else{
+                            updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  ;
+                        }
+                        
                     }else{
                         updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
                     }
@@ -234,6 +266,43 @@ let RReport= ()=>{
         }
     })
 }
+
+
+//getting brand ID
+let getBrandId = async(property__c, customer_set__c)=>{
+    try{
+        console.log(`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`)
+        let qry=``
+        if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
+        else qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where customer_set__c  = '${customer_set__c}' limit 1`;
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+
+//getting dynamic value 
+
+let getDynamicValues=async(brandId)=>{
+    try{
+        console.log(`select brand_name__c,brand_logo__c, tlc_logo__c,page_footer_1_rr__c,page_footer_2_rr__c,column_1_rr__c,column_2_rr__c,column_3_rr__c,display_name_rr__c,subject_rr__c,footer_rr__c,
+		from_email_id_rr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let query=await pool.query(`select brand_name__c,brand_logo__c, tlc_logo__c,page_footer_1_rr__c,page_footer_2_rr__c,column_1_rr__c,column_2_rr__c,column_3_rr__c,display_name_rr__c,subject_rr__c,footer_rr__c,
+		from_email_id_rr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        
+        
+        let result = query ? query.rows : [];
+        console.log("query",result);
+        return result;        
+    }catch(e){
+        console.log(e);
+
+    }
+}
+
+
 module.exports={
     RReport
 }

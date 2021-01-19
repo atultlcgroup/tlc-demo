@@ -598,7 +598,7 @@ let getErrorDataFromPOSLog=async (posTrackingId)=>{
          email ? email.rows : null
          if( result.rows.length > 0){
         console.log("Error data is",result.rows);
-        let fileURL= await generateCSV(result.rows, email.rows[0].user_email_id__c, email.rows[0].pos_source__c);
+        let fileURL= await generateCSV(result.rows, email.rows[0].user_email_id__c, email.rows[0].pos_source__c,posTrackingId);
         return fileURL
      }else{
         console.log("Error data is",result.rows);
@@ -617,12 +617,12 @@ let getErrorDataFromPOSLog=async (posTrackingId)=>{
 }
 
 
-let generateCSV=async(data,email,posSource)=>{
+let generateCSV=async(data,email,posSource,posTrackingId)=>{
     // let headerArr = [{id:"SR No.",title:"SR No."}]
     // for(let [key,value] of Object.entries(data[0])){
     //     headerArr.push({id: `${key}`, title:`${key}`})
     // }
-    
+    console.log("generateCSV",data);
     let fileName = `POS_Error_${require('dateformat')(new Date(), "yyyymmddhMMss")}.csv`
     let path = `./uploads/${fileName}`
     // const csvWriter = createCsvWriter({
@@ -646,14 +646,14 @@ let generateCSV=async(data,email,posSource)=>{
      console.log("email value ",email);
 
 //    let result= await csvWriter.writeRecords(records) 
-   let fileUrl=await uploadErrorFileToFTP (fileName,email,posSource)
+   let fileUrl=await uploadErrorFileToFTP (fileName,email,posSource,posTrackingId)
     
    console.log("path",fileUrl);
    return  fileUrl;  
 } // returns a promise
 
 
-let uploadErrorFileToFTP = async (fileName,email,posSource) => {
+let uploadErrorFileToFTP = async (fileName,email,posSource,posTrackingId) => {
     return new Promise(async(resolve,reject)=>{
         try {
             let path = `POS/error/${fileName}`
@@ -671,7 +671,17 @@ let uploadErrorFileToFTP = async (fileName,email,posSource) => {
                     logoName=reportType[1].logoName;
                 }
                 console.log("email will send");
-            await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName);
+                let brandId=await getBrandId(posTrackingId);
+                console.log("brandId",brandId.sfid);
+                let dynamicValues=await getDynamicValues(brandId.sfid);
+                console.log("dynamicValues",dynamicValues);
+                if(dynamicValues.length){
+                    await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName,dynamicValues,brandId.program_name__c);
+
+                }else{
+                    updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                }
+           
             }
             else{
                 fs.unlink(`uploads/${fileName}`, (err, da) => {
@@ -786,6 +796,33 @@ let createFileName= (body,file)=>{
     return fileName;
 }
 
+//get brand Id
+let getBrandId = async(posTrackingId)=>{
+    try{
+        console.log(`select p1.sfid, p1.unique_identifier__c,p2.program_name__c from  tlcsalesforce.brand__c p1 inner join tlcsalesforce.pos_tracking__c p2 on 
+        p1.unique_identifier__c= p2.banduniqueidentifier__c where p2.id=${posTrackingId}`);
+        let getBrandId= await pool.query(`select p1.sfid, p1.unique_identifier__c,p2.program_name__c from  tlcsalesforce.brand__c p1 inner join tlcsalesforce.pos_tracking__c p2 on 
+        p1.unique_identifier__c= p2.banduniqueidentifier__c where p2.id=${posTrackingId}`)
+        console.log("getBrandId",getBrandId.rows[0]);
+        return getBrandId.rows ? getBrandId.rows[0] : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+
+//get Dynamic value
+let getDynamicValues=async(brandId)=>{
+    try{
+        let query=await pool.query(`select  brand_name__c,brand_logo__c,tlc_logo__c,subject_pos__c,display_name_pos__c,footer_pos__c,from_email_id_pos__c,
+        column_3_pos__c,column_2_pos__c,column_1_pos__c, page_footer_2_pos__c,
+        page_footer_1_pos__c from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let result = query ? query.rows : [];
+        return result;
+    }catch(e){
+        return [];
+    } 
+}
 
 
 module.exports = {
