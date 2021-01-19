@@ -237,6 +237,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
     let creditCardBatchClosureStr = ``
     serialNumber = 1;
+    if(sfdcFile)
     for (let d of sfdcFile) {
         creditCardBatchClosureStr += ` <tr height="50" align="center">`
         creditCardBatchClosureStr += `<td> ${serialNumber++}</td>`
