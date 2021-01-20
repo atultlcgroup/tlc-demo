@@ -187,7 +187,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
         indexForPage++;
-        if (indexForPage % 10 == 0 && indexForPage != 0 && dsrValues[indexForPage]) {
+        if (indexForPage % 8 == 0 && indexForPage != 0 && dsrValues[indexForPage]) {
             dailySalesReportRows += `${headerForPage}`
         }
 

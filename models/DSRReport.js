@@ -581,7 +581,7 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 10`)
+        On membershiptype__c.program__c = program__c.sfid limit 20`)
         let qry12=(` 
         where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
