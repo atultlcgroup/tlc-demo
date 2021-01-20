@@ -27,6 +27,7 @@ let getEmptyIfNull = (val) => {
 }
 let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues , sfdcFile) => {
     let pyamnetObj = {}
+    let paymentBYNrc = {}
 
     let summaryTotalSale = 0
     let summaryTotalAmount = 0
@@ -127,7 +128,22 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             pyamnetObj[obj.payment_mode__c] = { amount: obj.total_amount__c, noOfSale: 1 }
         }
 
+        
+        // paymentBYNrc
+        // summaryByNRCCount +=1;
+        // summaryByNRCAmount +=obj.total_amount__c
+        console.log("obj.type_n_r__c",obj.type_n_r__c);
+        if (obj.type_n_r__c == 'null' || obj.type_n_r__c == '' || obj.type_n_r__c == null ){}
+        else{
+        if (paymentBYNrc[obj.type_n_r__c]) {
 
+            paymentBYNrc[obj.type_n_r__c] = { amount: obj.total_amount__c + paymentBYNrc[obj.type_n_r__c].amount, noOfSale: paymentBYNrc[obj.type_n_r__c].noOfSale + 1 }
+        } else {
+            paymentBYNrc[obj.type_n_r__c] = { amount: obj.total_amount__c, noOfSale: 1 }
+        }
+    }
+
+        console.log("paymentBYNrc----",paymentBYNrc);
         console.log("pyamnetObj", pyamnetObj)
         console.log("obj.type_n_r__c", obj.type_n_r__c)
         //NRC 
@@ -207,7 +223,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     console.log("certifiacateIssued", certifiacateIssued);
 
     //For NRC Summary
-    let summaryTotalSalesNRC = summaryDataNRC[0].noOfSale + summaryDataNRC[1].noOfSale - summaryDataNRC[2].noOfSale;
+    let summaryTotalSalesNRC = summaryDataNRC[0].noOfSale + summaryDataNRC[1].noOfSale + summaryDataNRC[2].noOfSale;
     let summaryTotalAmountNRC = summaryDataNRC[0].amount + summaryDataNRC[1].amount + summaryDataNRC[2].amount;
 
     //For level summary 
@@ -224,6 +240,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     let summaryTotalSalesByLevlAndSpouseComplimentry=summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].noOfSale +  summaryDataLevel[4].noOfSale + summaryDataLevel[5].noOfSale
     let summaryTotalAmountByLevlAndSpouseComplimentry= summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount + summaryDataLevel[4].amount + summaryDataLevel[5].amount ;
     let summaryHtml = ``
+    let summaryHtml2 = ``
     let serialNumber = 1;
     for (let [key, value] of Object.entries(pyamnetObj)) {
         summaryHtml += ` <tr height="50" align="center">`
@@ -232,6 +249,16 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         summaryHtml += `<td >${value.noOfSale}</td>`
         summaryHtml += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
         summaryHtml += `</tr>`
+    }
+
+    let serialNumber2 = 1;
+    for (let [key, value] of Object.entries(paymentBYNrc)) {
+        summaryHtml2 += ` <tr height="50" align="center">`
+        summaryHtml2 += `<td> ${serialNumber2++}</td>`
+        summaryHtml2 += `<td style="text-align: left;">${key}</td>`
+        summaryHtml2 += `<td >${value.noOfSale}</td>`
+        summaryHtml2 += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
+        summaryHtml2 += `</tr>`
     }
 
 
@@ -483,27 +510,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-
-      <tr>
-          <td>1</td>
-          <td style="text-align: left;">New(N)</td>
-          <td>${summaryDataNRC[0].noOfSale}</td>
-          <td>${summaryDataNRC[0].amount}</td>
-      </tr>
-      <tr>
-          <td>2</td>
-          <td style="text-align: left;">Renewal(R)</td>
-          <td>${summaryDataNRC[1].noOfSale}</td>
-          <td>${summaryDataNRC[1].amount}</td>
-         
-      </tr>
-      <tr>
-          <td>3</td>
-          <td style="text-align: left;">Cancellation (C)</td>
-          <td>${summaryDataNRC[2].noOfSale}</td>
-          <td>${summaryDataNRC[2].amount}</td>
-      </tr>
       
+      ${summaryHtml2} 
        
       <tr height="50"  align="center">
           <td colspan="2">Total (N+R-C)</td>
