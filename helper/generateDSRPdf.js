@@ -58,7 +58,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     let summaryData = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
     let summaryDataNRC = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
 
-    let summaryDataLevel = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 },{ key: 'Compliementry', amount: 0, noOfSale: 0 }]
+    let summaryDataLevel = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 },{ key: 'Compliementry', amount: 0, noOfSale: 0 },{ key: 'Compliementry', amount: 0, noOfSale: 0 }]
 
     console.log("DSR values are");
 
@@ -226,6 +226,10 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             console.log("in level4",summaryDataLevel[3].noOfSale)
             summaryDataLevel[3].amount += obj.total_amount__c;
             summaryDataLevel[3].noOfSale += 1;
+        }
+        else if (obj.customer_set_level_name == "Wedding Bundling"){
+            summaryDataLevel[6].amount += obj.total_amount__c;
+            summaryDataLevel[6].noOfSale += 1;
         }
         
         //Summary by level end    
@@ -628,8 +632,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
       </tr>
       <td>${serialNumber3++}</td>
       <td style="text-align: left;">Wedding Bunding</td>
-      <td>2</td>
-      <td>4000</td>
+      <td>${summaryDataLevel[6].noOfSale}</td>
+      <td>${summaryDataLevel[6].amount}</td>
       </tr>
       
 
