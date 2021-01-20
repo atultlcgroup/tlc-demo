@@ -21,6 +21,24 @@ let convertDateFormat = (date1) => {
     return dateTime
 }
 
+// convert Date Format and Time
+let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+let convertDateFormatForPDF = (date1) => {
+    if (date1) {
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${String(days[today1.getDay()] || '')} ${String(today1.getDate()).padStart(2, '0')}/${today1.getMonth() +1}/${today1.getFullYear()} ${strTime}`
+    }
+    console.log("dateTime----",dateTime);
+    return dateTime
+}
+
 
 let getEmptyIfNull = (val) => {
     return val ? val : '';
@@ -250,7 +268,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     console.log("summaryTotalSalesByLevlc",summaryDataLevel[5].noOfSale)
 
     let summaryTotalSalesByLevl = summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].noOfSale;
-    let summaryTotalAmountByLevl = summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount;
+    let summaryTotalAmountByLevl = (Math.floor((summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount) * 100) / 100);
     
     let summaryTotalSalesByLevlAndSpouseComplimentry=summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].noOfSale +  summaryDataLevel[4].noOfSale + summaryDataLevel[5].noOfSale
     let summaryTotalAmountByLevlAndSpouseComplimentry= summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount + summaryDataLevel[4].amount + summaryDataLevel[5].amount ;
@@ -352,7 +370,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
            }
         .border-none th{
             font-size: 10px!important;
-            text-align: left;
+            text-align: center;
             color:white!important;
             height:30px!important;
             background-color: #C4B67E!important;
@@ -377,7 +395,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             background-color: #C4B67E;
             border: 1px solid black;
             padding: 6px;
-            text-align: left;
+            text-align: center;
         }
         .tftable1 td {
             font-size: 7px;
@@ -453,7 +471,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <tr>
               
               <td style="text-align: left; color:black">
-              ${today}
+              ${convertDateFormatForPDF(new Date())}
               </td>
           </tr>
       </table>
@@ -531,7 +549,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   
 
       <table class="tftable   border-none"  style="margin-top:50px;">
-      <caption  style="font-size: 12px; margin-top:11px; text-align:left;" ><b>Break-up of sales </b></caption>
+      <caption  style="font-size: 12px; margin-top:11px; text-align:left;" ><b>Break-up of Enrolments </b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
@@ -591,24 +609,24 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
       <td>${summaryTotalAmountByLevl}</td>
       </tr>
       <tr>
-      <td>5</td>
+      <td>${serialNumber3++}</td>
       <td style="text-align: left;">Spouse Complimentry</td>
       <td>${summaryDataLevel[4].noOfSale}</td>
       <td>${summaryDataLevel[4].amount}</td>
       </tr>
       <tr>
-      <td >6</td>
+      <td >${serialNumber3++}</td>
       <td style="text-align: left;">Other Complimentry (includes MGM)</td>
       <td>${summaryDataLevel[5].noOfSale}</td>
       <td>${summaryDataLevel[5].amount}</td>
       </tr>
       <tr>
-      <td>7</td>
+      <td>${serialNumber3++}</td>
       <td style="text-align: left;">Reissue (INR 500)</td>
       <td>2</td>
       <td>4000</td>
       </tr>
-      <td>8</td>
+      <td>${serialNumber3++}</td>
       <td style="text-align: left;">Wedding Bunding</td>
       <td>2</td>
       <td>4000</td>
