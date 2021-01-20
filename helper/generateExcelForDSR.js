@@ -795,7 +795,7 @@ if(slNo % 2 != 0)
 row+=1;
 column = 2
 paidSalesCnt+=spouseComplementry.cnt;
-paidSalesReveneu+=spouseComplementry.cnt
+paidSalesReveneu+=spouseComplementry.revenue
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Spouse Complimentary`).style(className2)
 ws2.cell(row, column++).number(spouseComplementry.cnt).style(className1)
@@ -813,7 +813,7 @@ if(slNo % 2 != 0)
 row+=1;
 column = 2
 paidSalesCnt+=otherComplementry.cnt;
-paidSalesReveneu+=otherComplementry.cnt
+paidSalesReveneu+=otherComplementry.revenue
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`Other Complimentary (Include Referrals)`).style(className2)
 ws2.cell(row, column++).number(otherComplementry.cnt).style(className1)

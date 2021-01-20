@@ -110,14 +110,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                     `
 
 
-        if (obj.payment_mode__c != 'Complimentary') {
+        // if (obj.payment_mode__c != 'Complimentary') {
             salesCount++;
             salesAmount += obj.amount__c ? obj.amount__c : 0
             salesTax += (obj.total_amount__c - obj.amount__c) ? (obj.total_amount__c - obj.amount__c) : 0
             //salesTax += obj.tax ? obj.tax : 0
             salesTotalAmount += obj.total_amount__c
             // salesTotalAmount += (obj.amount__c ? obj.amount__c : 0 ) + (obj.tax ? obj.tax : 0);
-        }
+        // }
         summaryTotalSale += 1
         summaryTotalAmount += obj.total_amount__c
         if (pyamnetObj[obj.payment_mode__c]) {
@@ -569,13 +569,13 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
       <tr>
       <td>7</td>
       <td style="text-align: left;">Reissue (INR 500)</td>
-      <td>2</td>
-      <td>4000</td>
+      <td>0</td>
+      <td>0</td>
       </tr>
       <td>8</td>
       <td style="text-align: left;">Wedding Bunding</td>
-      <td>2</td>
-      <td>4000</td>
+      <td>0</td>
+      <td>0</td>
       </tr>
       
 

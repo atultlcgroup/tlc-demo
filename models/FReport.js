@@ -99,13 +99,13 @@ let getFRData=async(property__c)=>{
         on membershiptype__c.property__c=property__c.sfid
         Left join tlcsalesforce.case c
         on c.sfid=member_feedback__c.case__c 
-        inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 20
-       -- where
-         --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        --date(member_feedback__c.createddate) =(current_date-1)
-       --and (outlet__c.property__c='${property__c}' 
+        inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid 
+       where
+         date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
+        date(member_feedback__c.createddate) =(current_date-1)
+       and (outlet__c.property__c='${property__c}' 
         --or membershiptype__c.sfid=''
-        --)
+        )
         `
         let data = await pool.query(qry)
         return data.rows? data.rows : []
@@ -131,15 +131,15 @@ let getFRDataCS=async( customer_set__c)=>{
         on membershiptype__c.property__c=property__c.sfid
         Left join tlcsalesforce.case c
         on c.sfid=member_feedback__c.case__c 
-        inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 20
-        --where
-        --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        --date(member_feedback__c.createddate) =(current_date-1)
-        --and 
-        --(
+        inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid
+        where
+        date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
+        date(member_feedback__c.createddate) =(current_date-1)
+        and 
+        (
             --outlet__c.property__c='' or 
-        --membershiptype__c.sfid='${customer_set__c}'
-        --)
+        membershiptype__c.sfid='${customer_set__c}'
+        )
 
         `
         let data = await pool.query(qry)
@@ -239,9 +239,9 @@ let FReport= ()=>{
                 if(dataCSWise.length){
                     let customersetName = await getCSName(csId)
                     if(e.length){
-                        console.log("dataCSWise :",dataCSWise[0].property_id)
+                        console.log("dataCSWise :",csId)
                     let pdfFile = await generateFRPdf.generateFRPDF(dataCSWise,customersetName,csId)
-                    let brandId = await getBrandId(dataCSWise[0].property_id,``);
+                    let brandId = await getBrandId(``,csId);
                     console.log("brandId",brandId);
                     let dynamicValues1=await getDynamicValues(brandId);
                     if(dynamicValues1.length){

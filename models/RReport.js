@@ -187,7 +187,7 @@ let RReport= ()=>{
     return new Promise(async(resolve, reject)=>{
         try{
             let getEmailandPropertyArr = await getRRSfid()
-           
+            console.log(getEmailandPropertyArr)
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
                  
@@ -198,12 +198,13 @@ let RReport= ()=>{
                 // console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
                     if(e.length){
-                        console.log("dataPropertyWise",dataPropertyWise[0].property_id)
-                        
+                        console.log("dataPropertyWise",propertyId)                        
                         //get brand Id
-                        let brandId = await getBrandId(dataPropertyWise[0].property_id,``)
+                        let brandId = await getBrandId(propertyId,``)
+                        console.log(brandId)
                         console.log(`brand id = ${brandId}`)
                         let dynamicValues=await getDynamicValues(brandId);
+                        console.log(`dynamic value = ${dynamicValues}`)
                         if(dynamicValues.length){
                             console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
                         let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
@@ -229,17 +230,16 @@ let RReport= ()=>{
             for(let e of getEmailandCSArr.emailArr){
                 let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
                 let csId = getEmailandCSArr.customerSetArr[ind1];
-                ind1++;
                 let dataCSWise = await getRRDataCS(csId)
                 // console.log(dataCSWise)
                 if(dataCSWise.length){
                     if(e.length){
-                        console.log(`Property Id = ${getEmailandCSArr.propertyArr[ind]}`)
+                        console.log(`Property Id = ${getEmailandCSArr.propertyArr[ind1]}`)
                         
                         //get brand Id
-                        let brandId1 = await getBrandId(getEmailandCSArr.propertyArr[ind],``)
+                        let brandId1 = await getBrandId(``,getEmailandCSArr.propertyArr[ind1])
                         console.log(`brand id = ${brandId1}`)
-                        let dynamicValues1=await getDynamicValues(brandId);
+                        let dynamicValues1=await getDynamicValues(brandId1);
                         console.log("dynamicValuesdynamicValues",dynamicValues1,dynamicValues1.length);
                         if(dynamicValues.length){
                             let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
@@ -258,6 +258,7 @@ let RReport= ()=>{
                }else{
                 updateLog(insertedId1, false ,'Error', 'Record not found!' , '' )
               }
+              ind1++;
             }
         
             resolve('Success')
@@ -271,6 +272,7 @@ let RReport= ()=>{
 //getting brand ID
 let getBrandId = async(property__c, customer_set__c)=>{
     try{
+        console.log(property__c , `property id`)
         console.log(`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`)
         let qry=``
         if(property__c) qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where property__c = '${property__c}' limit 1`
