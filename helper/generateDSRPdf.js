@@ -110,14 +110,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                     `
 
 
-        if (obj.payment_mode__c != 'Complimentary') {
+        // if (obj.payment_mode__c != 'Complimentary') {
             salesCount++;
             salesAmount += obj.amount__c ? obj.amount__c : 0
             salesTax += (obj.total_amount__c - obj.amount__c) ? (obj.total_amount__c - obj.amount__c) : 0
             //salesTax += obj.tax ? obj.tax : 0
             salesTotalAmount += obj.total_amount__c
             // salesTotalAmount += (obj.amount__c ? obj.amount__c : 0 ) + (obj.tax ? obj.tax : 0);
-        }
+        // }
         summaryTotalSale += 1
         summaryTotalAmount += obj.total_amount__c
         if (pyamnetObj[obj.payment_mode__c]) {
@@ -262,14 +262,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
           
           .tftable {
-              font-size: 8px;
+              font-size: 7px;
               color: #333333;
               width: 35%;
               border: 1px solid black;
               border-collapse: collapse;
           }
           .tftable th {
-              font-size: 8px;
+              font-size: 7px;
               color:white;
               background-color: #bfa57d;
               border: 1px solid black;
@@ -277,7 +277,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
               text-align: center;
           }
           .tftable td {
-              font-size: 8px;
+              font-size: 7px;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
@@ -311,21 +311,21 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
        
 
           .tftable1 {
-            font-size: 8px;
+            font-size: 7px;
             color: #333333;
             width: 100%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable1 th {
-            font-size: 8px;
+            font-size: 7px;
             background-color: #C4B67E;
             border: 1px solid black;
             padding: 6px;
             text-align: left;
         }
         .tftable1 td {
-            font-size: 8px;
+            font-size: 7px;
             border: 1px solid black;
             padding: 6px;
         }
@@ -375,9 +375,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
         <tbody>
             <tr >
-                <td align="left" style="font-size: 20px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img><br><span style="font-size: 12px; color:black;">www.tlcgroup.com</span></td>
-                <td align="center" style="font-size: 18px; width: 30%; color:black;">Daily Sales report-${programName}</td>
-                <td align="right"style="font-size: 18px; width: 30%; color:black;"> ${propertyName} </td>
+                <td align="left" style="font-size: 18px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img><br><span style="font-size: 12px; color:black;">www.tlcgroup.com</span></td>
+                <td align="center" style="font-size: 15px; width: 30%; color:black;">Daily Sales report-${programName}</td>
+                <td align="right"style="font-size: 15px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
         </tbody>
     </table>
@@ -387,14 +387,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             <td > 
                 <span style="font-size:30px;">DSR</span>
                 <br><hr color="black" style="margin: 0; width:100%"/>
-                <span style="font-size: 10px;"> ${today}</span>
+                <span style="font-size: 9px;"> ${today}</span>
             </td>
-            <td  align="right" style="font-size: 23px;color: #438282; width:30%"> ${propertyName}</td>
+            <td  align="right" style="font-size: 20px;color: #438282; width:30%"> ${propertyName}</td>
 
         </tr>
     </table-->
   
-      <table style="width: 100%; font-size: 12px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
+      <table style="width: 100%; font-size: 11px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
           <tr>
               
               <td style="text-align: left; color:black">
@@ -451,7 +451,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <div style="page-break-after: always;">&nbsp; </div>
 
       <table class="tftable border-none" style="margin-top:50px; ">
-      <caption align="left" style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Summary By Payment Mode</b></caption>
+      <caption align="left" style="font-size: 12px; margin-top:12px; text-align:left;" ><b>Summary By Payment Mode</b></caption>
           <tr width="200px">
               <th>S. No. </th>
               <th  height="50">Type</th>
@@ -476,7 +476,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   
 
       <table class="tftable   border-none"  style="margin-top:50px;">
-      <caption  style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Break-up of sales </b></caption>
+      <caption  style="font-size: 12px; margin-top:12px; text-align:left;" ><b>Break-up of sales </b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
@@ -516,7 +516,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     <div style="page-break-after: always;">&nbsp; </div>
   
       <table class="tftable border-none"  style="margin-top:50px; ">
-      <caption align="left" style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Summary By Level</b></caption>
+      <caption align="left" style="font-size: 12px; margin-top:12px; text-align:left;" ><b>Summary By Level</b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
@@ -587,7 +587,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
   <table class="tftable border-none" style="margin-top:50px; width: 45%">
-  <caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
+  <caption align="left" style="font-size: 12px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
   <tr width="200px">
       <th>S. No.</th>
       <th>Date</th>
@@ -609,7 +609,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
 <table class="tftable border-none" style="margin-top:50px; ">
-<caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
+<caption align="left" style="font-size: 12px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
 <tr width="200px">
     <th>S. No.</th>
     <th  height="50">Document Reference Number</th>
@@ -630,8 +630,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 <div style="page-break-after: always;">&nbsp;</div>
 
 
-<h4 style="width: 15%; font-size: 13px;" >Annexure – 3  Explanation</h4>
-<div style="font-size: 13px; " >
+<h4 style="width: 15%; font-size: 12px;" >Annexure – 3  Explanation</h4>
+<div style="font-size: 12px; " >
 This is an auto generated Daily Sales Report of ${programName}.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
 
 1.  Member Name – The full name of the Member <br>
@@ -657,7 +657,7 @@ Disclaimer <br><br>
 
 While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."
 
-    <div class="arilFont" id="pageFooter" style="font-size: 11px; height:500px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter" style="font-size: 10px; height:500px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
     <p align="left"> ${dynamicValues.page_footer_1_dsr__c} </p>
     <p>${dynamicValues.page_footer_2_dsr__c}</p>
