@@ -28,6 +28,7 @@ let getEmptyIfNull = (val) => {
 let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues , sfdcFile) => {
     let pyamnetObj = {}
     let paymentBYNrc = {}
+    let paymentBYLevel ={}
 
     let summaryTotalSale = 0
     let summaryTotalAmount = 0
@@ -143,9 +144,23 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         }
     }
 
+
+    // paymentBYLevel
+    
+    if (obj.payment_mode__c != 'Complimentary'){
+    
+    if (paymentBYLevel[obj.customer_set_level_name]) {
+
+        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c + paymentBYLevel[obj.customer_set_level_name].amount, noOfSale: paymentBYLevel[obj.customer_set_level_name].noOfSale + 1 }
+    } else {
+        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c, noOfSale: 1 }
+    }
+}
+
+
         console.log("paymentBYNrc----",paymentBYNrc);
         console.log("pyamnetObj", pyamnetObj)
-        console.log("obj.type_n_r__c", obj.type_n_r__c)
+        console.log("paymentBYLevel", paymentBYLevel)
         //NRC 
         if (obj.type_n_r__c == 'N') {
             summaryDataNRC[0].amount += obj.total_amount__c;
@@ -241,6 +256,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     let summaryTotalAmountByLevlAndSpouseComplimentry= summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount + summaryDataLevel[4].amount + summaryDataLevel[5].amount ;
     let summaryHtml = ``
     let summaryHtml2 = ``
+    let summaryHtml3 = ``
+    
     let serialNumber = 1;
     for (let [key, value] of Object.entries(pyamnetObj)) {
         summaryHtml += ` <tr height="50" align="center">`
@@ -260,7 +277,18 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         summaryHtml2 += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
         summaryHtml2 += `</tr>`
     }
-
+     
+    //paymentBYLevel
+    let serialNumber3 = 1;
+    for (let [key, value] of Object.entries(paymentBYLevel)) {
+        summaryHtml3 += ` <tr height="50" align="center">`
+        summaryHtml3 += `<td> ${serialNumber3++}</td>`
+        summaryHtml3 += `<td style="text-align: left;">${key}</td>`
+        summaryHtml3 += `<td >${value.noOfSale}</td>`
+        summaryHtml3 += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
+        summaryHtml3 += `</tr>`
+    }
+    
 
     let creditCardBatchClosureStr = ``
     serialNumber = 1;
@@ -531,7 +559,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-      
+      <!--
       <tr>
          <td>1</td>   
           <td style="text-align: left;">Level 1</td>
@@ -555,7 +583,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <td style="text-align: left;">Level 4</td>
           <td>${summaryDataLevel[3].noOfSale}</td>
           <td>${summaryDataLevel[3].amount}</td>
-      </tr>s
+      </tr> -->
+      ${summaryHtml3}
       <tr>
       <td colspan="2" >Sub Total of Paid sales</td>
       <td>${summaryTotalSalesByLevl}</td>
