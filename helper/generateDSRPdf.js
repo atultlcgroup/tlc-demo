@@ -291,12 +291,12 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                border:1px solid white!important;
            }
           .border-none  td{
-            font-size:12px!important;   
+            font-size:11px!important;   
             height:30px!important;   
             border:1px solid!important;
            }
         .border-none th{
-            font-size: 12px!important;
+            font-size: 11px!important;
             text-align: left;
             color:white!important;
             height:30px!important;
@@ -304,7 +304,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             
         }
         .border-none tr{
-            font-size: 12px!important;
+            font-size: 11px!important;
             height:30px!important;
             border:1px solid!important;
         }
@@ -375,9 +375,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
         <tbody>
             <tr >
-                <td align="left" style="font-size: 18px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img><br><span style="font-size: 12px; color:black;">www.tlcgroup.com</span></td>
-                <td align="center" style="font-size: 15px; width: 30%; color:black;">Daily Sales report-${programName}</td>
-                <td align="right"style="font-size: 15px; width: 30%; color:black;"> ${propertyName} </td>
+                <td align="left" style="font-size: 15px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img></td>
+                <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Sales report-${programName}</td>
+                <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
         </tbody>
     </table>
