@@ -409,7 +409,7 @@ let style = wb.createStyle({
   });
 
   ws2.addImage({
-    path: './helper/logo-tlc-small5.png',
+    path: './helper/logo-tlc-small.png',
     // path: dynamicValues[0].tlc_logo__c,
     type: 'picture',
     position: {
@@ -713,14 +713,14 @@ let totalNRC= 0;
   column = 2
   if(NRCObject['N']){
   ws2.cell(row, column++).number(slNo).style(className1)
-  ws2.cell(row, column++).string(`${key}`).style(className2)
+  ws2.cell(row, column++).string(`N`).style(className2)
   ws2.cell(row, column++).number(NRCObject['N'].count).style(className1)
   ws2.cell(row, column++).number(NRCObject['N'].reveneu).style(className1)
   NRCCount += NRCObject['N'].count;
   totalNRC += NRCObject['N'].reveneu;
   }else{
     ws2.cell(row, column++).number(slNo).style(className1)
-    ws2.cell(row, column++).string(`${key}`).style(className2)
+    ws2.cell(row, column++).string(`N`).style(className2)
     ws2.cell(row, column++).number(0).style(className1)
     ws2.cell(row, column++).number(0).style(className1)
     // NRCCount += value.count;
@@ -743,14 +743,14 @@ row+=1;
 column = 2
 if(NRCObject['R']){
 ws2.cell(row, column++).number(slNo).style(className1)
-ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).string(`R`).style(className2)
 ws2.cell(row, column++).number(NRCObject['R'].count).style(className1)
 ws2.cell(row, column++).number(NRCObject['R'].reveneu).style(className1)
 NRCCount += NRCObject['R'].count;
 totalNRC += NRCObject['R'].reveneu;
 }else{
   ws2.cell(row, column++).number(slNo).style(className1)
-  ws2.cell(row, column++).string(`${key}`).style(className2)
+  ws2.cell(row, column++).string(`R`).style(className2)
   ws2.cell(row, column++).number(0).style(className1)
   ws2.cell(row, column++).number(0).style(className1)
 }
@@ -769,14 +769,14 @@ row+=1;
 column = 2
 if(NRCObject['C']){
 ws2.cell(row, column++).number(slNo).style(className1)
-ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).string(`C`).style(className2)
 ws2.cell(row, column++).number(NRCObject['C'].count).style(className1)
 ws2.cell(row, column++).number(NRCObject['C'].reveneu).style(className1)
 NRCCount += NRCObject['C'].count;
 totalNRC += NRCObject['C'].reveneu;
 }else{
 ws2.cell(row, column++).number(slNo).style(className1)
-ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).string(`C`).style(className2)
 ws2.cell(row, column++).number(0).style(className1)
 ws2.cell(row, column++).number(0).style(className1)
 }
@@ -1061,7 +1061,7 @@ row +=4;
 column = 2;
 
 
-ws2.cell(row, column,row, column+19, true).string(`This is an auto generated Daily Sales Report of < Program Name>.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.`).style(myStyleAlignLeft);
+ws2.cell(row, column,row, column+19, true).string(`This is an auto generated Daily Sales Report of ${dsrValues[0].program_name}.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.`).style(myStyleAlignLeft);
 row+=2;
 column = 2;
 ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter2)

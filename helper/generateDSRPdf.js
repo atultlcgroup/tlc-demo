@@ -85,9 +85,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 <th width="3%">CC <br>Batch No.</th>
 <th width="3%">Cash <br>Receipt No.</th>
 <th width="4%">Chq Details</th>
-<th width="5%">Amount</th>
-<th width="4%">Tax</th>
-<th width="3%">Total <br> Amount</th>
+<th width="5%">Amount(A)</th>
+<th width="4%">Tax(B)</th>
+<th width="3%">Total <br> Amount <br>(C=A+B)</th>
 <th width="5%">GSTIN</th>
 <th width="4%">State Code</th>
 <th width="7%">Remarks</th>
@@ -502,9 +502,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                   <th width="3%">CC <br>Batch No.</th>
                   <th width="3%">Cash <br>Receipt No.</th>
                   <th width="4%">Chq Details</th>
-                  <th width="5%">Amount</th>
-                  <th width="4%">Tax</th>
-                  <th width="3%">Total Amount</th>
+                  <th width="5%">Amount(A)</th>
+                  <th width="4%">Tax(B)</th>
+                  <th width="3%">Total Amount<br> (C=A+B)</th>
                   <th width="5%">GSTIN</th>
                   <th width="4%">State Code</th>
                   <th width="7%">Remarks</th>
