@@ -80,30 +80,64 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     <th width="4%">Promo Code</th>
     <th width="4%">Payment Mode</th>   
     <th width="3%">Online
-    <br/>/Transaction #</th>
+    <br/>Transaction #</th>
 <th width="3%">CC Approval <br> Code</th>
 <th width="3%">CC <br>Batch No.</th>
 <th width="3%">Cash <br>Receipt No.</th>
 <th width="4%">Chq Details</th>
-<th width="5%">Amount</th>
-<th width="4%">Tax</th>
-<th width="3%">Total <br> Amount</th>
+<th width="5%">Amount(A)</th>
+<th width="4%">Tax(B)</th>
+<th width="3%">Total <br> Amount <br>(C=A+B)</th>
 <th width="5%">GSTIN</th>
 <th width="4%">State Code</th>
 <th width="7%">Remarks</th>
 </tr>
 `
+
+let headerForPageCertificate=`
+
+<table class="page-break tftable border-none" style="padding-top:100px; width: 45%">
+<tr width="200px">
+    <th>S. No.</th>
+    <th>Date</th>
+    <th >Member Name</th>
+    <th  height="50">Membership Number</th>
+    <th>Level</th>
+    <th>Certificate Number issued</th>
+</tr>`
+
     let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
     let slNo = 1;
     let dailySalesReportRows = ``;
     let certifiacateIssued = ``;
     let indexForPage = 0;
+    let indexForPageCertificate = 0;
 
-    // certificateIssuedArr = [
-    //     { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
-    //     , { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-    //     { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-    //     { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }];
+    certificateIssuedAr = [
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
+   ];
 
     for (obj of dsrValues) {
         dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
@@ -166,13 +200,19 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     // paymentBYLevel
     
     if (obj.payment_mode__c != 'Complimentary'){
-    
-    if (paymentBYLevel[obj.customer_set_level_name]) {
+        if(obj.customer_set_level_name == null || obj.customer_set_level_name == 'null' || obj.customer_set_level_name ==''){
 
-        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c + paymentBYLevel[obj.customer_set_level_name].amount, noOfSale: paymentBYLevel[obj.customer_set_level_name].noOfSale + 1 }
-    } else {
-        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c, noOfSale: 1 }
-    }
+        }
+        else{
+            if (paymentBYLevel[obj.customer_set_level_name]) {
+
+                paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c + paymentBYLevel[obj.customer_set_level_name].amount, noOfSale: paymentBYLevel[obj.customer_set_level_name].noOfSale + 1 }
+            } else {
+                paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c, noOfSale: 1 }
+            }   
+
+        }
+   
 }
 
 
@@ -245,17 +285,21 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         }
 
     }
+
     let sN = 1;
     for (d of certificateIssuedAr) {
-
-
-        
         certifiacateIssued += `<tr align="center" height="50"><td>${sN++}</td>
                 <td >${getEmptyIfNull(d.createddate ? d.createddate : '')}</td>
                 <td >${getEmptyIfNull(d.membername ? d.membername : '')}</td>
                 <td>${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
                 <td >${getEmptyIfNull(d.customer_set_program_level__c ? d.customer_set_program_level__c : '')}</td>
                 <td>${getEmptyIfNull(d.certifcate_number__c ? d.certifcate_number__c : '')}</td> </tr>`
+
+                
+                indexForPageCertificate++;
+        if (indexForPageCertificate % 12 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
+            certifiacateIssued += `${headerForPageCertificate}`
+        }
     }
     console.log("certifiacateIssued", certifiacateIssued);
 
@@ -314,6 +358,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
     let creditCardBatchClosureStr = ``
     serialNumber = 1;
+    if(sfdcFile)
     for (let d of sfdcFile) {
         creditCardBatchClosureStr += ` <tr height="50" align="center">`
         creditCardBatchClosureStr += `<td> ${serialNumber++}</td>`
@@ -452,7 +497,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
         <tbody>
             <tr >
-                <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img></td>
+            <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=80></img></td>
                 <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Sales report-${programName}</td>
                 <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
@@ -488,7 +533,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                   <th width="3%">Membership Number</th>
                   <th width="2%"> Level </th>
                   <th width="3%">Type
-                      <br/>(N/R)</th>
+                      <br/>(N/R/C)</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
@@ -496,14 +541,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                       <th width="4%">Promo Code</th>
                       <th width="4%">Payment Mode</th>
                   <th width="3%">Online
-                      <br/>/Transaction #</th>
+                      <br/>Transaction #</th>
                   <th width="3%">CC Approval<br> Code</th>
                   <th width="3%">CC <br>Batch No.</th>
                   <th width="3%">Cash <br>Receipt No.</th>
                   <th width="4%">Chq Details</th>
-                  <th width="5%">Amount</th>
-                  <th width="4%">Tax</th>
-                  <th width="3%">Total Amount</th>
+                  <th width="5%">Amount(A)</th>
+                  <th width="4%">Tax(B)</th>
+                  <th width="3%">Total Amount<br> (C=A+B)</th>
                   <th width="5%">GSTIN</th>
                   <th width="4%">State Code</th>
                   <th width="7%">Remarks</th>
@@ -560,8 +605,28 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-      
-      ${summaryHtml2} 
+      <tr>
+         <td>1</td>   
+          <td style="text-align: left;">N</td>
+          <td>${summaryDataNRC[0].noOfSale}</td>
+          <td>${summaryDataNRC[0].amount}</td>
+      </tr>
+      <tr>
+         <td>1</td>   
+          <td style="text-align: left;">R</td>
+          <td>${summaryDataNRC[1].noOfSale}</td>
+          <td>${summaryDataNRC[1].amount}</td>
+      </tr>
+      <tr>
+      <td>1</td>   
+       <td style="text-align: left;">C</td>
+       <td>${summaryDataNRC[2].noOfSale}</td>
+       <td>${summaryDataNRC[2].amount}</td>
+   </tr>
+
+
+      <!--
+      ${summaryHtml2} -->
        
       <tr height="50"  align="center">
           <td colspan="2">Total (N+R-C)</td>
@@ -627,8 +692,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
       <tr>
       <td>${serialNumber3++}</td>
       <td style="text-align: left;">Reissue (INR 500)</td>
-      <td>2</td>
-      <td>4000</td>
+      <td>0</td>
+      <td>0</td>
       </tr>
       <td>${serialNumber3++}</td>
       <td style="text-align: left;">Wedding Bunding</td>
@@ -644,6 +709,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
       </tr>
   </table>
 
+  <div style="page-break-after: always;">&nbsp; </div>
+
+
 
   <table class="tftable border-none" style="margin-top:50px; width: 45%">
   <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
@@ -657,13 +725,13 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   </tr>
 
     ${certifiacateIssued} 
+   
 
 </table>
+<div style="page-break-after: always;">&nbsp; </div>
 
 <br> 
 
-
-<div style="page-break-after: always;">&nbsp; </div>
 
 
 
@@ -685,9 +753,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
 </table>
-
-<div style="page-break-after: always;">&nbsp;</div>
-
+<br>
 
 <h4 style="width: 15%; font-size: 11px;" >Annexure – 3  Explanation</h4>
 <div style="font-size: 10px; " >

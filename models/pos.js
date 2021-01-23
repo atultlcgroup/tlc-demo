@@ -73,6 +73,9 @@ let dateValidation=(dateString)=> {
 //     return true;
 // }
 
+
+
+
 //Find duplicate
 let findDuplicate =async (str)=>{
     console.log("str",str);
@@ -679,7 +682,7 @@ let uploadErrorFileToFTP = async (fileName,email,posSource,posTrackingId) => {
                     await sendMail.sendPOSErrorReport(`uploads/${fileName}`,'POS Error Report',email,logoName,dynamicValues,brandId.program_name__c);
 
                 }else{
-                    updateLog(insertedId, false ,'Error', 'No record found for given brand in dynamic report object!' , '' )  
+                    console.log('No record found for given brand in dynamic report object!');
                 }
            
             }
