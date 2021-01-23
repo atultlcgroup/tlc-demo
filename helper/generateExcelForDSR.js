@@ -409,19 +409,19 @@ let style = wb.createStyle({
   });
 
   ws2.addImage({
-    path: './helper/logo-tlc-small.jpg',
+    path: './helper/logo-tlc-small5.png',
     // path: dynamicValues[0].tlc_logo__c,
     type: 'picture',
     position: {
       type: 'oneCellAnchor',
       from: {
         col: 2,
-        row: 4,
+        row: 3,
         rowOff: 0,
         height:'5px',
         width: '4px'
       },
-    },
+    }
   });
   let row = 3;
   let column = 2
@@ -438,7 +438,7 @@ ws2.cell(row, column++).string(`Member Name`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
 
-ws2.cell(row, column++).string(`Type (N/R)`).style(myStyleAlignCenter)
+ws2.cell(row, column++).string(`Type (N/R/C)`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Enrollment/Renewal Date`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Valid Till`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Promo code`).style(myStyleAlignCenter)
@@ -462,14 +462,19 @@ let getEmptyIfNull = (val) => {
 }
 
 
+
 let summaryObject = {};
 
 let NRCObject = {}
 let summaryByLevel = {}
 let spouseComplementry={ cnt : 0, revenue: 0};
 let otherComplementry = { cnt : 0, revenue: 0};
-let className1 = myStyleAlignCenterWithoutBold
-let className2 = myStyleAlignCenterWithoutBoldAlignLeft
+let className1 = myStyleAlignCenterWithoutBold;
+let className2 = myStyleAlignCenterWithoutBoldAlignLeft;
+let amountOfMailTable = 0;
+let totalTmountOfMailTable = 0;
+let taxOfMailTable = 0;
+
 for(obj of dsrValues){
     if(slNo % 2 != 0) 
     {
@@ -543,10 +548,34 @@ for(obj of dsrValues){
                     ws2.cell(row, column++).number((obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)).style(className1)
                     ws2.cell(row, column++).number((obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0).style(className1)
                     ws2.cell(row, column++).number((obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0)).style(className1)
+                    amountOfMailTable += (obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0);
+                    totalTmountOfMailTable += (obj.total_amount__c-obj.amount__c) ? (Math.floor((obj.total_amount__c-obj.amount__c) * 100) / 100): 0;
+                    taxOfMailTable += (obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100):0);
+
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.gstin__c)}`).style(className2)
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.state_code__c)}`).style(className2)
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.remarks__c)}`).style(className2)
 }
+
+slNo++;
+row++ ;
+column= 2;
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+ws2.cell(row, column,row, column+=13, true).string(`Total`).style(className1);
+column++
+ws2.cell(row, column++).number(amountOfMailTable).style(className1);
+ws2.cell(row, column++).number(totalTmountOfMailTable).style(className1);
+ws2.cell(row, column++).number(taxOfMailTable).style(className1);
+ws2.cell(row, column++).string(``).style(className2);
+ws2.cell(row, column++).string(``).style(className2);
+ws2.cell(row, column++).string(``).style(className2);
 
 
 
@@ -668,7 +697,38 @@ ws2.cell(row, column++).string(`Net Revenue`).style(myStyleAlignCenter)
 slNo =0;
 let NRCCount = 0;
 let totalNRC= 0;
-for([key,value] of Object.entries(NRCObject)){
+// for([key,value] of Object.entries(NRCObject)){
+//FOR N
+    if(slNo % 2 != 0) 
+    {
+      className1=myStyleAlignCenterWithoutBold2
+      className2=myStyleAlignCenterWithoutBoldAlignLeft2
+    }else{
+      className1=myStyleAlignCenterWithoutBold
+      className2=myStyleAlignCenterWithoutBoldAlignLeft   
+    }
+
+  slNo++;
+  row+=1;
+  column = 2
+  if(NRCObject['N']){
+  ws2.cell(row, column++).number(slNo).style(className1)
+  ws2.cell(row, column++).string(`${key}`).style(className2)
+  ws2.cell(row, column++).number(NRCObject['N'].count).style(className1)
+  ws2.cell(row, column++).number(NRCObject['N'].reveneu).style(className1)
+  NRCCount += NRCObject['N'].count;
+  totalNRC += NRCObject['N'].reveneu;
+  }else{
+    ws2.cell(row, column++).number(slNo).style(className1)
+    ws2.cell(row, column++).string(`${key}`).style(className2)
+    ws2.cell(row, column++).number(0).style(className1)
+    ws2.cell(row, column++).number(0).style(className1)
+    // NRCCount += value.count;
+    // totalNRC += value.reveneu;
+  }
+  
+
+  //FOR R
   if(slNo % 2 != 0) 
   {
     className1=myStyleAlignCenterWithoutBold2
@@ -677,16 +737,52 @@ for([key,value] of Object.entries(NRCObject)){
     className1=myStyleAlignCenterWithoutBold
     className2=myStyleAlignCenterWithoutBoldAlignLeft   
   }
-NRCCount += value.count;
-totalNRC += value.reveneu;
+
 slNo++;
 row+=1;
 column = 2
+if(NRCObject['R']){
 ws2.cell(row, column++).number(slNo).style(className1)
 ws2.cell(row, column++).string(`${key}`).style(className2)
-ws2.cell(row, column++).number(value.count).style(className1)
-ws2.cell(row, column++).number(value.reveneu).style(className1)
+ws2.cell(row, column++).number(NRCObject['R'].count).style(className1)
+ws2.cell(row, column++).number(NRCObject['R'].reveneu).style(className1)
+NRCCount += NRCObject['R'].count;
+totalNRC += NRCObject['R'].reveneu;
+}else{
+  ws2.cell(row, column++).number(slNo).style(className1)
+  ws2.cell(row, column++).string(`${key}`).style(className2)
+  ws2.cell(row, column++).number(0).style(className1)
+  ws2.cell(row, column++).number(0).style(className1)
 }
+//FOR C
+if(slNo % 2 != 0) 
+{
+  className1=myStyleAlignCenterWithoutBold2
+  className2=myStyleAlignCenterWithoutBoldAlignLeft2
+}else{
+  className1=myStyleAlignCenterWithoutBold
+  className2=myStyleAlignCenterWithoutBoldAlignLeft   
+}
+
+slNo++;
+row+=1;
+column = 2
+if(NRCObject['C']){
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).number(NRCObject['C'].count).style(className1)
+ws2.cell(row, column++).number(NRCObject['C'].reveneu).style(className1)
+NRCCount += NRCObject['C'].count;
+totalNRC += NRCObject['C'].reveneu;
+}else{
+ws2.cell(row, column++).number(slNo).style(className1)
+ws2.cell(row, column++).string(`${key}`).style(className2)
+ws2.cell(row, column++).number(0).style(className1)
+ws2.cell(row, column++).number(0).style(className1)
+}
+
+
+// }
 // row+=1;
 // column = 2
 // ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)

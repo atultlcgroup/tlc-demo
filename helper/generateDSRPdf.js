@@ -21,12 +21,32 @@ let convertDateFormat = (date1) => {
     return dateTime
 }
 
+// convert Date Format and Time
+let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+let convertDateFormatForPDF = (date1) => {
+    if (date1) {
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${String(days[today1.getDay()] || '')} ${String(today1.getDate()).padStart(2, '0')}/${today1.getMonth() +1}/${today1.getFullYear()} ${strTime}`
+    }
+    console.log("dateTime----",dateTime);
+    return dateTime
+}
+
 
 let getEmptyIfNull = (val) => {
     return val ? val : '';
 }
 let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicValues , sfdcFile) => {
     let pyamnetObj = {}
+    let paymentBYNrc = {}
+    let paymentBYLevel ={}
 
     let summaryTotalSale = 0
     let summaryTotalAmount = 0
@@ -38,7 +58,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     let summaryData = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
     let summaryDataNRC = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
 
-    let summaryDataLevel = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 },{ key: 'Compliementry', amount: 0, noOfSale: 0 }]
+    let summaryDataLevel = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 },{ key: 'Compliementry', amount: 0, noOfSale: 0 },{ key: 'Compliementry', amount: 0, noOfSale: 0 }]
 
     console.log("DSR values are");
 
@@ -60,7 +80,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     <th width="4%">Promo Code</th>
     <th width="4%">Payment Mode</th>   
     <th width="3%">Online
-    <br/>/Transaction #</th>
+    <br/>Transaction #</th>
 <th width="3%">CC Approval <br> Code</th>
 <th width="3%">CC <br>Batch No.</th>
 <th width="3%">Cash <br>Receipt No.</th>
@@ -127,9 +147,38 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             pyamnetObj[obj.payment_mode__c] = { amount: obj.total_amount__c, noOfSale: 1 }
         }
 
+        
+        // paymentBYNrc
+        // summaryByNRCCount +=1;
+        // summaryByNRCAmount +=obj.total_amount__c
+        console.log("obj.type_n_r__c",obj.type_n_r__c);
+        if (obj.type_n_r__c == 'null' || obj.type_n_r__c == '' || obj.type_n_r__c == null ){}
+        else{
+        if (paymentBYNrc[obj.type_n_r__c]) {
 
+            paymentBYNrc[obj.type_n_r__c] = { amount: obj.total_amount__c + paymentBYNrc[obj.type_n_r__c].amount, noOfSale: paymentBYNrc[obj.type_n_r__c].noOfSale + 1 }
+        } else {
+            paymentBYNrc[obj.type_n_r__c] = { amount: obj.total_amount__c, noOfSale: 1 }
+        }
+    }
+
+
+    // paymentBYLevel
+    
+    if (obj.payment_mode__c != 'Complimentary'){
+    
+    if (paymentBYLevel[obj.customer_set_level_name]) {
+
+        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c + paymentBYLevel[obj.customer_set_level_name].amount, noOfSale: paymentBYLevel[obj.customer_set_level_name].noOfSale + 1 }
+    } else {
+        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c, noOfSale: 1 }
+    }
+}
+
+
+        console.log("paymentBYNrc----",paymentBYNrc);
         console.log("pyamnetObj", pyamnetObj)
-        console.log("obj.type_n_r__c", obj.type_n_r__c)
+        console.log("paymentBYLevel", paymentBYLevel)
         //NRC 
         if (obj.type_n_r__c == 'N') {
             summaryDataNRC[0].amount += obj.total_amount__c;
@@ -178,6 +227,10 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             summaryDataLevel[3].amount += obj.total_amount__c;
             summaryDataLevel[3].noOfSale += 1;
         }
+        else if (obj.customer_set_level_name == "Wedding Bundling"){
+            summaryDataLevel[6].amount += obj.total_amount__c;
+            summaryDataLevel[6].noOfSale += 1;
+        }
         
         //Summary by level end    
 
@@ -187,7 +240,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
         indexForPage++;
-        if (indexForPage % 10 == 0 && indexForPage != 0 && dsrValues[indexForPage]) {
+        if (indexForPage % 8 == 0 && indexForPage != 0 && dsrValues[indexForPage]) {
             dailySalesReportRows += `${headerForPage}`
         }
 
@@ -207,7 +260,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     console.log("certifiacateIssued", certifiacateIssued);
 
     //For NRC Summary
-    let summaryTotalSalesNRC = summaryDataNRC[0].noOfSale + summaryDataNRC[1].noOfSale - summaryDataNRC[2].noOfSale;
+    let summaryTotalSalesNRC = summaryDataNRC[0].noOfSale + summaryDataNRC[1].noOfSale + summaryDataNRC[2].noOfSale;
     let summaryTotalAmountNRC = summaryDataNRC[0].amount + summaryDataNRC[1].amount + summaryDataNRC[2].amount;
 
     //For level summary 
@@ -219,11 +272,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     console.log("summaryTotalSalesByLevlc",summaryDataLevel[5].noOfSale)
 
     let summaryTotalSalesByLevl = summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].noOfSale;
-    let summaryTotalAmountByLevl = summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount;
+    let summaryTotalAmountByLevl = (Math.floor((summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount) * 100) / 100);
     
     let summaryTotalSalesByLevlAndSpouseComplimentry=summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].noOfSale +  summaryDataLevel[4].noOfSale + summaryDataLevel[5].noOfSale
     let summaryTotalAmountByLevlAndSpouseComplimentry= summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount + summaryDataLevel[4].amount + summaryDataLevel[5].amount ;
     let summaryHtml = ``
+    let summaryHtml2 = ``
+    let summaryHtml3 = ``
+    
     let serialNumber = 1;
     for (let [key, value] of Object.entries(pyamnetObj)) {
         summaryHtml += ` <tr height="50" align="center">`
@@ -234,6 +290,27 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         summaryHtml += `</tr>`
     }
 
+    let serialNumber2 = 1;
+    for (let [key, value] of Object.entries(paymentBYNrc)) {
+        summaryHtml2 += ` <tr height="50" align="center">`
+        summaryHtml2 += `<td> ${serialNumber2++}</td>`
+        summaryHtml2 += `<td style="text-align: left;">${key}</td>`
+        summaryHtml2 += `<td >${value.noOfSale}</td>`
+        summaryHtml2 += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
+        summaryHtml2 += `</tr>`
+    }
+     
+    //paymentBYLevel
+    let serialNumber3 = 1;
+    for (let [key, value] of Object.entries(paymentBYLevel)) {
+        summaryHtml3 += ` <tr height="50" align="center">`
+        summaryHtml3 += `<td> ${serialNumber3++}</td>`
+        summaryHtml3 += `<td style="text-align: left;">${key}</td>`
+        summaryHtml3 += `<td >${value.noOfSale}</td>`
+        summaryHtml3 += `<td >${(value.amount ? (Math.floor(value.amount * 100) / 100) : 0)}</td>`
+        summaryHtml3 += `</tr>`
+    }
+    
 
     let creditCardBatchClosureStr = ``
     serialNumber = 1;
@@ -263,14 +340,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
           
           .tftable {
-              font-size: 8px;
+              font-size: 7px;
               color: #333333;
               width: 35%;
               border: 1px solid black;
               border-collapse: collapse;
           }
           .tftable th {
-              font-size: 8px;
+              font-size: 7px;
               color:white;
               background-color: #bfa57d;
               border: 1px solid black;
@@ -278,7 +355,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
               text-align: center;
           }
           .tftable td {
-              font-size: 8px;
+              font-size: 7px;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
@@ -292,41 +369,41 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                border:1px solid white!important;
            }
           .border-none  td{
-            font-size:12px!important;   
+            font-size:10px!important;   
             height:30px!important;   
             border:1px solid!important;
            }
         .border-none th{
-            font-size: 12px!important;
-            text-align: left;
+            font-size: 10px!important;
+            text-align: center;
             color:white!important;
             height:30px!important;
             background-color: #C4B67E!important;
             
         }
         .border-none tr{
-            font-size: 12px!important;
+            font-size: 10px!important;
             height:30px!important;
             border:1px solid!important;
         }
        
 
           .tftable1 {
-            font-size: 8px;
+            font-size: 7px;
             color: #333333;
             width: 100%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable1 th {
-            font-size: 8px;
+            font-size: 7px;
             background-color: #C4B67E;
             border: 1px solid black;
             padding: 6px;
-            text-align: left;
+            text-align: center;
         }
         .tftable1 td {
-            font-size: 8px;
+            font-size: 7px;
             border: 1px solid black;
             padding: 6px;
         }
@@ -376,9 +453,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
         <tbody>
             <tr >
-                <td align="left" style="font-size: 20px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=140></img><br><span style="font-size: 12px; color:black;">www.tlcgroup.com</span></td>
-                <td align="center" style="font-size: 18px; width: 30%; color:black;">Daily Sales report-${programName}</td>
-                <td align="right"style="font-size: 18px; width: 30%; color:black;"> ${propertyName} </td>
+            <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=80></img></td>
+                <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Sales report-${programName}</td>
+                <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
         </tbody>
     </table>
@@ -388,18 +465,18 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
             <td > 
                 <span style="font-size:30px;">DSR</span>
                 <br><hr color="black" style="margin: 0; width:100%"/>
-                <span style="font-size: 10px;"> ${today}</span>
+                <span style="font-size: 9px;"> ${today}</span>
             </td>
-            <td  align="right" style="font-size: 23px;color: #438282; width:30%"> ${propertyName}</td>
+            <td  align="right" style="font-size: 20px;color: #438282; width:30%"> ${propertyName}</td>
 
         </tr>
     </table-->
   
-      <table style="width: 100%; font-size: 12px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
+      <table style="width: 100%; font-size: 10px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
           <tr>
               
               <td style="text-align: left; color:black">
-              ${today}
+              ${convertDateFormatForPDF(new Date())}
               </td>
           </tr>
       </table>
@@ -412,7 +489,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                   <th width="3%">Membership Number</th>
                   <th width="2%"> Level </th>
                   <th width="3%">Type
-                      <br/>(N/R)</th>
+                      <br/>(N/R/C)</th>
                   <th width="3%">Enrollment/
                       <br/>Renewal
                       <br/>Date</th>
@@ -420,7 +497,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                       <th width="4%">Promo Code</th>
                       <th width="4%">Payment Mode</th>
                   <th width="3%">Online
-                      <br/>/Transaction #</th>
+                      <br/>Transaction #</th>
                   <th width="3%">CC Approval<br> Code</th>
                   <th width="3%">CC <br>Batch No.</th>
                   <th width="3%">Cash <br>Receipt No.</th>
@@ -452,7 +529,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <div style="page-break-after: always;">&nbsp; </div>
 
       <table class="tftable border-none" style="margin-top:50px; ">
-      <caption align="left" style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Summary By Payment Mode</b></caption>
+      <caption align="left" style="font-size: 11px; margin-top:12px; text-align:left;" ><b>Summary By Payment Mode</b></caption>
           <tr width="200px">
               <th>S. No. </th>
               <th  height="50">Type</th>
@@ -477,34 +554,35 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   
 
       <table class="tftable   border-none"  style="margin-top:50px;">
-      <caption  style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Break-up of sales </b></caption>
+      <caption  style="font-size: 12px; margin-top:11px; text-align:left;" ><b>Break-up of Enrolments </b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-
       <tr>
-          <td>1</td>
-          <td style="text-align: left;">New(N)</td>
+         <td>1</td>   
+          <td style="text-align: left;">N</td>
           <td>${summaryDataNRC[0].noOfSale}</td>
           <td>${summaryDataNRC[0].amount}</td>
       </tr>
       <tr>
-          <td>2</td>
-          <td style="text-align: left;">Renewal(R)</td>
+         <td>1</td>   
+          <td style="text-align: left;">R</td>
           <td>${summaryDataNRC[1].noOfSale}</td>
           <td>${summaryDataNRC[1].amount}</td>
-         
       </tr>
       <tr>
-          <td>3</td>
-          <td style="text-align: left;">Cancellation (C)</td>
-          <td>${summaryDataNRC[2].noOfSale}</td>
-          <td>${summaryDataNRC[2].amount}</td>
-      </tr>
-      
+      <td>1</td>   
+       <td style="text-align: left;">C</td>
+       <td>${summaryDataNRC[2].noOfSale}</td>
+       <td>${summaryDataNRC[2].amount}</td>
+   </tr>
+
+
+      <!--
+      ${summaryHtml2} -->
        
       <tr height="50"  align="center">
           <td colspan="2">Total (N+R-C)</td>
@@ -517,14 +595,14 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     <div style="page-break-after: always;">&nbsp; </div>
   
       <table class="tftable border-none"  style="margin-top:50px; ">
-      <caption align="left" style="font-size: 13px; margin-top:12px; text-align:left;" ><b>Summary By Level</b></caption>
+      <caption align="left" style="font-size: 11px; margin-top:12px; text-align:left;" ><b>Summary By Level</b></caption>
       <tr width="200px" >
           <th>S. No.</th>
           <th  height="50">Type</th>
           <th>No. Of Sales</th>
           <th>Amount</th>
       </tr>
-      
+      <!--
       <tr>
          <td>1</td>   
           <td style="text-align: left;">Level 1</td>
@@ -548,34 +626,35 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
           <td style="text-align: left;">Level 4</td>
           <td>${summaryDataLevel[3].noOfSale}</td>
           <td>${summaryDataLevel[3].amount}</td>
-      </tr>s
+      </tr> -->
+      ${summaryHtml3}
       <tr>
       <td colspan="2" >Sub Total of Paid sales</td>
       <td>${summaryTotalSalesByLevl}</td>
       <td>${summaryTotalAmountByLevl}</td>
       </tr>
       <tr>
-      <td>5</td>
+      <td>${serialNumber3++}</td>
       <td style="text-align: left;">Spouse Complimentry</td>
       <td>${summaryDataLevel[4].noOfSale}</td>
       <td>${summaryDataLevel[4].amount}</td>
       </tr>
       <tr>
-      <td >6</td>
+      <td >${serialNumber3++}</td>
       <td style="text-align: left;">Other Complimentry (includes MGM)</td>
       <td>${summaryDataLevel[5].noOfSale}</td>
       <td>${summaryDataLevel[5].amount}</td>
       </tr>
       <tr>
-      <td>7</td>
+      <td>${serialNumber3++}</td>
       <td style="text-align: left;">Reissue (INR 500)</td>
       <td>0</td>
       <td>0</td>
       </tr>
-      <td>8</td>
+      <td>${serialNumber3++}</td>
       <td style="text-align: left;">Wedding Bunding</td>
-      <td>0</td>
-      <td>0</td>
+      <td>${summaryDataLevel[6].noOfSale}</td>
+      <td>${summaryDataLevel[6].amount}</td>
       </tr>
       
 
@@ -588,7 +667,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
   <table class="tftable border-none" style="margin-top:50px; width: 45%">
-  <caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
+  <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
   <tr width="200px">
       <th>S. No.</th>
       <th>Date</th>
@@ -610,7 +689,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
 <table class="tftable border-none" style="margin-top:50px; ">
-<caption align="left" style="font-size: 13px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
+<caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
 <tr width="200px">
     <th>S. No.</th>
     <th  height="50">Document Reference Number</th>
@@ -631,8 +710,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 <div style="page-break-after: always;">&nbsp;</div>
 
 
-<h4 style="width: 15%; font-size: 13px;" >Annexure – 3  Explanation</h4>
-<div style="font-size: 13px; " >
+<h4 style="width: 15%; font-size: 11px;" >Annexure – 3  Explanation</h4>
+<div style="font-size: 10px; " >
 This is an auto generated Daily Sales Report of ${programName}.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
 
 1.  Member Name – The full name of the Member <br>
@@ -658,7 +737,7 @@ Disclaimer <br><br>
 
 While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."
 
-    <div class="arilFont" id="pageFooter" style="font-size: 11px; height:500px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter" style="font-size: 9px; height:500px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
     <p align="left"> ${dynamicValues.page_footer_1_dsr__c} </p>
     <p>${dynamicValues.page_footer_2_dsr__c}</p>

@@ -1,23 +1,27 @@
-var request = require("request");
-const fs = require("fs")
-var options = {
-  method: 'GET',
-  encoding: null,
-  url: 'https://prod-tlc--devpro.my.salesforce.com/services/data/v47.0/sobjects/ContentVersion/0681y000000PkNXAA0/VersionData',
-  headers: 
-   { 'postman-token': '415fe161-03f9-0381-1c3d-a7df352568af',
-     'cache-control': 'no-cache',
-     authorization  : 'Bearer 00D1y0000008obX!ARAAQFJKLT_x8AEJ8rZBTSnaFgfumSKMzeJLm_k0TuIxKDT0m30hXENWdHKXvYNb5lSrtFt9nH09A1NlZNQitE5ubM0O4Nmn' } 
-    };
-
-request(options, function (error, response, body) {
-  if (error) throw new Error(error);
-  // console.log(response)
-  try{
-    console.log(JSON.parse(body.toString()))
-
-  }catch(e){
-    fs.writeFileSync('newDSR1122.pdf' , body.toString('base64'), {encoding:'base64'});
-  }
-
+const { Pool } = require('pg');
+let  dotenv = require('dotenv');
+dotenv.config();
+console.log(process.env.DATABASE_URL)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: true
 });
+let jsonxml = require('jsontoxml');
+let fs = require('fs')
+let getData=async()=>{
+  setTimeout(async()=>{
+    // SELECT query_to_xml('select * from tlcsalesforce."UTR_Log" order by "UTR Log Id" desc limit 10', TRUE,FALSE,'');
+    
+    let data = jsonxml((await pool.query(`select * from tlcsalesforce."UTR_Log" order by "UTR Log Id" desc limit 10`)).rows)
+    console.log(`------------`) 
+    console.log(data)
+    fs.writeFileSync('result.xml' , data )
+  } , 2000)
+ 
+
+}
+getData().then(d=>{
+    
+}).catch(e=>{
+
+})
