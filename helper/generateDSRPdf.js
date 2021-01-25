@@ -96,7 +96,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 let headerForPageCertificate=`
 <table class="page-break tftable1 border-none" style="padding-top:100px; width: 45%">
-<tr height="80px"></tr>
+<tr height="100px"></tr>
 <tr width="200px">
     <th>S. No.</th>
     <th>Date</th>
@@ -113,31 +113,31 @@ let headerForPageCertificate=`
     let indexForPage = 0;
     let indexForPageCertificate = 0;
 
-    certificateIssuedAr = [
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-        { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
-   ];
+//     certificateIssuedAr = [
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
+//    ];
 
     for (obj of dsrValues) {
         dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
@@ -152,7 +152,7 @@ let headerForPageCertificate=`
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
-                    <td>${getEmptyIfNull((obj.payment_mode__c == 'Online'  ? '' : `${obj.receipt_no__c}`))}</td>
+                    <td>${getEmptyIfNull((obj.payment_mode__c == 'Cash'  ? `${obj.receipt_no__c}` : ``))}</td>
                     <td>${getEmptyIfNull((obj.cheque_details))}</td>
                     <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100) : 0)}</td>
                     <td>${(obj.total_amount__c - obj.amount__c) ? (Math.floor((obj.total_amount__c - obj.amount__c) * 100) / 100) : 0}</td>
@@ -289,11 +289,11 @@ let headerForPageCertificate=`
     let sN = 1;
     for (d of certificateIssuedAr) {
         certifiacateIssued += `<tr align="center" height="50"><td>${sN++}</td>
-                <td >${getEmptyIfNull(d.createddate ? d.createddate : '')}</td>
+                <td >${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
                 <td >${getEmptyIfNull(d.membername ? d.membername : '')}</td>
                 <td>${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
-                <td >${getEmptyIfNull(d.customer_set_program_level__c ? d.customer_set_program_level__c : '')}</td>
-                <td>${getEmptyIfNull(d.certifcate_number__c ? d.certifcate_number__c : '')}</td> </tr>`
+                <td >${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
+                <td>${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</td> </tr>`
 
                 
                 indexForPageCertificate++;
