@@ -94,8 +94,8 @@ let getContentDocumentIdFromSFDC=async(propertyId,token, date)=>{
     let options = {
         method: 'GET',
         encoding: null,
-        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
-        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
+        // url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = 'a0Y1y000000EFBNEA4' and date__c = 2021-01-14)`,
+        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select ContentDocumentId from ContentDocumentLink where LinkedEntityId IN (select id from UTR_Tracking__c where property__c = '${propertyId}' and date__c = ${date})`,
 
         headers: 
          {
@@ -268,7 +268,7 @@ let sfdcApiCall =  async(propertyId, date)=>{
                 if(fileData.code== 200){
                     console.log(`yes! file exists for given fileId`)
                     // let fileName = await saveSfdcFile(fileData.msg, propertyId)
-                    fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber })
+                    fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : `${sequenceNumber} ${convertDateForDOCName()}` })
                     // fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber + '1' })
                     // fileArr.push({name: fileName, extension: fileExtension , url : fileData.msg.fileName , sequenceNumber : sequenceNumber + '2' })
 
@@ -288,6 +288,24 @@ let sfdcApiCall =  async(propertyId, date)=>{
     }
 }
 
+
+let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let convertDateForDOCName= () => {
+  let date1 = new Date()
+  if (date1) {
+      date1.setDate(date1.getDate() - 1); 
+      let today1 = new Date(date1);
+      let hours1 = date1.getHours();
+      let minutes = date1.getMinutes();
+      let ampm = hours1 >= 12 ? 'pm' : 'am';
+      hours1 = hours1 % 12;
+      hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      let strTime = hours1 + ':' + minutes + ' ' + ampm;
+      dateTime = `${String(today1.getDate()).padStart(2, '0')} ${months[String(today1.getMonth() +1)]} ${today1.getFullYear()}`
+  }
+  return dateTime
+}
 
 
 
@@ -402,8 +420,6 @@ let DSRReport = async()=>{
                       //get dsr file from SFDC
                       let sfdcFiles = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
                       console.log(`from drs attachment`)
-                      console.log(sfdcFiles)
-                    
                       let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       console.log(`------------------------------------------------------------`)
@@ -441,7 +457,7 @@ let DSRReport = async()=>{
                 if(emails1.length){
             // get brand id 
             let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
-            let dynamicValues1=await getDynamicValues(brandId);
+            let dynamicValues1=await getDynamicValues(brandId1);
             if(dynamicValues1.length){
             // get dsr file from SFDC
                   let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
@@ -449,7 +465,7 @@ let DSRReport = async()=>{
                   let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
                   let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
                
-                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
+                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile1}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
                   updateLog(insertedId1, true ,'Success', '' , pdfFile1)
                   }else{
                     updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )

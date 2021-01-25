@@ -940,6 +940,7 @@ column = 2;
 ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
 ws2.cell(row, column++, row , column+ 3,true).string(`Document Reference Number`).style(myStyleAlignCenter)
 slNo =1;
+if(sfdcFiles)
 for(let d of sfdcFiles){
   if(slNo % 2 != 0) 
   {
