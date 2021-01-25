@@ -95,7 +95,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 `
 
 let headerForPageCertificate=`
-<table class="page-break tftable1 border-none" style="padding-top:100px width:50%">
+<table class="page-break tftable1 border-none" style="padding-top:100px;">
 <tr height="100px"></tr>
 <tr >
     <th width="2%">S. No.</th>
