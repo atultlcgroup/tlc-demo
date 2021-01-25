@@ -405,6 +405,7 @@ let DSRReport = async()=>{
    
             let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
             let DSRCertificateIssued =await getCertificateIssuedByPropertyId(dataObj.propertyArr[ind] , ``)
+            
             console.log(`DSRCertificateIssued`)
              console.log(DSRCertificateIssued)
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
@@ -529,35 +530,60 @@ let getEPRSfidCS = async()=>{
 
 let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
     try{
-        let qry = ` Select payment__c.createddate, account.name membername,
-        membership__c.membership_number__c, membershiptype__c.name membershiptypename,
-        count(payment__c.sfid) from tlcsalesforce.payment__c
-        Inner Join tlcsalesforce.account On 
-        payment__c.account__c = account.sfid
-        Inner Join tlcsalesforce.membership_offers__c
-        On payment__c.membership_offer__c = membership_offers__c.sfid
-        Inner Join tlcsalesforce.membership__c
-        On membership_offers__c.membership2__c = membership__c.sfid
-        Inner Join tlcsalesforce.membershiptype__c
-        On membership__c.customer_set__c = membershiptype__c.sfid
-        Left Join tlcsalesforce.property__c
-        On membershiptype__c.property__c = property__c.sfid
-        where  (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+    //     let qry = ` Select payment__c.createddate, account.name membername,
+    //     membership__c.membership_number__c, membershiptype__c.name membershiptypename,
+    //     count(payment__c.sfid) from tlcsalesforce.payment__c
+    //     Inner Join tlcsalesforce.account On 
+    //     payment__c.account__c = account.sfid
+    //     Inner Join tlcsalesforce.membership_offers__c
+    //     On payment__c.membership_offer__c = membership_offers__c.sfid
+    //     Inner Join tlcsalesforce.membership__c
+    //     On membership_offers__c.membership2__c = membership__c.sfid
+    //     Inner Join tlcsalesforce.membershiptype__c
+    //     On membership__c.customer_set__c = membershiptype__c.sfid
+    //     Left Join tlcsalesforce.property__c
+    //     On membershiptype__c.property__c = property__c.sfid
+    //     where  (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
     
-       or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-       and
-       Membership__c is not Null and Membership_Offer__c is null
-       and`
-       ;
-       if(property_sfid)
-       qry+=` (Property__c.sfid='${property_sfid}') `
-       else
-       qry+=` membership__c.customer_set__c IN ('${customer_set_sfid}') `
-       qry+=`group by payment__c.createddate, account.name,
-        membership__c.membership_number__c, membershiptype__c.name`
+    //    or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+    //    and
+    //    Membership__c is not Null and Membership_Offer__c is null
+    //    and`
+    //    ;
+    //    if(property_sfid)
+    //    qry+=` (Property__c.sfid='${property_sfid}') `
+    //    else
+    //    qry+=` membership__c.customer_set__c IN ('${customer_set_sfid}') `
+    //    qry+=`group by payment__c.createddate, account.name,
+    //     membership__c.membership_number__c, membershiptype__c.name`
+    let qry = `Select  property__c.sfid property_id ,date(payment__c.createddate) createddate, payment__c.sfid payment_id, membershiptype__c.customer_set_program_level__c membershiptypename, account.name membername, membership__c,membership__c.membership_number__c
+    , STRING_AGG(membership_offers__c.offer_unique_identifier__c , ',') as certificatenumber
+    from tlcsalesforce.payment__c
+    Inner Join tlcsalesforce.account On
+    payment__c.account__c = account.sfid 
+    inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+    inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+    inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid 
+    left join tlcsalesforce.membership_offers__c
+    On membership_offers__c.membership2__c = membership__c.sfid
+    where 
+    -- (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+   --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+  --and 
+membership__c.membership_number__c is not Null and `
+         if(property_sfid)
+      qry+=` (Property__c.sfid='${property_sfid}') `
+            else
+      qry+=` membership__c.customer_set__c IN ('${customer_set_sfid}') `
+
+      qry+=`
+         group by  property__c.sfid  ,date(payment__c.createddate) , payment__c.sfid , membershiptype__c.customer_set_program_level__c , account.name , membership__c,membership__c.membership_number__c`
+        //    console.log(qry)
+
         let result  = await pool.query(qry)
         return result ? result.rows : []
      }catch(e){
+         console.log(e)
         return []
     }
 }
@@ -597,9 +623,8 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 10`)
-        let qry12=(` 
-        where
+        On membershiptype__c.program__c = program__c.sfid
+       where
         (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
            or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))

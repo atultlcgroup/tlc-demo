@@ -542,7 +542,7 @@ for(obj of dsrValues){
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}`).style(className2)
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.authorization_number__c)}`).style(className2)
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.batch_number__c)}`).style(className2)
-                    ws2.cell(row, column++).string(`${getEmptyIfNull(obj.receipt_no__c)}`).style(className2)
+                    ws2.cell(row, column++).string(`${(obj.payment_mode__c == 'Cash'  ? `${obj.receipt_no__c}` : ``)}`).style(className2)
                     ws2.cell(row, column++).string(`${getEmptyIfNull(obj.cheque_details)}`).style(className2)
 
                     ws2.cell(row, column++).number((obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100):0)).style(className1)
@@ -995,9 +995,9 @@ for(d of certificateIssuedArr){
 row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo).style(className1)
-ws2.cell(row, column++).string(d.createddate ? d.createddate : '').style(className1)
+ws2.cell(row, column++).string(`${d.createddate ? convertDateFormat(d.createddate) : ''}`).style(className1)
 ws2.cell(row, column++).string(d.membername ? d.membername : '').style(className2)
-ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)
+ws2.cell(row, column++).string(d.membership_number__c ? d.membership_number__c : '').style(className2)
 ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)
 ws2.cell(row, column++).string(d.certificatenumber ? d.certificatenumber : '').style(className2)
 }

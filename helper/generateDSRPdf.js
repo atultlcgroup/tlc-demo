@@ -93,17 +93,51 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 <th width="7%">Remarks</th>
 </tr>
 `
+
+let headerForPageCertificate=`
+<table class="page-break tftable1 border-none" style="padding-top:100px; width: 45%">
+<tr height="100px"></tr>
+<tr width="200px">
+    <th>S. No.</th>
+    <th>Date</th>
+    <th >Member Name</th>
+    <th  height="50">Membership Number</th>
+    <th>Level</th>
+    <th>Certificate Number issued</th>
+</tr>`
+
     let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
     let slNo = 1;
     let dailySalesReportRows = ``;
     let certifiacateIssued = ``;
     let indexForPage = 0;
+    let indexForPageCertificate = 0;
 
-    // certificateIssuedArr = [
-    //     { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
-    //     , { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-    //     { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
-    //     { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }];
+//     certificateIssuedAr = [
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Manish", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Atul", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//         { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" },
+//          { createddate: "15/12/2020", membername: "Shubham Thute", membership_number__c: "113677894", customer_set_program_level__c: "Level 3", certifcate_number__c: "rybc3oksdjd" }
+//    ];
 
     for (obj of dsrValues) {
         dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
@@ -118,7 +152,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
-                    <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
+                    <td>${getEmptyIfNull((obj.payment_mode__c == 'Cash'  ? `${obj.receipt_no__c}` : ``))}</td>
                     <td>${getEmptyIfNull((obj.cheque_details))}</td>
                     <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100) : 0)}</td>
                     <td>${(obj.total_amount__c - obj.amount__c) ? (Math.floor((obj.total_amount__c - obj.amount__c) * 100) / 100) : 0}</td>
@@ -166,13 +200,19 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     // paymentBYLevel
     
     if (obj.payment_mode__c != 'Complimentary'){
-    
-    if (paymentBYLevel[obj.customer_set_level_name]) {
+        if(obj.customer_set_level_name == null || obj.customer_set_level_name == 'null' || obj.customer_set_level_name ==''){
 
-        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c + paymentBYLevel[obj.customer_set_level_name].amount, noOfSale: paymentBYLevel[obj.customer_set_level_name].noOfSale + 1 }
-    } else {
-        paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c, noOfSale: 1 }
-    }
+        }
+        else{
+            if (paymentBYLevel[obj.customer_set_level_name]) {
+
+                paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c + paymentBYLevel[obj.customer_set_level_name].amount, noOfSale: paymentBYLevel[obj.customer_set_level_name].noOfSale + 1 }
+            } else {
+                paymentBYLevel[obj.customer_set_level_name] = { amount: obj.total_amount__c, noOfSale: 1 }
+            }   
+
+        }
+   
 }
 
 
@@ -245,17 +285,21 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
         }
 
     }
+
     let sN = 1;
     for (d of certificateIssuedAr) {
-
-
-        
         certifiacateIssued += `<tr align="center" height="50"><td>${sN++}</td>
-                <td >${getEmptyIfNull(d.createddate ? d.createddate : '')}</td>
+                <td >${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
                 <td >${getEmptyIfNull(d.membername ? d.membername : '')}</td>
                 <td>${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
-                <td >${getEmptyIfNull(d.customer_set_program_level__c ? d.customer_set_program_level__c : '')}</td>
-                <td>${getEmptyIfNull(d.certifcate_number__c ? d.certifcate_number__c : '')}</td> </tr>`
+                <td >${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
+                <td>${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</td> </tr>`
+
+                
+                indexForPageCertificate++;
+        if (indexForPageCertificate % 12 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
+            certifiacateIssued += `${headerForPageCertificate}`
+        }
     }
     console.log("certifiacateIssued", certifiacateIssued);
 
@@ -665,6 +709,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
       </tr>
   </table>
 
+  <div style="page-break-after: always;">&nbsp; </div>
+
+
 
   <table class="tftable border-none" style="margin-top:50px; width: 45%">
   <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
@@ -678,13 +725,13 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
   </tr>
 
     ${certifiacateIssued} 
+   
 
 </table>
+<div style="page-break-after: always;">&nbsp; </div>
 
 <br> 
 
-
-<div style="page-break-after: always;">&nbsp; </div>
 
 
 
@@ -706,9 +753,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 
 
 </table>
-
-<div style="page-break-after: always;">&nbsp;</div>
-
+<br>
 
 <h4 style="width: 15%; font-size: 11px;" >Annexure – 3  Explanation</h4>
 <div style="font-size: 10px; " >
