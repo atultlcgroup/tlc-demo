@@ -95,8 +95,8 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 `
 
 let headerForPageCertificate=`
-
-<table class="page-break tftable border-none" style="padding-top:100px; width: 45%">
+<table class="page-break tftable1 border-none" style="padding-top:100px; width: 45%">
+<tr height="80px"></tr>
 <tr width="200px">
     <th>S. No.</th>
     <th>Date</th>
@@ -152,7 +152,7 @@ let headerForPageCertificate=`
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
-                    <td>${getEmptyIfNull(obj.receipt_no__c)}</td>
+                    <td>${getEmptyIfNull((obj.payment_mode__c == 'Online'  ? '' : `${obj.receipt_no__c}`))}</td>
                     <td>${getEmptyIfNull((obj.cheque_details))}</td>
                     <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100) : 0)}</td>
                     <td>${(obj.total_amount__c - obj.amount__c) ? (Math.floor((obj.total_amount__c - obj.amount__c) * 100) / 100) : 0}</td>
