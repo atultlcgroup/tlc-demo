@@ -95,15 +95,15 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 `
 
 let headerForPageCertificate=`
-<table class="page-break tftable1 border-none" style="padding-top:100px; width: 45%">
+<table class="page-break tftable1 border-none" style="padding-top:100px width:50%">
 <tr height="100px"></tr>
-<tr width="200px">
-    <th>S. No.</th>
-    <th>Date</th>
-    <th >Member Name</th>
-    <th  height="50">Membership Number</th>
-    <th>Level</th>
-    <th>Certificate Number issued</th>
+<tr >
+    <th width="2%">S. No.</th>
+    <th width="5%">Date</th>
+    <th width="5%">Member Name</th>
+    <th width="5%" height="50">Membership Number</th>
+    <th width="5%">Level</th>
+    <th width="10%">Certificate Number issued</th>
 </tr>`
 
     let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
@@ -288,12 +288,12 @@ let headerForPageCertificate=`
 
     let sN = 1;
     for (d of certificateIssuedAr) {
-        certifiacateIssued += `<tr align="center" height="50"><td>${sN++}</td>
-                <td >${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
-                <td >${getEmptyIfNull(d.membername ? d.membername : '')}</td>
-                <td>${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
-                <td >${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
-                <td>${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</td> </tr>`
+        certifiacateIssued += `<tr align="center" height="50" ><td>${sN++}</td>
+                <td width="5%">${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
+                <td width="5%">${getEmptyIfNull(d.membername ? d.membername : '')}</td>
+                <td width="5%">${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
+                <td width="5%">${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
+                <td width="10%">${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</td> </tr>`
 
                 
                 indexForPageCertificate++;
@@ -713,15 +713,16 @@ let headerForPageCertificate=`
 
 
 
-  <table class="tftable border-none" style="margin-top:50px; width: 45%">
+  <!--table class="tftable border-none" style="margin-top:50px;"-->
+  <table class="tftable1 border-none" style="padding-top:100px; margin-top:50px;">
   <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
-  <tr width="200px">
-      <th>S. No.</th>
-      <th>Date</th>
-      <th >Member Name</th>
-      <th  height="50">Membership Number</th>
-      <th>Level</th>
-      <th>Certificate Number issued</th>
+  <tr>
+      <th width="2%">S. No.</th>
+      <th width="5%">Date</th>
+      <th  width="5%">Member Name</th>
+      <th  width="5%" height="50">Membership Number</th>
+      <th  width="5%">Level</th>
+      <th width="10%">Certificate Number issued</th>
   </tr>
 
     ${certifiacateIssued} 
