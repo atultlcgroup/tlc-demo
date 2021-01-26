@@ -95,7 +95,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 `
 
 let headerForPageCertificate=`
-<table class="page-break tftable1 border-none" style="padding-top:100px;">
+<table class="page-break tftable1 border-none" style="padding-top:100px;max-width: 50%;overflow-wrap: anywhere;">
 <tr height="100px"></tr>
 <tr >
     <th width="2%">S. No.</th>
@@ -288,16 +288,16 @@ let headerForPageCertificate=`
 
     let sN = 1;
     for (d of certificateIssuedAr) {
-        certifiacateIssued += `<tr align="center" height="50" ><td>${sN++}</td>
+        certifiacateIssued += `<tr align="center" style="height:10px;" ><td>${sN++}</td>
                 <td width="5%">${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
                 <td width="5%">${getEmptyIfNull(d.membername ? d.membername : '')}</td>
                 <td width="5%">${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
                 <td width="5%">${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
-                <td width="10%">${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</td> </tr>`
+                <td width="10%"><div style="width:200px; word-wrap: break-word;">${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</div></td> </tr>`
 
                 
                 indexForPageCertificate++;
-        if (indexForPageCertificate % 12 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
+        if (indexForPageCertificate % 11 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
             certifiacateIssued += `${headerForPageCertificate}`
         }
     }
@@ -714,7 +714,7 @@ let headerForPageCertificate=`
 
 
   <!--table class="tftable border-none" style="margin-top:50px;"-->
-  <table class="tftable1 border-none" style="padding-top:100px; margin-top:50px;">
+  <table class="tftable1 border-none" style="padding-top:100px; margin-top:50px; max-width: 50%;overflow-wrap: anywhere;">
   <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
   <tr>
       <th width="2%">S. No.</th>
