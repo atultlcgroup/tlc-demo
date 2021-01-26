@@ -95,9 +95,7 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 `
 
 let headerForPageCertificate=`
-</table>
-<table class="page-break tftable1" align="center" border="1" style="max-width: 50%;">
-<!-- table class="page-break tftable1 border-none" style="padding-top:100px;max-width: 50%;overflow-wrap: anywhere;" -->
+<table class="page-break tftable1 border-none" style="padding-top:100px;max-width: 50%;overflow-wrap: anywhere;">
 <tr height="100px"></tr>
 <tr >
     <th width="2%">S. No.</th>
@@ -715,8 +713,7 @@ let headerForPageCertificate=`
 
 
 
-<table class="page-break tftable1" align="center" border="1" style="max-width: 50%;">
-  <!--table class="tftable1 border-none" style="padding-top:100px; margin-top:50px; max-width: 50%;overflow-wrap: anywhere;" -->
+  <table class="tftable1 border-none" style="padding-top:100px; margin-top:50px; max-width: 50%;overflow-wrap: anywhere;">
   <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
   <tr>
       <th width="2%">S. No.</th>
