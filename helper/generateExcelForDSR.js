@@ -995,7 +995,7 @@ for(d of certificateIssuedArr){
 row+=1;
 column = 2
 ws2.cell(row, column++).number(slNo).style(className1)
-ws2.cell(row, column++).string(`${d.createddate ? convertDateFormat(d.createddate) : ''}`).style(className1)
+ws2.cell(row, column++).string(`${(d.createddate ? convertDateFormat(d.createddate) : '')}`).style(className1)
 ws2.cell(row, column++).string(d.membername ? d.membername : '').style(className2)
 ws2.cell(row, column++).string(d.membership_number__c ? d.membership_number__c : '').style(className2)
 ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)

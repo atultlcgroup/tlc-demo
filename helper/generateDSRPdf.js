@@ -35,7 +35,7 @@ let convertDateFormatForPDF = (date1) => {
         let strTime = hours1 + ':' + minutes + ' ' + ampm;
         dateTime = `${String(days[today1.getDay()] || '')} ${String(today1.getDate()).padStart(2, '0')}/${today1.getMonth() +1}/${today1.getFullYear()} ${strTime}`
     }
-    console.log("dateTime----",dateTime);
+    // console.log("dateTime----",dateTime);
     return dateTime
 }
 
@@ -52,9 +52,9 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
     let summaryTotalAmount = 0
     propertyName = `${dsrValues[0].property_name}`;
     programName = dsrValues[0].program_name;
-    console.log("dsr values",dsrValues);
-    console.log("dynamicValuesPDF",dynamicValues)
-    console.log("logo",dynamicValues.tlc_logo__c)
+    // console.log("dsr values",dsrValues);
+    // console.log("dynamicValuesPDF",dynamicValues)
+    // console.log("logo",dynamicValues.tlc_logo__c)
     let summaryData = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
     let summaryDataNRC = [{ key: 'Spouse Complimentary', amount: 0, noOfSale: 0 }, { key: 'Credit Card', amount: 0, noOfSale: 0 }, { key: 'Hotel Transfer', amount: 0, noOfSale: 0 }, { key: 'Cash', amount: 0, noOfSale: 0 }, { key: 'Online', amount: 0, noOfSale: 0 }]
 
@@ -95,15 +95,15 @@ let generateDSRPDF = async (dsrValues, propertyId, certificateIssuedAr,dynamicVa
 `
 
 let headerForPageCertificate=`
-<table class="page-break tftable1 border-none" style="padding-top:100px; width: 45%">
+<table class="page-break tftable1 border-none" style="padding-top:100px;max-width: 100%;overflow-wrap: anywhere;">
 <tr height="100px"></tr>
-<tr width="200px">
-    <th>S. No.</th>
-    <th>Date</th>
-    <th >Member Name</th>
-    <th  height="50">Membership Number</th>
-    <th>Level</th>
-    <th>Certificate Number issued</th>
+<tr >
+    <th width="2%">S. No.</th>
+    <th width="5%">Date</th>
+    <th width="5%">Member Name</th>
+    <th width="5%" height="50">Membership Number</th>
+    <th width="5%">Level</th>
+    <th width="10%">Certificate Number issued</th>
 </tr>`
 
     let salesCount = 0, salesAmount = 0, salesTax = 0, salesTotalAmount = 0;
@@ -185,7 +185,7 @@ let headerForPageCertificate=`
         // paymentBYNrc
         // summaryByNRCCount +=1;
         // summaryByNRCAmount +=obj.total_amount__c
-        console.log("obj.type_n_r__c",obj.type_n_r__c);
+        // console.log("obj.type_n_r__c",obj.type_n_r__c);
         if (obj.type_n_r__c == 'null' || obj.type_n_r__c == '' || obj.type_n_r__c == null ){}
         else{
         if (paymentBYNrc[obj.type_n_r__c]) {
@@ -216,9 +216,9 @@ let headerForPageCertificate=`
 }
 
 
-        console.log("paymentBYNrc----",paymentBYNrc);
-        console.log("pyamnetObj", pyamnetObj)
-        console.log("paymentBYLevel", paymentBYLevel)
+        // console.log("paymentBYNrc----",paymentBYNrc);
+        // console.log("pyamnetObj", pyamnetObj)
+        // console.log("paymentBYLevel", paymentBYLevel)
         //NRC 
         if (obj.type_n_r__c == 'N') {
             summaryDataNRC[0].amount += obj.total_amount__c;
@@ -239,14 +239,14 @@ let headerForPageCertificate=`
         // For Sumaary by level count 
        console.log(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         //console.log("obj",obj);
-        console.log("obj",obj.payment_mode__c);
+        // console.log("obj",obj.payment_mode__c);
         if(obj.payment_mode__c == 'Complimentary' && obj.payment_for__c == 'Add-On' ){
-            console.log("in Complimentary Add-on",summaryDataLevel[4].noOfSale)
+            // console.log("in Complimentary Add-on",summaryDataLevel[4].noOfSale)
             summaryDataLevel[4].amount += obj.total_amount__c;
             summaryDataLevel[4].noOfSale += 1;
         }
         else if(obj.payment_mode__c == 'Complimentary'){
-            console.log("in Complimentary",summaryDataLevel[5].noOfSale)
+            // console.log("in Complimentary",summaryDataLevel[5].noOfSale)
             summaryDataLevel[5].amount += obj.total_amount__c;
             summaryDataLevel[5].noOfSale += 1;
         }
@@ -263,7 +263,7 @@ let headerForPageCertificate=`
             summaryDataLevel[2].noOfSale += 1;
         }
         else if (obj.customer_set_level_name == 'Level 4') {
-            console.log("in level4",summaryDataLevel[3].noOfSale)
+            // console.log("in level4",summaryDataLevel[3].noOfSale)
             summaryDataLevel[3].amount += obj.total_amount__c;
             summaryDataLevel[3].noOfSale += 1;
         }
@@ -274,7 +274,7 @@ let headerForPageCertificate=`
         
         //Summary by level end    
 
-       console.log( "summaryDataLevel[3].amount",summaryDataLevel[3].amount, summaryDataLevel[3].noOfSale)
+    //    console.log( "summaryDataLevel[3].amount",summaryDataLevel[3].amount, summaryDataLevel[3].noOfSale)
 
 
 
@@ -288,32 +288,32 @@ let headerForPageCertificate=`
 
     let sN = 1;
     for (d of certificateIssuedAr) {
-        certifiacateIssued += `<tr align="center" height="50"><td>${sN++}</td>
-                <td >${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
-                <td >${getEmptyIfNull(d.membername ? d.membername : '')}</td>
-                <td>${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
-                <td >${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
-                <td>${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</td> </tr>`
+        certifiacateIssued += `<tr align="center" style="height:10px;" ><td>${sN++}</td>
+                <td width="10%">${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
+                <td width="5%" align="left">${getEmptyIfNull(d.membername ? d.membername : '')}</td>
+                <td width="5%">${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
+                <td width="5%" align="left">${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
+                <td width="10%" align="left">${(d.certificatenumber ? d.certificatenumber.match(/.{1,65}/g).join(' ') : '')}</div></td> </tr>`
 
                 
                 indexForPageCertificate++;
-        if (indexForPageCertificate % 12 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
+        if (indexForPageCertificate % 11 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
             certifiacateIssued += `${headerForPageCertificate}`
         }
     }
-    console.log("certifiacateIssued", certifiacateIssued);
+    // console.log("certifiacateIssued", certifiacateIssued);
 
     //For NRC Summary
     let summaryTotalSalesNRC = summaryDataNRC[0].noOfSale + summaryDataNRC[1].noOfSale + summaryDataNRC[2].noOfSale;
     let summaryTotalAmountNRC = summaryDataNRC[0].amount + summaryDataNRC[1].amount + summaryDataNRC[2].amount;
 
-    //For level summary 
-    console.log("summaryTotalSalesByLevl1",summaryDataLevel[0].noOfSale )
-    console.log("summaryTotalSalesByLevl2",summaryDataLevel[1].noOfSale)
-    console.log("summaryTotalSalesByLevl3",summaryDataLevel[2].noOfSale) 
-    console.log("summaryTotalSalesByLevl4",summaryDataLevel[3].noOfSale)
-    console.log("summaryTotalSalesByLevlsc",summaryDataLevel[4].noOfSale) 
-    console.log("summaryTotalSalesByLevlc",summaryDataLevel[5].noOfSale)
+    // //For level summary 
+    // console.log("summaryTotalSalesByLevl1",summaryDataLevel[0].noOfSale )
+    // console.log("summaryTotalSalesByLevl2",summaryDataLevel[1].noOfSale)
+    // console.log("summaryTotalSalesByLevl3",summaryDataLevel[2].noOfSale) 
+    // console.log("summaryTotalSalesByLevl4",summaryDataLevel[3].noOfSale)
+    // console.log("summaryTotalSalesByLevlsc",summaryDataLevel[4].noOfSale) 
+    // console.log("summaryTotalSalesByLevlc",summaryDataLevel[5].noOfSale)
 
     let summaryTotalSalesByLevl = summaryDataLevel[0].noOfSale + summaryDataLevel[1].noOfSale + summaryDataLevel[2].noOfSale + summaryDataLevel[3].noOfSale;
     let summaryTotalAmountByLevl = (Math.floor((summaryDataLevel[0].amount + summaryDataLevel[1].amount + summaryDataLevel[2].amount + summaryDataLevel[3].amount) * 100) / 100);
@@ -713,15 +713,15 @@ let headerForPageCertificate=`
 
 
 
-  <table class="tftable border-none" style="margin-top:50px; width: 45%">
+  <table class="tftable1 border-none" style="padding-top:100px; margin-top:50px; max-width: 100%;overflow-wrap: anywhere;">
   <caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 1      Certificate Numbers Issued for Audit purpose</b></caption>
-  <tr width="200px">
-      <th>S. No.</th>
-      <th>Date</th>
-      <th >Member Name</th>
-      <th  height="50">Membership Number</th>
-      <th>Level</th>
-      <th>Certificate Number issued</th>
+  <tr>
+      <th width="2%">S. No.</th>
+      <th width="5%">Date</th>
+      <th  width="5%">Member Name</th>
+      <th  width="5%" height="50">Membership Number</th>
+      <th  width="5%">Level</th>
+      <th width="10%">Certificate Number issued</th>
   </tr>
 
     ${certifiacateIssued} 
