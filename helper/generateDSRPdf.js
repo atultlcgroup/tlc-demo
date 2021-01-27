@@ -290,10 +290,10 @@ let headerForPageCertificate=`
     for (d of certificateIssuedAr) {
         certifiacateIssued += `<tr align="center" style="height:10px;" ><td>${sN++}</td>
                 <td width="5%">${getEmptyIfNull(d.createddate ? convertDateFormat(d.createddate) : '')}</td>
-                <td width="5%">${getEmptyIfNull(d.membername ? d.membername : '')}</td>
+                <td width="5%" align="left">${getEmptyIfNull(d.membername ? d.membername : '')}</td>
                 <td width="5%">${getEmptyIfNull(d.membership_number__c ? d.membership_number__c : '')}
-                <td width="5%">${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
-                <td width="10%"><div style="width:200px; word-wrap: break-word;">${getEmptyIfNull(d.certificatenumber ? d.certificatenumber : '')}</div></td> </tr>`
+                <td width="5%" align="left">${getEmptyIfNull(d.membershiptypename ? d.membershiptypename : '')}</td>
+                <td width="10%" align="left">${(d.certificatenumber ? d.certificatenumber.match(/.{1,65}/g).join(' ') : '')}</div></td> </tr>`
 
                 
                 indexForPageCertificate++;
