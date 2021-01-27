@@ -980,7 +980,7 @@ ws2.cell(row, column++).string(`Date`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Member Name`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
-ws2.cell(row, column++).string(`Certificate Number Issued`).style(myStyleAlignCenter)
+ws2.cell(row, column , row, column+4, true).string(`Certificate Number Issued`).style(myStyleAlignCenter)
 slNo =0;
 for(d of certificateIssuedArr){
   if(slNo % 2 != 0) 
@@ -999,7 +999,7 @@ ws2.cell(row, column++).string(`${(d.createddate ? convertDateFormat(d.createdda
 ws2.cell(row, column++).string(d.membername ? d.membername : '').style(className2)
 ws2.cell(row, column++).string(d.membership_number__c ? d.membership_number__c : '').style(className2)
 ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)
-ws2.cell(row, column++).string(d.certificatenumber ? d.certificatenumber : '').style(className2)
+ws2.cell(row, column, row, column+4, true).string(d.certificatenumber ? d.certificatenumber : '').style(className2)
 }
 // row+=1;
 // column = 2
