@@ -333,26 +333,95 @@ let style = wb.createStyle({
     border:{
       left: {
           style: "thin",
-          color: '#F2F2F2'
+          color: '#FFFFFF'
         },
         right: {
           style: "thin",
-          color: '#F2F2F2'
+          color: '#FFFFFF'
         },
         top: {
           style: "thin",
-          color: '#F2F2F2'
+          color: '#FFFFFF'
         },
         bottom: {
           style: "thin",
-          color: '#F2F2F2' 
+          color: '#FFFFFF' 
         },
       },
         fill: {
           type: 'pattern',
           patternType: 'solid',
-          bgColor: '#F2F2F2',
-          fgColor: '#F2F2F2',
+          bgColor: '#FFFFFF',
+          fgColor: '#FFFFFF',
+        }
+  });
+
+  let myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2 = wb.createStyle({
+    font: {
+        size: 10,
+      },
+      alignment: {
+        wrapText: true,
+        horizontal: 'center',
+        vertical: 'center'
+      },
+    border:{
+      left: {
+          style: "thin",
+          color: '#FFFFFF'
+        },
+        right: {
+          style: "thin",
+          color: '#FFFFFF'
+        },
+        top: {
+          style: "thin",
+          color: '#FFFFFF'
+        },
+        bottom: {
+          style: "thin",
+          color: '#FFFFFF' 
+        },
+      },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#FFFFFF',
+          fgColor: '#FFFFFF',
+        }
+  });
+  let myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder3 = wb.createStyle({
+    font: {
+        size: 10,
+      },
+      alignment: {
+        wrapText: true,
+        horizontal: 'center',
+        vertical: 'center'
+      },
+    border:{
+      left: {
+          style: "thin",
+          color: '#FFFFFF'
+        },
+        right: {
+          style: "thin",
+          color: '#FFFFFF'
+        },
+        top: {
+          style: "thin",
+          color: '#FFFFFF'
+        },
+        bottom: {
+          style: "thin",
+          color: '#FFFFFF' 
+        },
+      },
+        fill: {
+          type: 'pattern',
+          patternType: 'solid',
+          bgColor: '#FFFFFF',
+          fgColor: '#FFFFFF',
         }
   });
   let myStyleAlignCenterWithoutBoldAlignLeft2 = wb.createStyle({
@@ -980,7 +1049,7 @@ ws2.cell(row, column++).string(`Date`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Member Name`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Membership Number`).style(myStyleAlignCenter)
 ws2.cell(row, column++).string(`Level`).style(myStyleAlignCenter)
-ws2.cell(row, column , row, column+4, true).string(`Certificate Number Issued`).style(myStyleAlignCenter)
+ws2.cell(row, column , row, column+6, true).string(`Certificate Number Issued`).style(myStyleAlignCenter)
 slNo =0;
 for(d of certificateIssuedArr){
   if(slNo % 2 != 0) 
@@ -999,7 +1068,7 @@ ws2.cell(row, column++).string(`${(d.createddate ? convertDateFormat(d.createdda
 ws2.cell(row, column++).string(d.membername ? d.membername : '').style(className2)
 ws2.cell(row, column++).string(d.membership_number__c ? d.membership_number__c : '').style(className2)
 ws2.cell(row, column++).string(d.membershiptypename ? d.membershiptypename : '').style(className2)
-ws2.cell(row, column, row, column+4, true).string(d.certificatenumber ? d.certificatenumber : '').style(className2)
+ws2.cell(row, column, row, column+6, true).string(d.certificatenumber ? d.certificatenumber : '').style(className2)
 }
 // row+=1;
 // column = 2
@@ -1027,7 +1096,7 @@ ws2.cell(row, column, row, column+4, true).string(d.certificatenumber ? d.certif
 // ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
  
-//Annexure – 2 		Credit Card Batch Closure  table
+//Annexure – 2    Credit Card Batch Closure  table
 row +=3;
 column = 2;
 ws2.cell(row, column,row, column+4, true).string(`Credit Card Batch Closure`).style(myStyle1);
@@ -1064,91 +1133,91 @@ column = 2;
 ws2.cell(row, column,row, column+19, true).string(`This is an auto generated Daily Sales Report of ${dsrValues[0].program_name}.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.`).style(myStyleAlignLeft);
 row+=2;
 column = 2;
-ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter2)
-ws2.cell(row, column++,row, column+19, true).string(`Description`).style(myStyleAlignLeft2)
+ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
+ws2.cell(row, column++,row, column+19, true).string(`Description`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 slNo = 1;
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Member Name – The full name of the Member`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Membership Number – A Nine-digit unique number for every membership`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Level-  Membership Type name`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Type – New or Renewal Membership. N for New and R for Renewal`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Enrolment Date – The date when the membership was enrolled or renewed`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Valid Till – The date when the membership expires`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Promo code - Promocode to avail extra benefit`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Payment Mode – The mode of payment through which a member pays the membership amount`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Online Transaction No. – A unique transaction number to identify a membership (Not the UTR number)`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`CC Approval Code – An approval code that appears on the charge slip that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`CC Batch Number – Batch Number that appears on the charge slips that gets printed from a credit/debit card charging machine`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Cash Receipt Number – The number that appears on a Cash receipt issued by the hotel/program`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Cheque Details – Cheque number, Bank Name and Deposit Date`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Amount – Net Amount without Tax`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Tax – Goods and Services Tax`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Total Amount – The amount that the member has paid`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`GSTIN – The GST number that the member has provided`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`State Code – Two-digit code that appears before the PAN number in a GSTIN provided`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Remarks – Comments entered by the person enrolling a membership in the TLC CRM`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 row+=1;
 column = 2;
-ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)
+ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder2)
 ws2.cell(row, column++,row, column+19, true).string(`Certificate Number – The number printed on the back of a physical voucher or on a digital certificate.  This can be used by the Audit teams to reconcile any used certificate`).style(myStyleAlignCenterWithoutBoldAlignLeftWithoutBorder)
 
 
