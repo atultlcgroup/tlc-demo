@@ -143,23 +143,23 @@ let headerForPageCertificate=`
         dailySalesReportRows += `<tr align="center" height="50"><td>${slNo++}</td>
                     <td align="left" >${getEmptyIfNull(obj.name)}</td>
                     <td >${getEmptyIfNull(obj.membership_number__c)}</td>
-                    <td >${getEmptyIfNull(obj.customer_set_level_name)}</td>
+                    <td align="left">${getEmptyIfNull(obj.customer_set_level_name)}</td>
                     <td>${getEmptyIfNull(obj.type_n_r__c)}</td>
                     <td>${(obj.membership_enrollment_date__c ? convertDateFormat((obj.membership_renewal_date__c ? obj.membership_renewal_date__c : obj.membership_enrollment_date__c)) : '')}</td>
                     <td>${(obj.expiry_date__c ? convertDateFormat(obj.expiry_date__c) : '')}</td>
                     <td>${getEmptyIfNull(obj.promocode__c)}</td>
-                    <td>${getEmptyIfNull((obj.payment_mode__c == 'Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c ? obj.credit_card__c : '')}` : `${obj.payment_mode__c}`))}</td>
+                    <td align="left">${getEmptyIfNull((obj.payment_mode__c == 'Credit Card' ? `${obj.payment_mode__c} ${(obj.credit_card__c ? obj.credit_card__c : '')}` : `${obj.payment_mode__c}`))}</td>
                     <td>${getEmptyIfNull(obj.cc_cheqno_online_trn_no__c)}</td>
                     <td>${getEmptyIfNull(obj.authorization_number__c)}</td>
                     <td>${getEmptyIfNull(obj.batch_number__c)}</td>
-                    <td>${getEmptyIfNull((obj.payment_mode__c == 'Cash'  ? `${obj.receipt_no__c}` : ``))}</td>
+                    <td align="left">${getEmptyIfNull((obj.payment_mode__c == 'Cash'  ? `${obj.receipt_no__c}` : ``))}</td>
                     <td>${getEmptyIfNull((obj.cheque_details))}</td>
                     <td>${(obj.amount__c ? (Math.floor(obj.amount__c * 100) / 100) : 0)}</td>
                     <td>${(obj.total_amount__c - obj.amount__c) ? (Math.floor((obj.total_amount__c - obj.amount__c) * 100) / 100) : 0}</td>
                     <td>${(obj.total_amount__c ? (Math.floor(obj.total_amount__c * 100) / 100) : 0)}</td>
                     <td>${getEmptyIfNull(obj.gstin__c)}</td>
                     <td>${getEmptyIfNull(obj.state_code__c)}</td>
-                    <td>${getEmptyIfNull(obj.remarks__c)}</td>
+                    <td align="left">${getEmptyIfNull(obj.remarks__c)}</td>
                     </tr>
                     `
 
@@ -280,7 +280,7 @@ let headerForPageCertificate=`
 
 
         indexForPage++;
-        if (indexForPage % 8 == 0 && indexForPage != 0 && dsrValues[indexForPage]) {
+        if (indexForPage % 7 == 0 && indexForPage != 0 && dsrValues[indexForPage]) {
             dailySalesReportRows += `${headerForPage}`
         }
 
@@ -297,7 +297,7 @@ let headerForPageCertificate=`
 
                 
                 indexForPageCertificate++;
-        if (indexForPageCertificate % 11 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
+        if (indexForPageCertificate % 3 == 0 && indexForPageCertificate != 0 && dsrValues[indexForPageCertificate]) {
             certifiacateIssued += `${headerForPageCertificate}`
         }
     }
@@ -609,19 +609,19 @@ let headerForPageCertificate=`
          <td>1</td>   
           <td style="text-align: left;">N</td>
           <td>${summaryDataNRC[0].noOfSale}</td>
-          <td>${summaryDataNRC[0].amount}</td>
+          <td>${summaryDataNRC[0].amount * (Math.floor(summaryDataNRC[0].amount * 100) / 100) }</td>
       </tr>
       <tr>
          <td>1</td>   
           <td style="text-align: left;">R</td>
           <td>${summaryDataNRC[1].noOfSale}</td>
-          <td>${summaryDataNRC[1].amount}</td>
+          <td>${summaryDataNRC[1].amount * (Math.floor(summaryDataNRC[1].amount * 100) / 100)}</td>
       </tr>
       <tr>
       <td>1</td>   
        <td style="text-align: left;">C</td>
        <td>${summaryDataNRC[2].noOfSale}</td>
-       <td>${summaryDataNRC[2].amount}</td>
+       <td>${summaryDataNRC[2].amount * (Math.floor(summaryDataNRC[2].amount * 100) / 100)}</td>
    </tr>
 
 
@@ -782,7 +782,7 @@ Disclaimer <br><br>
 
 While we have taken every precaution to ensure that the data presented here is accurate, errors and omissions may occur.  TLC is not responsible for any errors or omissions, or for the results obtained from the use of this information. This information has no guarantee of completeness, accuracy, timeliness or of the results obtained from the use of this information..."
 
-    <div class="arilFont" id="pageFooter" style="font-size: 9px; height:500px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter" style="font-size: 8px; height:500px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
     <p align="left"> ${dynamicValues.page_footer_1_dsr__c} </p>
     <p>${dynamicValues.page_footer_2_dsr__c}</p>
