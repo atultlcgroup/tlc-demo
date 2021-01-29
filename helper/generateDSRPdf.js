@@ -696,7 +696,7 @@ let headerForPageCertificate=`
       <td>0</td>
       </tr>
       <td>${serialNumber3++}</td>
-      <td style="text-align: left;">Wedding Bunding</td>
+      <td style="text-align: left;">Wedding Bundling</td>
       <td>${summaryDataLevel[6].noOfSale}</td>
       <td>${summaryDataLevel[6].amount}</td>
       </tr>
