@@ -609,19 +609,19 @@ let headerForPageCertificate=`
          <td>1</td>   
           <td style="text-align: left;">N</td>
           <td>${summaryDataNRC[0].noOfSale}</td>
-          <td>${summaryDataNRC[0].amount * (Math.floor(summaryDataNRC[0].amount * 100) / 100) }</td>
+          <td>${summaryDataNRC[0].amount ? (Math.floor(summaryDataNRC[0].amount * 100) / 100) : 0}</td>
       </tr>
       <tr>
          <td>1</td>   
           <td style="text-align: left;">R</td>
           <td>${summaryDataNRC[1].noOfSale}</td>
-          <td>${summaryDataNRC[1].amount * (Math.floor(summaryDataNRC[1].amount * 100) / 100)}</td>
+          <td>${summaryDataNRC[1].amount ? (Math.floor(summaryDataNRC[1].amount * 100) / 100) : 0}</td>
       </tr>
       <tr>
       <td>1</td>   
        <td style="text-align: left;">C</td>
        <td>${summaryDataNRC[2].noOfSale}</td>
-       <td>${summaryDataNRC[2].amount * (Math.floor(summaryDataNRC[2].amount * 100) / 100)}</td>
+       <td>${summaryDataNRC[2].amount ? (Math.floor(summaryDataNRC[2].amount * 100) / 100) : 0}</td>
    </tr>
 
 
