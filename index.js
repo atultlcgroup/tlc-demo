@@ -27,6 +27,7 @@ const body_parser = require("body-parser");
 const FandBSummary = require("./routers/FandBSummary")
 const referralRouters = require("./routers/referral");
 const whatsAppRouters=require("./routers/whatsAppOtp")
+const tallyrouters=require("./routers/tally")
 const memberSpentPOS = require("./routers/memberSpentForPOS")
 const cors = require("cors");
 const app = express();
@@ -51,6 +52,7 @@ app.use("/api/DRR",DRReport)
 app.use("/api/FR",FReport)
 app.use("/api/RR",RReport)
 app.use("/api/MemberSpend",memberSpentPOS)
+app.use("/api/tally" , tallyrouters)
 
 
 
