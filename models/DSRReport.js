@@ -314,7 +314,7 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' `;
         else if(req.property_sfid)
          qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
          else if(req.customer_set_sfid)
@@ -491,7 +491,7 @@ let DSRReport = async()=>{
 let getEPRSfid = async()=>{
     try{
       let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
-      (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and  (property__c is not NULL or property__c !='')`
+      (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and  (property__c is not NULL or property__c !='') and property__c='a0Y1y000000EVufEAG'`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
@@ -623,17 +623,17 @@ let getDSRReport=async(property_sfid)=>{
         inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
         inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
         Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid limit 100
-       --where
-       -- (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        On membershiptype__c.program__c = program__c.sfid 
+       where
+       --(Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-           --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+         --  or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
            --and
            --Membership__c is not Null and Membership_Offer__c is null
            --and
-           --(Property__c.sfid='${property_sfid}'
+           (Property__c.sfid='${property_sfid}'
            --or membership__c.customer_set__c IN ('')
-            --)
+            ) limit 100;
          `)
         console.log(`hiiiSS`)
         let result = query ? query.rows : [];
@@ -682,17 +682,17 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         Inner Join tlcsalesforce.program__c
         On membershiptype__c.program__c = program__c.sfid
         where
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+       -- (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-           or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-           and
-           Membership__c is not Null and Membership_Offer__c is null
-           and
-           (
+         --  or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+           --and
+           --Membership__c is not Null and Membership_Offer__c is null
+           --and
+           --(
            --Property__c.sfid=''
            --or 
            membership__c.customer_set__c IN ('${customer_set_sfid}')
-            )
+            ) limit 100
          `)
         let result = query ? query.rows : [];
         return result;
