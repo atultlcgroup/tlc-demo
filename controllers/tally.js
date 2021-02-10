@@ -8,6 +8,7 @@ let tally = async(req,res)=>{
         res.status(200).send({code :200 , message:'Success',data: tally})
     }catch(e){
         console.log(`${e}`)
+        res.status(e.code).send(e.data)
 }
 }
 
