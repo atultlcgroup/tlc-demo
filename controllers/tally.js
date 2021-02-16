@@ -1,10 +1,10 @@
 let TallyModel = require('../models/tally')
 let tally = async(req,res)=>{
     try{    
-        if(!req.headers.client_id || !req.headers.client_secret){
+        if(!req.headers.client_id || !req.headers.client_secret || !req.body.payment_id){
             res.status(401).send({code: 401 , message : 'Invalid inputs!'})
         }
-        let tally =await TallyModel.tally(req.headers.client_id , req.headers.client_secret)
+        let tally =await TallyModel.tally(req.headers.client_id , req.headers.client_secret , req.body.payment_id)
         res.status(200).send({code :200 , message:'Success',data: tally})
     }catch(e){
         console.log(`${e}`)

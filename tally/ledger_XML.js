@@ -1,3 +1,5 @@
+const { pool } = require("../databases/db")
+
 let getLedgerTemplate =(data)=> {
     try{
         let ledger = `<ENVELOPE>
@@ -237,6 +239,8 @@ let getLedgerTemplate =(data)=> {
     }
 
 }
+
+
 
 
 
