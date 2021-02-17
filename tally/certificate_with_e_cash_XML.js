@@ -9,7 +9,7 @@ let getCertificateTemplate =(data)=> {
           <REQUESTDESC>
            <REPORTNAME>Vouchers</REPORTNAME>
            <STATICVARIABLES>
-            <SVCURRENTCOMPANY>TLC Testing</SVCURRENTCOMPANY>
+            <SVCURRENTCOMPANY>${data[0].company_name}</SVCURRENTCOMPANY>
            </STATICVARIABLES>
           </REQUESTDESC>
           <REQUESTDATA>
@@ -196,7 +196,7 @@ let getCertificateTemplate =(data)=> {
               <OLDAUDITENTRYIDS.LIST TYPE="Number">
                <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
               </OLDAUDITENTRYIDS.LIST>
-              <LEDGERNAME>${d.certificate_name}</LEDGERNAME>
+              <LEDGERNAME>Certification 1</LEDGERNAME>
               <GSTCLASS/>
               <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
               <LEDGERFROMITEM>No</LEDGERFROMITEM>
@@ -403,8 +403,8 @@ let getCertificateTemplate =(data)=> {
               <ISCAPVATTAXALTERED>No</ISCAPVATTAXALTERED>
               <ISCAPVATNOTCLAIMED>No</ISCAPVATNOTCLAIMED>
               <ROUNDLIMIT> 1</ROUNDLIMIT>
-              <AMOUNT>-0.10</AMOUNT>
-              <VATEXPAMOUNT>-0.10</VATEXPAMOUNT>
+              <AMOUNT>-0</AMOUNT>
+              <VATEXPAMOUNT>-0</VATEXPAMOUNT>
               <SERVICETAXDETAILS.LIST>       </SERVICETAXDETAILS.LIST>
               <BANKALLOCATIONS.LIST>       </BANKALLOCATIONS.LIST>
               <BILLALLOCATIONS.LIST>       </BILLALLOCATIONS.LIST>
@@ -440,7 +440,7 @@ let getCertificateTemplate =(data)=> {
             <COMPANY>
              <REMOTECMPINFO.LIST MERGE="Yes">
               <NAME>3105d5c9-a08f-4500-bde5-5b998bc7e009</NAME>
-              <REMOTECMPNAME>TLC Testing</REMOTECMPNAME>
+              <REMOTECMPNAME>${data[0].company_name}</REMOTECMPNAME>
               <REMOTECMPSTATE>Delhi</REMOTECMPSTATE>
              </REMOTECMPINFO.LIST>
             </COMPANY>
@@ -449,7 +449,7 @@ let getCertificateTemplate =(data)=> {
             <COMPANY>
              <REMOTECMPINFO.LIST MERGE="Yes">
               <NAME>3105d5c9-a08f-4500-bde5-5b998bc7e009</NAME>
-              <REMOTECMPNAME>TLC Testing</REMOTECMPNAME>
+              <REMOTECMPNAME>${data[0].company_name}</REMOTECMPNAME>
               <REMOTECMPSTATE>Delhi</REMOTECMPSTATE>
              </REMOTECMPINFO.LIST>
             </COMPANY>

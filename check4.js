@@ -1,13 +1,3 @@
-let responsedata = `<RESPONSE>
- <LINEERROR>Voucher totals do not match! Dr:  Cr: 180.00 Cr Diff: 180.00 Cr</LINEERROR>
- <CREATED>0</CREATED>
- <ALTERED>0</ALTERED>
- <DELETED>0</DELETED>
- <LASTVCHID>0</LASTVCHID>
- <LASTMID>0</LASTMID>
- <COMBINED>0</COMBINED>
- <IGNORED>0</IGNORED>
- <ERRORS>1</ERRORS>
- <CANCELLED>0</CANCELLED>
-</RESPONSE>`
-console.log(responsedata.indexOf(`LINEERROR`))
+let a = 910 
+let b = 163.8
+console.log(Math.ceil(a+b))

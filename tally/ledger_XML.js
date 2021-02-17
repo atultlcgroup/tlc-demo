@@ -11,7 +11,7 @@ let getLedgerTemplate =(data)=> {
           <REQUESTDESC>
            <REPORTNAME>All Masters</REPORTNAME> 
            <STATICVARIABLES>
-            <SVCURRENTCOMPANY>TLC Testing</SVCURRENTCOMPANY> 
+            <SVCURRENTCOMPANY>${data.company_name}</SVCURRENTCOMPANY> 
            </STATICVARIABLES>
           </REQUESTDESC>
           <REQUESTDATA>
