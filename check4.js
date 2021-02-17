@@ -1,3 +1,3 @@
-let a = 910 
-let b = 163.8
-console.log(Math.ceil(a+b))
+let net_amont= 910 
+let GST_amount = 163.8
+let final_amount =Math.ceil(a+b) = 1074

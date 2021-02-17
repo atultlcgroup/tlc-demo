@@ -196,7 +196,7 @@ let getCertificateTemplate =(data)=> {
               <OLDAUDITENTRYIDS.LIST TYPE="Number">
                <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
               </OLDAUDITENTRYIDS.LIST>
-              <LEDGERNAME>Certification 1</LEDGERNAME>
+              <LEDGERNAME>${d.certificate_name}</LEDGERNAME>
               <GSTCLASS/>
               <ISDEEMEDPOSITIVE>No</ISDEEMEDPOSITIVE>
               <LEDGERFROMITEM>No</LEDGERFROMITEM>
