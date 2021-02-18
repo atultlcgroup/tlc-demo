@@ -16,7 +16,7 @@ let getLedgerTemplate =(data)=> {
           </REQUESTDESC>
           <REQUESTDATA>
            <TALLYMESSAGE xmlns:UDF="TallyUDF">
-            <LEDGER NAME="${data.name}-${data.member_id__c}" RESERVEDNAME="">
+            <LEDGER NAME="${data.current_name}-${data.member_id__c}" Action= "Create">
              <ADDRESS.LIST TYPE="String">
               <ADDRESS>${data.billingstreet}</ADDRESS> 
               <ADDRESS>${data.billingstate}</ADDRESS> 
@@ -152,7 +152,7 @@ let getLedgerTemplate =(data)=> {
              <GSTDETAILS.LIST>      </GSTDETAILS.LIST>
              <LANGUAGENAME.LIST>
               <NAME.LIST TYPE="String">
-               <NAME>${data.name}-${data.member_id__c}</NAME>
+               <NAME>${data.new_name}-${data.member_id__c}</NAME>
               <NAME>${data.member_id__c}</NAME>       
               </NAME.LIST>
               <LANGUAGEID> 1033</LANGUAGEID>
@@ -196,7 +196,7 @@ let getLedgerTemplate =(data)=> {
               <ADDRESSNAME>${data.billingstreet}</ADDRESSNAME>
               <MOBILENUMBER>${data.mobile__c}</MOBILENUMBER>
               <PARTYGSTIN>${data.member_gst_details__c}</PARTYGSTIN>
-              <CONTACTPERSON>${data.name}</CONTACTPERSON>
+              <CONTACTPERSON>${data.current_name}</CONTACTPERSON>
               <STATE>${data.billingstate}</STATE>
               <ISOTHTERRITORYASSESSEE>No</ISOTHTERRITORYASSESSEE>
               <ISEXCISEMERCHANTEXPORTER>No</ISEXCISEMERCHANTEXPORTER>

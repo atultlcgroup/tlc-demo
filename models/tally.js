@@ -315,9 +315,9 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
 }
 
 
-let updateLedger = async(client_id, client_secret  , member_id)=>{
+let updateLedger = async(client_id, client_secret  , member_id , current_name, new_name)=>{
     try{
-        let data = await MuleApiCallCreateLedgerUpdate(client_id, client_secret  , member_id)   
+        let data = await MuleApiCallCreateLedgerUpdate(client_id, client_secret  , member_id , current_name, new_name)   
         return data ;
     }catch(e)
     {
@@ -325,7 +325,7 @@ let updateLedger = async(client_id, client_secret  , member_id)=>{
     }
 }
 
-let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id)=>{
+let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id , current_name, new_name)=>{
     return new Promise(async(resolve,reject)=>{
         try{
             let logData = 0
@@ -342,10 +342,16 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id)
             //for voucher 
             // ledgerData[0].name = 'voucher1';
             // ledgerData[0].member_id__c = '3258'
+         
+            ledgerData[0].current_name = ledgerData[0].name
+            ledgerData[0].new_name = ledgerData[0].name 
+            if(current_name && new_name){
+                ledgerData[0].current_name = current_name
+                ledgerData[0].new_name = new_name         
+            }
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;
-            payment_SFID= ledgerData[0].payment_SFID
-            
+            payment_SFID= ledgerData[0].payment_SFID ;
         }
         let requestObj = {
             insertedId : 0,
