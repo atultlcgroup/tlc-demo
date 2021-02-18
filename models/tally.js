@@ -522,7 +522,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
       where  account.member_id__c = '${member_id}' limit 1
-       --and payment__c.payment_status__c = 'CONSUMED' 
+       and payment__c.payment_status__c = 'CONSUMED' 
        `)  
       return qry ? qry.rows : [] 
     }catch(e){
@@ -570,7 +570,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
       where 
-      --payment__c.payment_status__c = 'CONSUMED' and 
+      payment__c.payment_status__c = 'CONSUMED' and 
       payment__c.transaction_type__c in ('Certificates-Buy') and 
       payment__c.sfid = '${payment_SFID}' 
 	  `)  
