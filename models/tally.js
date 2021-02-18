@@ -55,14 +55,13 @@ let tally = (client_id, client_secret , paymentId)=>{
             if(getTransactionType){
                 console.log(`create ledger`)
                 let createLedger = await MuleApiCallCreateLedger(client_id, client_secret , paymentId )
-                console.log(createLedger)
                     if(['SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew'].includes(getTransactionType)){
                             // create voucher 
                             let createVoucher = await MuleApiCallCreateVoucher(client_id, client_secret , paymentId , createLedger.insertedId )
                             console.log(createVoucher)
                     }if(getTransactionType == 'Certificates-Buy'){
                         // create certificate 
-                        console.log(`from certificate creation `)
+                        console.log(`from certificate creation`)
                         let createCertificate = await MuleApiCallCreateCertificate(client_id, client_secret , paymentId  , createLedger.insertedId)
                         resolve(createCertificate)
                         // create e-cash 
@@ -121,7 +120,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             // voucherData[0].member_id__c = '3258'
             voucherXML = voucherTemplate.getVoucherTemplate(voucherData[0])
         }
-
+     
         let requestObj = {
             insertedId : 0,
             response: ``,
@@ -203,6 +202,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
         let IGST = 0;
         let CGST = 0;
         let SGST = 0;
+        let ecash_value =0
         if(certificateData.length ){
             if(!certificateData[0].member_state)
             certificateData[0].member_state= certificateData[0].account_billingstate
@@ -225,7 +225,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].CGST = CGST;
             certificateData[0].createddate = (convertDateFormat(certificateData[0].createddate)) 
             certificateData[0].company_name = certificateData[0].supplier_company || 'TLC Testing'
-            let ecash_value = await getEcash(paymentId);
+            ecash_value = await getEcash(paymentId);
             certificateData[0].e_cash =  ecash_value ? ecash_value : 0;
             certificateData[0].grand_total__c = certificateData[0].IGST  + certificateData[0].CGST + certificateData[0].SGST + certificateData[0].net_amount__c - certificateData[0].e_cash   
             certificateXML = certificateTemplate.getCertificateTemplate(certificateData)
@@ -243,6 +243,8 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             operationType : `Create`, 
             paymentSfid : `${paymentId}`
         } 
+        if(ecash_value)
+        requestObj.status = 'E-Cash'
         logData = await insertUpdateIntegrationLog(requestObj)
         let config = {
         method: 'post',
@@ -305,6 +307,7 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
                 insertedId = data.rows[0].id 
             }else{
                 console.log(`from update `)
+                if(requestObj.insertedId)
             data= await pool.query(`update tlcsalesforce.integration_log__c set status__c = '${requestObj.status}', response__c = '${requestObj.response}' where id = ${requestObj.insertedId}`)    
         }
         return insertedId ;
@@ -334,8 +337,8 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
         let accountSfid = ``;
         let payment_SFID = ``
         if(ledgerData.length ){
-            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            // ledgerData[0].company_name ='TLC Testing'
+            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
             // ledgerData[0].member_id__c = '3258770'
@@ -351,8 +354,9 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
             }
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;
-            payment_SFID= ledgerData[0].payment_SFID ;
+            payment_SFID= ledgerData[0].payment_sfid ;
         }
+        console.log(ledgerData)
         let requestObj = {
             insertedId : 0,
             response: ``,
@@ -362,7 +366,7 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
             request : `${ledgerXML}`,
             accountSfid : `${accountSfid}`, 
             ledgerSfid :  0,
-            operationType : `Create`, 
+            operationType : `Update`, 
             paymentSfid : `${payment_SFID}`
         }        
         logData = await insertUpdateIntegrationLog(requestObj)
@@ -415,8 +419,8 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
         let ledgerXML = ``
         let accountSfid = ``;
         if(ledgerData.length ){
-            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            // ledgerData[0].company_name ='TLC Testing'
+            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            ledgerData[0].company_name ='TLC Testing'
 
             //for certificate
             // ledgerData[0].name = 'tally1';
@@ -424,10 +428,13 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
             //for voucher 
             // ledgerData[0].name = 'voucher1';
             // ledgerData[0].member_id__c = '3258'
+            ledgerData[0].current_name = ledgerData[0].name
+            ledgerData[0].new_name = ledgerData[0].name 
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
-            accountSfid = ledgerData[0].account_sfid ;
-            
+            accountSfid = ledgerData[0].account_sfid ;  
         }
+        console.log(ledgerData)
+
         let requestObj = {
             insertedId : 0,
             response: ``,
@@ -521,8 +528,8 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
       left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
-      where  account.member_id__c = '${member_id}' limit 1
-       and payment__c.payment_status__c = 'CONSUMED' 
+      where  account.member_id__c = '${member_id}' 
+       and payment__c.payment_status__c = 'CONSUMED'  limit 1
        `)  
       return qry ? qry.rows : [] 
     }catch(e){
