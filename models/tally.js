@@ -409,8 +409,8 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
         let ledgerXML = ``
         let accountSfid = ``;
         if(ledgerData.length ){
-            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            ledgerData[0].company_name ='TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            // ledgerData[0].company_name ='TLC Testing'
 
             //for certificate
             // ledgerData[0].name = 'tally1';
