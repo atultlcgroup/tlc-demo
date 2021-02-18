@@ -8,6 +8,8 @@ const DRReport = require('../models/DRReport')
 const FReport = require('../models/FReport')
 const RReport = require('../models/RReport')
 const getMembershipDetails=require('../models/memberSpentForPOS');
+const tally=require('../models/tally');
+
 
 
 
@@ -175,4 +177,18 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_IMAP == true || process.env.IS_SCHEDULER
   // scheduleForUtrReport(process.env.SCHEDULER_TIME_FOR_IMAP);
   const imapForUTR = require('./imap')
 
+}
+
+
+//For POS membership Total spent
+let scheduleTasksForTally=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR Tally  ========================`)
+  tally.scheduleTallyTasks()
+ console.log(`================= Tally: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == true || process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == 'TRUE')
+{
+  console.log(`schedule Tasks For Member Spent Report `);
+  scheduleTasksForTally(process.env.SCHEDULER_TIME_FOR_TALLY);
 }

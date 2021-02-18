@@ -4,7 +4,7 @@ const tallyApiUrl = process.env.TALLY_API_URL || ``
 const tallyApiClentId = process.env.TALLY_API_CLIENT_ID || ``
 const tallyApiClientSecret = process.env.TALLY_API_SECRET || ``
 let ledgerTemplate = require('../tally/ledger_XML')
-let voucherTemplate = require('../tally/sales_voucher_XML2')
+let voucherTemplate = require('../tally/sales_voucher_XML')
 let certificateTemplate = require('../tally/certificate_with_e_cash_XML')
 
 
@@ -12,11 +12,11 @@ const axios = require('axios');
 
 
 let convertDateFormat = (date1) => {
-    if (date1) {
+    if (!date1)
+    date1 = Date.now()
         let today1 = new Date(date1);
         dateTime = `${today1.getFullYear()}${String(today1.getMonth() + 1).padStart(2, '0')}${String(today1.getDate()).padStart(2, '0')}`
-    }
-    console.log(dateTime)
+        return dateTime
 }
 let getPaymentDetails= async(paymentId)=>{
     try{
@@ -24,6 +24,19 @@ let getPaymentDetails= async(paymentId)=>{
         return  data.rows ? data.rows[0].transaction_type__c : `` 
     }catch(e){
         return ``;
+    }
+}
+
+let scheduleTallyTasks = async()=>{
+    try{
+        let data = await pool.query(`select payment__c  from tlcsalesforce.integration_log__c where DATE(createddate) = current_date - interval '1 day' order  by id desc limit 10`)
+        if(data.rows.length){
+            data.rows.map(d=>{
+                tally(tallyApiClentId,tallyApiClientSecret,d.payment__c)
+            })
+        }
+    }catch(e){
+        console.log(e)
     }
 }
 let tally = (client_id, client_secret , paymentId)=>{
@@ -77,7 +90,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
         if(voucherData.length ){
             if(!voucherData[0].member_state)
             voucherData[0].member_state= voucherData[0].account_billingstate
-            // voucherData[0].createddate = (convertDateFormat(voucherData[0].createddate)) || Date.now()
+            voucherData[0].createddate = (convertDateFormat(voucherData[0].createddate)) 
             voucherData[0].CGST =0;
             voucherData[0].IGST = 0;
             voucherData[0].SGST = 0;
@@ -107,7 +120,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             // voucherData[0].member_id__c = '3258'
             voucherXML = voucherTemplate.getVoucherTemplate(voucherData[0])
         }
-        console.log(voucherData)
+
         let requestObj = {
             insertedId : 0,
             response: ``,
@@ -209,6 +222,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].IGST = IGST;
             certificateData[0].SGST = SGST;
             certificateData[0].CGST = CGST;
+            certificateData[0].createddate = (convertDateFormat(certificateData[0].createddate)) 
             certificateData[0].company_name = certificateData[0].supplier_company || 'TLC Testing'
             let ecash_value = await getEcash(paymentId);
             certificateData[0].e_cash =  ecash_value ? ecash_value : 0;
@@ -276,16 +290,17 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
         //     VALUES (gen_random_uuid(),'${requestObj.response}' ,'Tally', '${requestObj.accountSfid}' , '${requestObj.status}',  '${requestObj.requestFor}' , '${requestObj.request}', '${requestObj.accountSfid}', '${requestObj.ledgerSfid}', '${requestObj.operationType}' , '${requestObj.paymentSfid}')`)
        insertedId = 0;
         if(! requestObj.insertedId){
-            // console.log(`select sfid from tlcsalesforce.integration_log__c where id =${requestObj.ledgerSfid}`)
-            // let ledgerSfidData =await pool.query(`select sfid from tlcsalesforce.integration_log__c where id =${requestObj.ledgerSfid}`)
-            // console.log(ledgerSfidData.rows)
-            // console.log(`======`)
-            // if(ledgerSfidData.rows.length){
-            //     ledgerSFID =  ledgerSfidData.rows[0].sfid
-            
-            data= await pool.query(`INSERT INTO tlcsalesforce.integration_log__c(external_id__c,
-                response__c, integrated_system__c, account__r__member_id__c, status__c, interface_name__c, request__c, account__c, process_after__c, operation__c, payment__c)
-                VALUES (gen_random_uuid(),'${requestObj.response}' ,'Tally', '${requestObj.accountSfid}' , '${requestObj.status}',  '${requestObj.requestFor}' , '${requestObj.request}', '${requestObj.accountSfid}', '${requestObj.ledgerSfid}', '${requestObj.operationType}' , '${requestObj.paymentSfid}') RETURNING  id`)    
+            let ledgerSFID = ``
+            console.log(`select external_id__c  from tlcsalesforce.integration_log__c where id =${requestObj.ledgerSfid}`)
+            let ledgerSfidData =await pool.query(`select external_id__c from tlcsalesforce.integration_log__c where id =${requestObj.ledgerSfid}`)
+            console.log(ledgerSfidData.rows)
+            console.log(`======`)
+            if(ledgerSfidData.rows.length){
+                ledgerSFID =  ledgerSfidData.rows[0].external_id__c
+            }
+            data= await pool.query(`INSERT INTO tlcsalesforce.integration_log__c(createddate,external_id__c,
+                response__c, integrated_system__c, account__r__member_id__c, status__c, interface_name__c, request__c, account__c, process_after__r__external_id__c, operation__c, payment__c)
+                VALUES (NOW(),gen_random_uuid(),'${requestObj.response}' ,'Tally', '${requestObj.accountSfid}' , '${requestObj.status}',  '${requestObj.requestFor}' , '${requestObj.request}', '${requestObj.accountSfid}', '${ledgerSFID}', '${requestObj.operationType}' , '${requestObj.paymentSfid}') RETURNING  id`)    
                 insertedId = data.rows[0].id 
             }else{
                 console.log(`from update `)
@@ -296,6 +311,92 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
         console.log(e)
         return ``
     }
+}
+
+
+let updateLedger = async(client_id, client_secret  , member_id)=>{
+    try{
+        let data = await MuleApiCallCreateLedgerUpdate(client_id, client_secret  , member_id)   
+        return data ;
+    }catch(e)
+    {
+        return e ;
+    }
+}
+
+let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id)=>{
+    return new Promise(async(resolve,reject)=>{
+        try{
+            let logData = 0
+        let ledgerData = await  gerReuiredDetailsForLedgerUpdate(member_id);
+        let ledgerXML = ``
+        let accountSfid = ``;
+        let payment_SFID = ``
+        if(ledgerData.length ){
+            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            ledgerData[0].company_name ='TLC Testing'
+            //for certificate
+            // ledgerData[0].name = 'tally1';
+            // ledgerData[0].member_id__c = '3258770'
+            //for voucher 
+            // ledgerData[0].name = 'voucher1';
+            // ledgerData[0].member_id__c = '3258'
+            ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
+            accountSfid = ledgerData[0].account_sfid ;
+            payment_SFID= ledgerData[0].payment_SFID
+            
+        }
+        let requestObj = {
+            insertedId : 0,
+            response: ``,
+            accountSfid : ``,
+            status  : `Not-Processed`,  
+            requestFor : `Ledger`, 
+            request : `${ledgerXML}`,
+            accountSfid : `${accountSfid}`, 
+            ledgerSfid :  0,
+            operationType : `Create`, 
+            paymentSfid : `${payment_SFID}`
+        }        
+        logData = await insertUpdateIntegrationLog(requestObj)
+        console.log(logData)
+        let config = {
+        method: 'post',
+        url: tallyApiUrl,
+        headers: { 
+            'client_id': client_id || tallyApiClentId, 
+            'client_secret': client_secret || tallyApiClientSecret,
+            'Content-Type': 'application/xml'
+        },
+        data : ledgerXML
+        };
+        try{
+            let data = await axios(config)
+            requestObj.insertedId = logData
+            requestObj.response = data.data
+            console.log((`${data.data}`).indexOf(`LINEERROR`))
+    
+            if((`${data.data}`).indexOf(`LINEERROR`) > -1)
+            requestObj.status = 'Failure'
+            else
+            requestObj.status = 'Success'
+            insertUpdateIntegrationLog(requestObj)
+            resolve({code:data.status ,data :data.data , insertedId : logData})
+        }catch(e){
+            let requestObjE = {}
+            requestObjE.insertedId = logData
+            requestObjE.response = JSON.stringify(e.response.data)
+            requestObjE.status = 'Failure'
+            insertUpdateIntegrationLog(requestObjE)
+            // console.log(e)
+            // console.log(e.response.status)
+         reject({code:e.response.status ,data :e.response.data , insertedId : logData})
+        }
+
+        }catch(e){
+            reject(e)
+        }
+    })
 }
 
 
@@ -404,6 +505,24 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     }
  }
 
+ let gerReuiredDetailsForLedgerUpdate = async(member_id)=>{
+    try{
+      let qry = await pool.query(`select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      from  tlcsalesforce.account
+      left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
+      left join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+      left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      where  account.member_id__c = '${member_id}' limit 1
+       --and payment__c.payment_status__c = 'CONSUMED' 
+       `)  
+      return qry ? qry.rows : [] 
+    }catch(e){
+        return []
+    }
+ }
+
  let gerReuiredDetailsForVoucher = async(payment_SFID)=>{
     try{
         // console.log(` select  account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.receipt_no__c,payment__c.payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
@@ -496,5 +615,7 @@ let postgresNotifyEvent = async()=>{
 }
 postgresNotifyEvent()
 module.exports={
-    tally
+    scheduleTallyTasks,
+    tally,
+    updateLedger
 }
