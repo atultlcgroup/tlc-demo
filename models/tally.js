@@ -333,8 +333,8 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id)
         let accountSfid = ``;
         let payment_SFID = ``
         if(ledgerData.length ){
-            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            ledgerData[0].company_name ='TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            // ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
             // ledgerData[0].member_id__c = '3258770'
