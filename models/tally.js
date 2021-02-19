@@ -1,4 +1,6 @@
 const pool = require("../databases/db").pool;
+// const poolUAT = require("../databases/dbUAT").pool;
+
 const client = require("../databases/dbNotifyEvent").client;
 const tallyApiUrl = process.env.TALLY_API_URL || ``
 const tallyApiClentId = process.env.TALLY_API_CLIENT_ID || ``
@@ -226,6 +228,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].createddate = (convertDateFormat(certificateData[0].createddate)) 
             certificateData[0].company_name = certificateData[0].supplier_company || 'TLC Testing'
             ecash_value = await getEcash(paymentId);
+            // ecash_value =120
             certificateData[0].e_cash =  ecash_value ? ecash_value : 0;
             certificateData[0].grand_total__c = certificateData[0].IGST  + certificateData[0].CGST + certificateData[0].SGST + certificateData[0].net_amount__c - certificateData[0].e_cash   
             certificateXML = certificateTemplate.getCertificateTemplate(certificateData)
@@ -244,7 +247,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             paymentSfid : `${paymentId}`
         } 
         if(ecash_value)
-        requestObj.status = 'E-Cash'
+        requestObj.requestFor = 'E-Cash'
         logData = await insertUpdateIntegrationLog(requestObj)
         let config = {
         method: 'post',
@@ -337,8 +340,8 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
         let accountSfid = ``;
         let payment_SFID = ``
         if(ledgerData.length ){
-            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            ledgerData[0].company_name ='TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            // ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
             // ledgerData[0].member_id__c = '3258770'
@@ -419,8 +422,8 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
         let ledgerXML = ``
         let accountSfid = ``;
         if(ledgerData.length ){
-            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            ledgerData[0].company_name ='TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            // ledgerData[0].company_name ='TLC Testing'
 
             //for certificate
             // ledgerData[0].name = 'tally1';
@@ -511,7 +514,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
       where payment__c.sfid = '${payment_SFID}' 
-       --and payment__c.payment_status__c = 'CONSUMED'
+       and payment__c.payment_status__c = 'CONSUMED'
        `)  
       return qry ? qry.rows : [] 
     }catch(e){
