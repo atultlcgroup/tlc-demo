@@ -189,6 +189,6 @@ let scheduleTasksForTally=(scheduledTime)=> schedule.scheduleJob(scheduledTime, 
 
 if(process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == true || process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == 'TRUE')
 {
-  console.log(`schedule Tasks For Member Spent Report `);
+  console.log(`schedule Tasks For Tally`);
   scheduleTasksForTally(process.env.SCHEDULER_TIME_FOR_TALLY);
 }
