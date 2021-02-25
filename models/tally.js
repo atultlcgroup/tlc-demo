@@ -73,6 +73,16 @@ let updateRetrialCount = async(integrationSFID)=>{
     }
 }
 
+let updateRetrialCountById = async(integrationID)=>{
+    try{
+        console.log(`update tlcsalesforce.integration_log__c set retrial_count__c  =  (retrial_count__c + 1) where id = '${integrationID}'`)
+        integrationID ?  pool.query(`update tlcsalesforce.integration_log__c set retrial_count__c  =  (retrial_count__c + 1) where id = '${integrationID}'`) : ''
+    }catch(e){
+        console.log(e)
+    }
+}
+
+
 let scheduleTallyTasks = async()=>{
     try{
         let data = await pool.query(`select payment__c,sfid  from tlcsalesforce.integration_log__c where retrial_count__c < ${tallyMaximumRetrialCount} and status__c NOT IN ('Success')`)
@@ -229,7 +239,18 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             paymentSfid : `${paymentId}`
         }  
         console.log(voucherData)
-        logData = await insertUpdateIntegrationLog(requestObj)
+        let integrationLogSFID= await getIntegrationLogSFID(paymentId,accountSfid, 'Voucher')
+        console.log(`Integration log id = ${integrationLogSFID} ------------------------`)
+        if(integrationLogSFID > 0)
+        {
+            logData  = integrationLogSFID
+            requestObj.insertedId = logData
+            await insertUpdateIntegrationLog(requestObj)
+        }else{
+            logData = await insertUpdateIntegrationLog(requestObj)
+        }
+        updateRetrialCountById(logData)
+        console.log(logData)
         let config = {
         method: 'post',
         url: tallyApiUrl,
@@ -360,7 +381,18 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
         } 
         if(ecash_value)
         requestObj.requestFor = 'E-Cash'
-        logData = await insertUpdateIntegrationLog(requestObj)
+        let integrationLogSFID= await getIntegrationLogSFID(paymentId,accountSfid, requestObj.requestFor)
+        console.log(`Integration log id = ${integrationLogSFID} ------------------------`)
+        if(integrationLogSFID > 0)
+        {
+            logData  = integrationLogSFID
+            requestObj.insertedId = logData
+            await insertUpdateIntegrationLog(requestObj)
+        }else{
+            logData = await insertUpdateIntegrationLog(requestObj)
+        }
+        updateRetrialCountById(logData)
+        console.log(logData)
         let config = {
         method: 'post',
         url: tallyApiUrl,
@@ -404,6 +436,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
 }
 
 
+
 let insertUpdateIntegrationLog = async(requestObj)=>{
     try{
         let data = ``;
@@ -420,14 +453,14 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
             if(ledgerSfidData.rows.length){
                 ledgerSFID =  ledgerSfidData.rows[0].external_id__c
             }
-            data= await pool.query(`INSERT INTO tlcsalesforce.integration_log__c(createddate,external_id__c,
+                data= await pool.query(`INSERT INTO tlcsalesforce.integration_log__c(createddate,external_id__c,
                 response__c, integrated_system__c, account__r__member_id__c, status__c, interface_name__c, request__c, account__c, process_after__r__external_id__c, operation__c, payment__c, retrial_count__c)
                 VALUES (NOW(),gen_random_uuid(),'${requestObj.response}' ,'Tally', '${requestObj.accountSfid}' , '${requestObj.status}',  '${requestObj.requestFor}' , '${requestObj.request}', '${requestObj.accountSfid}', '${ledgerSFID}', '${requestObj.operationType}' , '${requestObj.paymentSfid}' , 0) RETURNING  id`)    
                 insertedId = data.rows[0].id 
             }else{
                 console.log(`from update `)
                 if(requestObj.insertedId)
-            data= await pool.query(`update tlcsalesforce.integration_log__c set status__c = '${requestObj.status}', response__c = '${requestObj.response}', retrial_count__c = (retrial_count__c + 1) where id = ${requestObj.insertedId}`)    
+            data= await pool.query(`update tlcsalesforce.integration_log__c set status__c = '${requestObj.status}', response__c = '${requestObj.response}' where id = ${requestObj.insertedId}`)    
         }
         return insertedId ;
     }catch(e){
@@ -444,6 +477,16 @@ let updateLedger = async(client_id, client_secret  , member_id , current_name, n
     }catch(e)
     {
         return e ;
+    }
+}
+
+let getIntegrationLogSFID = async(paymentSfid , accountSfid , requestFor)=>{
+    try{
+        console.log(`select id from tlcsalesforce.integration_log__c where account__c = '${accountSfid}' and payment__c = '${paymentSfid}' and interface_name__c = '${requestFor}'  and sfid IS NOT NULL order by id desc limit 1`)
+        let selectSFID = await pool.query(`select id from tlcsalesforce.integration_log__c where account__c = '${accountSfid}' and payment__c = '${paymentSfid}' and interface_name__c = '${requestFor}' and sfid IS NOT NULL  order by id desc limit 1`)
+        return selectSFID.rows.length ? selectSFID.rows[0].id : 0
+    }catch(e){
+        return 0;
     }
 }
 
@@ -488,7 +531,17 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
             operationType : `Update`, 
             paymentSfid : `${payment_SFID}`
         }        
-        logData = await insertUpdateIntegrationLog(requestObj)
+        let integrationLogSFID= await getIntegrationLogSFID(payment_SFID,accountSfid, 'Ledger')
+        console.log(`Integration log id = ${integrationLogSFID} ------------------------`)
+        if(integrationLogSFID > 0)
+        {
+            logData  = integrationLogSFID
+            requestObj.insertedId = logData
+            await insertUpdateIntegrationLog(requestObj)
+        }else{
+            logData = await insertUpdateIntegrationLog(requestObj)
+        }
+        updateRetrialCountById(logData)
         console.log(logData)
         let config = {
         method: 'post',
@@ -543,8 +596,8 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
         let ledgerXML = ``
         let accountSfid = ``;
         if(ledgerData.length ){
-            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            // ledgerData[0].company_name ='TLC Testing'
+            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            ledgerData[0].company_name ='TLC Testing'
 
             //for certificate
             // ledgerData[0].name = 'tally1';
@@ -571,7 +624,18 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
             operationType : `Create`, 
             paymentSfid : `${paymentId}`
         }        
-        logData = await insertUpdateIntegrationLog(requestObj)
+        let integrationLogSFID= await getIntegrationLogSFID(paymentId,accountSfid , 'Ledger')
+        console.log(`Integration log id = ${integrationLogSFID} ------------------------`)
+        if(integrationLogSFID > 0)
+        {
+            logData  = integrationLogSFID
+            requestObj.insertedId = logData
+            await insertUpdateIntegrationLog(requestObj)
+        }else{
+            logData = await insertUpdateIntegrationLog(requestObj)
+        }
+        updateRetrialCountById(logData)
+        console.log(logData)
         let config = {
         method: 'post',
         url: tallyApiUrl,
@@ -587,6 +651,7 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
             let data = await axios(config)
             requestObj.insertedId = logData
             requestObj.response = data.data
+            console.log(data.data)
             console.log((`${data.data}`).indexOf(`LINEERROR`))
             if((`${data.data}`).indexOf(`LINEERROR`) > -1){
                 updateAccountStatus(ledgerData[0].member_id__c,'Failure')
