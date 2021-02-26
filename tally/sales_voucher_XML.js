@@ -9,6 +9,7 @@ let getVoucherTemplate = (data)=>{
      <REQUESTDESC>
      <REPORTNAME>Vouchers</REPORTNAME> 
      <STATICVARIABLES>
+     <SVCURRENTCOMPANY>${data.company_name}</SVCURRENTCOMPANY>
      </STATICVARIABLES>
      </REQUESTDESC>
      <REQUESTDATA>
