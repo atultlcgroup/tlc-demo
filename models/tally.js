@@ -225,6 +225,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             voucherData[0].promocodeAmt = voucherData[0].amount__c - voucherData[0].net_amount__c;
             let taxPerc = await findTax( voucherData[0].tax_master__c)
             console.log(taxPerc)
+            // voucherData[0].member_state = 'Manama' // to check UTGST
              if(voucherData[0].supplier_state && voucherData[0].supplier_state == voucherData[0].member_state || !voucherData[0].member_state)
             {
                 voucherData[0].CGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.CGST) / 100)): 0); 
@@ -235,7 +236,6 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             }else if(voucherData[0].supplier_state && voucherData[0].supplier_state != voucherData[0].member_state ){
                 voucherData[0].IGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.IGST) / 100)): 0)  ; 
             }
-
             //write gst calculation logic hear 
             // voucherData[0].IGST = 100;
             // voucherData[0].CGST = 24;
@@ -359,17 +359,21 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             if(!certificateData[0].member_state)
             certificateData[0].member_state= certificateData[0].account_billingstate
             let taxPerc = await findTax( certificateData[0].tax_master__c)
-
-             if(certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state || !certificateData[0].member_state)
+            // certificateData[0].member_state = 'Delhi'   to check UTGST
+            console.log(certificateData[0].supplier_state ,  certificateData[0].member_state )       
+            if(certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state || !certificateData[0].member_state)
             {
+                console.log(`------------------------------------1`)
                 CGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.CGST) / 100)): 0); 
                if(certificateData[0].is_union_territory__c && certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state)
                UTGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.UTGST) / 100)): 0);  
                 else
                 SGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.SGST) / 100)) :0);
             }else if(certificateData[0].supplier_state && certificateData[0].supplier_state != certificateData[0].member_state){
+                console.log(`------------------------------------2`)
                 IGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.IGST) / 100)): 0); 
             }
+            console.log(CGST , UTGST , SGST , IGST)        
             for(let d of certificateData){
                 // d.name= 'tally1'
                 // d.member_id__c = '3258770'
@@ -388,6 +392,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].company_name = certificateData[0].supplier_company || 'TLC Testing'
             certificateData[0].company_name = 'TLC Testing'
             ecash_value = await getEcash(paymentId);
+            
     
             // ecash_value =120
             certificateData[0].e_cash =  ecash_value ? ecash_value : 0;
