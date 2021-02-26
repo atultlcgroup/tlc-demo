@@ -10,8 +10,27 @@ let voucherTemplate = require('../tally/sales_voucher_XML')
 let certificateTemplate = require('../tally/certificate_with_e_cash_XML')
 const tallyMaximumRetrialCount = process.env.TALLY_MAXIMUM_RETRIAL_COUNT || 5;
 
+const allowedProgramUniqueIdentifiers = process.env.TALLY_ALLOWED_PROGRAM_UNIQUE_IDENTIFIER || ''
 const axios = require('axios');
 
+
+
+let checkForAllowedProgram = async(paymentId, transactionType)=>{
+    try{
+    console.log(`Funtion : checkForAllowedProgram req: ${paymentId}, ${transactionType}`)
+        let result = ``   
+        let data = []
+        if(['SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew'].includes(transactionType))
+            data = await gerReuiredDetailsForVoucher(`${paymentId}`)
+           if(transactionType == 'Certificates-Buy')
+            data = await gerReuiredDetailsForCertificate(`${paymentId}`)
+                if(data.length && allowedProgramUniqueIdentifiers.indexOf(data[0].unique_identifier__c )> -1)
+                    result = 'Valid Program'
+        return result;
+    }catch(e){
+      return ``
+    }
+}
 
 let convertDateFormat = (date1) => {
     if (!date1)
@@ -109,6 +128,12 @@ let tally = (client_id, client_secret , paymentId)=>{
             console.log(`Transaction type `)
             console.log(getTransactionType)
             if(getTransactionType){
+                //check for program unique identifier
+                let isProgramAllowed = await checkForAllowedProgram(paymentId , getTransactionType)
+                if(!isProgramAllowed){
+                    console.log(`Invalid Program!!`)
+                    return
+                }
                 console.log(`create ledger`)
                 let createLedger = await MuleApiCallCreateLedger(client_id, client_secret , paymentId )
                     if(['SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew'].includes(getTransactionType)){
@@ -149,6 +174,12 @@ let tallyNotify = (client_id, client_secret , paymentId)=>{
             console.log(`Transaction type `)
             console.log(getTransactionType)
             if(getTransactionType){
+                   //check for program unique identifier
+                   let isProgramAllowed = await checkForAllowedProgram(paymentId , getTransactionType)
+                   if(!isProgramAllowed){
+                       console.log(`Invalid Program!!`)
+                       return
+                   }
                 console.log(`create ledger`)
                 let createLedger = await MuleApiCallCreateLedger(client_id, client_secret , paymentId )
                     if(['SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew'].includes(getTransactionType)){
@@ -190,18 +221,18 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             voucherData[0].CGST =0;
             voucherData[0].IGST = 0;
             voucherData[0].SGST = 0;
-            voucherData[0].UGST = 0;
+            voucherData[0].UTGST = 0;
             voucherData[0].promocodeAmt = voucherData[0].amount__c - voucherData[0].net_amount__c;
             let taxPerc = await findTax( voucherData[0].tax_master__c)
             console.log(taxPerc)
-            if(voucherData[0].is_union_territory__c){
-                voucherData[0].UGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.UGST) / 100)): 0)  ; 
-            }
-            else if(voucherData[0].supplier_state && voucherData[0].supplier_state == voucherData[0].member_state)
+             if(voucherData[0].supplier_state && voucherData[0].supplier_state == voucherData[0].member_state || !voucherData[0].member_state)
             {
                 voucherData[0].CGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.CGST) / 100)): 0); 
+                if(voucherData[0].is_union_territory__c && voucherData[0].supplier_state && voucherData[0].supplier_state == voucherData[0].member_state)
+                voucherData[0].UTGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.UTGST) / 100)): 0)  ; 
+                else
                 voucherData[0].SGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.SGST) / 100)) :0);
-            }else{
+            }else if(voucherData[0].supplier_state && voucherData[0].supplier_state != voucherData[0].member_state ){
                 voucherData[0].IGST = (voucherData[0].net_amount__c ? (((voucherData[0].net_amount__c * taxPerc.IGST) / 100)): 0)  ; 
             }
 
@@ -217,7 +248,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             // }
             accountSfid = voucherData[0].account_sfid
             voucherData[0].company_name = voucherData.supplier_company || 'TLC Testing'
-            voucherData[0].grand_total__c =voucherData[0].CGST + voucherData[0].IGST + voucherData[0].SGST +voucherData[0].net_amount__c + voucherData[0].UGST;
+            voucherData[0].grand_total__c =voucherData[0].CGST + voucherData[0].IGST + voucherData[0].SGST +voucherData[0].net_amount__c + voucherData[0].UTGST;
              // for voucher
             // voucherData[0].name = 'voucher1';
             // voucherData[0].member_id__c = '3258'
@@ -322,21 +353,21 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
         let IGST = 0;
         let CGST = 0;
         let SGST = 0;
-        let UGST = 0;
+        let UTGST = 0;
         let ecash_value =0
         if(certificateData.length ){
             if(!certificateData[0].member_state)
             certificateData[0].member_state= certificateData[0].account_billingstate
             let taxPerc = await findTax( certificateData[0].tax_master__c)
 
-            if(certificateData[0].is_union_territory__c){
-                UGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.UGST) / 100)): 0);  
-            }
-            else if(certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state)
+             if(certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state || !certificateData[0].member_state)
             {
                 CGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.CGST) / 100)): 0); 
+               if(certificateData[0].is_union_territory__c && certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state)
+               UTGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.UTGST) / 100)): 0);  
+                else
                 SGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.SGST) / 100)) :0);
-            }else{
+            }else if(certificateData[0].supplier_state && certificateData[0].supplier_state != certificateData[0].member_state){
                 IGST += (certificateData[0].net_amount__c ? (((certificateData[0].net_amount__c * taxPerc.IGST) / 100)): 0); 
             }
             for(let d of certificateData){
@@ -352,7 +383,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].IGST = IGST;
             certificateData[0].SGST = SGST;
             certificateData[0].CGST = CGST;
-            certificateData[0].UGST = UGST;
+            certificateData[0].UTGST = UTGST;
             certificateData[0].createddate = (convertDateFormat(certificateData[0].createddate)) 
             certificateData[0].company_name = certificateData[0].supplier_company || 'TLC Testing'
             certificateData[0].company_name = 'TLC Testing'
@@ -360,7 +391,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
     
             // ecash_value =120
             certificateData[0].e_cash =  ecash_value ? ecash_value : 0;
-            certificateData[0].grand_total__c = certificateData[0].IGST  + certificateData[0].CGST + certificateData[0].SGST + certificateData[0].net_amount__c - certificateData[0].e_cash + certificateData[0].UGST 
+            certificateData[0].grand_total__c = certificateData[0].IGST  + certificateData[0].CGST + certificateData[0].SGST + certificateData[0].net_amount__c - certificateData[0].e_cash + certificateData[0].UTGST 
             if(certificateData[0].amount__c)
             certificateData[0].net_amount__c  = certificateData[0].amount__c
             console.log(certificateData)
@@ -459,8 +490,12 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
                 insertedId = data.rows[0].id 
             }else{
                 console.log(`from update `)
-                if(requestObj.insertedId)
-            data= await pool.query(`update tlcsalesforce.integration_log__c set status__c = '${requestObj.status}', response__c = '${requestObj.response}' where id = ${requestObj.insertedId}`)    
+                if(requestObj.insertedId){
+                    if(requestObj.request)
+                    data= await pool.query(`update tlcsalesforce.integration_log__c set status__c = '${requestObj.status}', response__c = '${requestObj.response}',request__c = '${requestObj.request}'  where id = ${requestObj.insertedId}`)    
+                    else
+                    data= await pool.query(`update tlcsalesforce.integration_log__c set status__c = '${requestObj.status}', response__c = '${requestObj.response}' where id = ${requestObj.insertedId}`)    
+                }
         }
         return insertedId ;
     }catch(e){
@@ -470,10 +505,34 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
 }
 
 
+let getCompaniesByMemberId = async(member_id)=>{
+    try{
+        let data = await pool.query(` 	   select distinct Supplier_Details__c.name supplier_company from tlcsalesforce.account inner join tlcsalesforce.membership__c on 
+        membership__c.member__c = account.sfid inner join tlcsalesforce.membershiptype__c 
+        on membershiptype__c.sfid = membership__c.customer_set__c 
+           inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+        where member_id__c = '${member_id}' 
+        union select distinct Supplier_Details__c.name supplier_company from tlcsalesforce.account inner join tlcsalesforce.membership__c on 
+        membership__c.member__c = account.sfid inner join tlcsalesforce.membershiptype__c 
+        on membershiptype__c.sfid = membership__c.customer_set__c 
+        inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  =membershiptype__c.sfid 
+        inner join tlcsalesforce.membership_offers__c on membership_offers__c.customer_set_offer__c = membershiptypeoffer__c.sfid 
+           inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+        where member_id__c = '${member_id}';`)
+        return data.rows.length ? data.rows : []
+    }catch(e){
+        console.log(e)
+        return []
+    }
+}
+
 let updateLedger = async(client_id, client_secret  , member_id , current_name, new_name)=>{
     try{
-        let data = await MuleApiCallCreateLedgerUpdate(client_id, client_secret  , member_id , current_name, new_name)   
-        return data ;
+        let companiesBymemberId = await getCompaniesByMemberId(member_id)
+        companiesBymemberId.map(d=>MuleApiCallCreateLedgerUpdate(client_id, client_secret  , member_id , current_name, new_name , d.supplier_company))
+        return `Success` ;
     }catch(e)
     {
         return e ;
@@ -490,17 +549,19 @@ let getIntegrationLogSFID = async(paymentSfid , accountSfid , requestFor)=>{
     }
 }
 
-let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id , current_name, new_name)=>{
+let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id , current_name, new_name , company_name )=>{
     return new Promise(async(resolve,reject)=>{
         try{
-            let logData = 0
-        let ledgerData = await  gerReuiredDetailsForLedgerUpdate(member_id);
+        console.log(`-----------------------------Company Name = ${company_name}`)
+        let logData = 0
+        let ledgerData = await  gerReuiredDetailsForLedgerUpdate(member_id ,company_name);
         let ledgerXML = ``
         let accountSfid = ``;
         let payment_SFID = ``
         if(ledgerData.length ){
-            // ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
-            ledgerData[0].company_name ='TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            console.log(ledgerData[0].company_name)
+            // ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
             // ledgerData[0].member_id__c = '3258770'
@@ -553,10 +614,12 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
         },
         data : ledgerXML
         };
+     
         try{
             let data = await axios(config)
             requestObj.insertedId = logData
             requestObj.response = data.data
+            console.log(data.data)
             console.log((`${data.data}`).indexOf(`LINEERROR`))
     
             if((`${data.data}`).indexOf(`LINEERROR`) > -1){
@@ -698,7 +761,7 @@ let tallyApis=(sfid)=>{
 let findTax= async(tax_master_sfid)=>{
     try {
         let data = await pool.query(`select tax_breakup__c.name tax_name,tax_breakup__c.break_up__c breakup_perc__c  from tlcsalesforce.tax_master__c inner join tlcsalesforce.tax_breakup__c on tax_master__c.sfid = tax_breakup__c.tax_master__c where tax_master__c.sfid = '${tax_master_sfid}'`)
-        let result = data.rows ? data.rows :[  { tax_name: 'CGST', breakup_perc__c: 9 },{ tax_name: 'SGST', breakup_perc__c: 9 },{ tax_name: 'IGST', breakup_perc__c: 18 }, { tax_name: 'UGST', breakup_perc__c: 18 }]
+        let result = data.rows ? data.rows :[  { tax_name: 'CGST', breakup_perc__c: 9 },{ tax_name: 'SGST', breakup_perc__c: 9 },{ tax_name: 'IGST', breakup_perc__c: 18 }, { tax_name: 'UTGST', breakup_perc__c: 18 }]
         let finalResult = {}
         for(let [key, value]of Object.entries(result)){
             finalResult[value.tax_name] = value.breakup_perc__c
@@ -727,8 +790,9 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     }
  }
 
- let gerReuiredDetailsForLedgerUpdate = async(member_id)=>{
+ let gerReuiredDetailsForLedgerUpdate = async(member_id , company_name)=>{
     try{
+
       let qry = await pool.query(`select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
       from  tlcsalesforce.account
       left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
@@ -736,8 +800,18 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
       left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
-      where  account.member_id__c = '${member_id}' 
-       and payment__c.payment_status__c = 'CONSUMED'  limit 1
+      where  account.member_id__c = '${member_id}' and Supplier_Details__c.name = '${company_name}'
+       and payment__c.payment_status__c = 'CONSUMED' union 
+       select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      from  tlcsalesforce.account
+      left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
+      left join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+      left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+      inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  =membershiptype__c.sfid 
+      inner join tlcsalesforce.membership_offers__c on membership_offers__c.customer_set_offer__c = membershiptypeoffer__c.sfid 
+    inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+     left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      where  account.member_id__c = '${member_id}' and Supplier_Details__c.name = '${company_name}' limit 1
        `)  
       return qry ? qry.rows : [] 
     }catch(e){
@@ -755,18 +829,18 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
         // where payment__c.sfid = '${payment_SFID}' 
         //  and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
         //  `)
-      let qry = await pool.query(`select   membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select   program__c.unique_identifier__c, membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
       inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+      inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
 	  left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
 	  where payment__c.sfid = '${payment_SFID}' 
        and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
        
        `)  
-       console.log(qry.rows)
       return qry ? qry.rows : [] 
     }catch(e){
         return []
@@ -775,13 +849,14 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
 
  let gerReuiredDetailsForCertificate = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select  payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select   program__c.unique_identifier__c,payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
       from tlcsalesforce.payment__c
 	  inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
 	  inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.sfid = payment_line_item__c.membership_type_offer__c
       --inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       inner join tlcsalesforce.membershiptype__c on membershiptypeoffer__c.membership_type__c=membershiptype__c.sfid
+      inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
       where 
