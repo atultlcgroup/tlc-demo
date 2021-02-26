@@ -104,7 +104,8 @@ let updateRetrialCountById = async(integrationID)=>{
 
 let scheduleTallyTasks = async()=>{
     try{
-        let data = await pool.query(`select payment__c,sfid  from tlcsalesforce.integration_log__c where retrial_count__c < ${tallyMaximumRetrialCount} and status__c NOT IN ('Success')`)
+        console.log()
+        let data = await pool.query(`select payment__c,sfid  from tlcsalesforce.integration_log__c where retrial_count__c < ${tallyMaximumRetrialCount} and status__c NOT IN ('Success') and sfid is not null`)
         if(data.rows.length){
             data.rows.map(d=>{
                 tally(tallyApiClentId,tallyApiClientSecret,d.payment__c)
