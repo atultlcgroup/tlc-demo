@@ -17,6 +17,7 @@ const axios = require('axios');
 
 let checkForAllowedProgram = async(paymentId, transactionType)=>{
     try{
+        console.log(paymentId, transactionType)
     console.log(`Funtion : checkForAllowedProgram req: ${paymentId}, ${transactionType}`)
         let result = ``   
         let data = []
@@ -24,6 +25,7 @@ let checkForAllowedProgram = async(paymentId, transactionType)=>{
             data = await gerReuiredDetailsForVoucher(`${paymentId}`)
            if(transactionType == 'Certificates-Buy')
             data = await gerReuiredDetailsForCertificate(`${paymentId}`)
+            console.log(data)
                 if(data.length && allowedProgramUniqueIdentifiers.indexOf(data[0].unique_identifier__c )> -1)
                     result = 'Valid Program'
         return result;
