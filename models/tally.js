@@ -67,7 +67,7 @@ let updateAccountStatus = async(account_id, status )=>{
 
 let getPaymentDetails= async(paymentId)=>{
     try{
-        let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and tally_status__c NOT IN('Processed')`)
+        let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`)
         // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' `)
 
         return  data.rows ? data.rows[0].transaction_type__c : `` 
@@ -79,6 +79,7 @@ let getPaymentDetails= async(paymentId)=>{
 let getPaymentDetailsNotify= async(paymentId)=>{
     try{
         let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and tally_status__c is NULL`)
+        // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}'`)
         return  data.rows ? data.rows[0].transaction_type__c : `` 
     }catch(e){
         return ``;
@@ -106,7 +107,7 @@ let updateRetrialCountById = async(integrationID)=>{
 
 let scheduleTallyTasks = async()=>{
     try{
-        console.log()
+        console.log(`select payment__c,sfid  from tlcsalesforce.integration_log__c where retrial_count__c < ${tallyMaximumRetrialCount} and status__c NOT IN ('Success') and sfid is not null`)
         let data = await pool.query(`select payment__c,sfid  from tlcsalesforce.integration_log__c where retrial_count__c < ${tallyMaximumRetrialCount} and status__c NOT IN ('Success') and sfid is not null`)
         if(data.rows.length){
             data.rows.map(d=>{

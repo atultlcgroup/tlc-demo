@@ -34,7 +34,7 @@ let getVoucherTemplate = (data)=>{
      <VOUCHERTYPENAME>Sales</VOUCHERTYPENAME>
      <REFERENCE>Inv 2</REFERENCE>
      <VOUCHERNUMBER>Inv 2</VOUCHERNUMBER> 
-     <BASICBASEPARTYNAME>$${data.name}-${data.member_id__c}</BASICBASEPARTYNAME> 
+     <BASICBASEPARTYNAME>${data.name}-${data.member_id__c}</BASICBASEPARTYNAME> 
      <CSTFORMISSUETYPE/>
      <CSTFORMRECVTYPE/>
      <FBTPAYMENTTYPE>Default</FBTPAYMENTTYPE> 
