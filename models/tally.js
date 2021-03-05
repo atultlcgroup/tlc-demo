@@ -901,6 +901,9 @@ let createLedger = (payment_SFID)=>{
     })
 }
 
+let previousPaymentId = ``
+let previousPaymentStatus  = ``
+
 let postgresNotifyEvent = async()=>{
  try{
     client.connect((err, client)=>{
@@ -909,9 +912,18 @@ let postgresNotifyEvent = async()=>{
         }
         client.on('notification', function(msg) {
             console.log(`-----------------------11`)
-            console.log(msg.payload)
-            tallyNotify( tallyApiClentId ,tallyApiClientSecret,msg.payload)
-            console.log(msg.payload);
+            // console.log(msg)
+            let notificationData =  JSON.parse(msg.payload)
+            if(previousPaymentId == notificationData['sfid'] && previousPaymentStatus == 'CONSUMED' &&   notificationData['payment_status__c'] == 'CONSUMED'){
+                console.log(`previous payment id = ${previousPaymentId}  , previous_payment_status = ${previousPaymentStatus},  new paymentid = ${notificationData['sfid']} and payment_status = ${notificationData['payment_status__c']} ---- 1`)
+                // tallyNotify( tallyApiClentId ,tallyApiClientSecret,msg.payload.sfid)
+            }else{
+                tallyNotify( tallyApiClentId ,tallyApiClientSecret,notificationData['sfid'])
+                console.log(`previous payment id = ${previousPaymentId}  , previous_payment_status = ${previousPaymentStatus},  new paymentid = ${notificationData['sfid']} and payment_status = ${notificationData['payment_status__c']} } ----2`)
+            }
+            previousPaymentId = notificationData['sfid'];
+            previousPaymentStatus = notificationData['payment_status__c']
+            // console.log(msg.payload);
         });
         client.on('error', function(error) {
           console.error('This never even runs:', error);

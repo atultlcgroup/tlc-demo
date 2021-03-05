@@ -5,7 +5,7 @@ let tally = async(req,res)=>{
             res.status(401).send({code: 401 , message : 'Invalid inputs!'})
         }
         let tally = TallyModel.tally(req.headers.client_id , req.headers.client_secret , req.body.payment_id)
-        res.status(200).send({code :200 , message:'Success'})
+        res.status(200).send({code :200 , message:'Success', data : tally})
     }catch(e){
         console.log(`${e}`)
         res.status(e.code).send(e.data)
