@@ -46,8 +46,9 @@ let updatePaymentStatus = async(payment_id, status )=>{
     try {
         console.log(`select tally_status__c from tlcsalesforce.payment__c where sfid = '${payment_id}'`)
         let paymentData = await pool.query(`select tally_status__c from tlcsalesforce.payment__c where sfid = '${payment_id}'`)
-        if(paymentData.rows && !paymentData.rows[0].tally_status__c)
+        if(paymentData.rows)
         {
+
             console.log(`update tlcsalesforce.payment__c set tally_status__c = '${status}' where sfid = '${payment_id}' `)
             payment_id ? await pool.query(`update tlcsalesforce.payment__c set tally_status__c = '${status}' where sfid = '${payment_id}' `) : ''    
         }
@@ -67,8 +68,8 @@ let updateAccountStatus = async(account_id, status )=>{
 
 let getPaymentDetails= async(paymentId)=>{
     try{
-        // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`)
-        let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' `)
+        let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`)
+        // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' `)
 
         return  data.rows ? data.rows[0].transaction_type__c : `` 
     }catch(e){
@@ -187,13 +188,16 @@ let tallyNotify = (client_id, client_secret , paymentId)=>{
                        return
                    }
                 console.log(`create ledger`)
-                let createLedger = await MuleApiCallCreateLedger(client_id, client_secret , paymentId )
+                let createLedger = ``
                     if(['SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew'].includes(getTransactionType)){
                             // create voucher 
+                            createLedger =await MuleApiCallCreateLedger(client_id, client_secret , paymentId  , 'M')
+
                             let createVoucher = await MuleApiCallCreateVoucher(client_id, client_secret , paymentId , createLedger.insertedId )
                             console.log(createVoucher)
                     }if(getTransactionType == 'Certificates-Buy'){
                         // create certificate 
+                        createLedger =await MuleApiCallCreateLedger(client_id, client_secret , paymentId ,'C')
                         console.log(`from certificate creation`)
                         let createCertificate = await MuleApiCallCreateCertificate(client_id, client_secret , paymentId  , createLedger.insertedId)
                         resolve(createCertificate)
@@ -305,7 +309,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             requestObj.insertedId = logData
             requestObj.response = data.data
             if((`${data.data}`).indexOf(`LINEERROR`) > -1){
-                updatePaymentStatus(paymentId, 'Failure')
+                updatePaymentStatus(paymentId, 'Not-Processed')
                 requestObj.status = 'Failure'
             }
             else{
@@ -450,7 +454,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             console.log(data.data)
             console.log(`--------------`)
             if((`${data.data}`).indexOf(`LINEERROR`) > -1){
-                updatePaymentStatus(paymentId,'Failure')
+                updatePaymentStatus(paymentId,'Not-Processed')
                 requestObj.status = 'Failure'
             }
             else{
@@ -666,13 +670,11 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
     return new Promise(async(resolve,reject)=>{
         try{
             let logData = 0
-
         let ledgerData = ``
         if(type == 'M')
         ledgerData =await  gerReuiredDetailsForLedger(paymentId);
         if(type == 'C')
         ledgerData = await  gerReuiredDetailsForLedgerC(paymentId);
-
         let ledgerXML = ``
         let accountSfid = ``;
         if(ledgerData.length ){
@@ -729,7 +731,6 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
         },
         data : ledgerXML
         };
-     
         try{
             let data = await axios(config)
             requestObj.insertedId = logData
@@ -894,7 +895,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
 
  let gerReuiredDetailsForCertificate = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select  distinct  program__c.unique_identifier__c,payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select  distinct  program__c.unique_identifier__c,payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,payment__c.membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
       from tlcsalesforce.payment__c
 	  inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
