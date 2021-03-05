@@ -67,8 +67,8 @@ let updateAccountStatus = async(account_id, status )=>{
 
 let getPaymentDetails= async(paymentId)=>{
     try{
-        let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`)
-        // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' `)
+        // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`)
+        let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' `)
 
         return  data.rows ? data.rows[0].transaction_type__c : `` 
     }catch(e){
@@ -139,13 +139,15 @@ let tally = (client_id, client_secret , paymentId)=>{
                     return
                 }
                 console.log(`create ledger`)
-                let createLedger = await MuleApiCallCreateLedger(client_id, client_secret , paymentId )
+                let createLedger = ``;
                     if(['SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew'].includes(getTransactionType)){
                             // create voucher 
+                            createLedger =await MuleApiCallCreateLedger(client_id, client_secret , paymentId , 'M')
                             let createVoucher = await MuleApiCallCreateVoucher(client_id, client_secret , paymentId , createLedger.insertedId )
                             console.log(createVoucher)
                     }if(getTransactionType == 'Certificates-Buy'){
                         // create certificate 
+                        createLedger =await MuleApiCallCreateLedger(client_id, client_secret , paymentId , 'C')
                         console.log(`from certificate creation`)
                         let createCertificate = await MuleApiCallCreateCertificate(client_id, client_secret , paymentId  , createLedger.insertedId)
                         resolve(createCertificate)
@@ -660,11 +662,17 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
 }
 
 
-let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId)=>{
+let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type)=>{
     return new Promise(async(resolve,reject)=>{
         try{
             let logData = 0
-        let ledgerData = await  gerReuiredDetailsForLedger(paymentId);
+
+        let ledgerData = ``
+        if(type == 'M')
+        ledgerData =await  gerReuiredDetailsForLedger(paymentId);
+        if(type == 'C')
+        ledgerData = await  gerReuiredDetailsForLedgerC(paymentId);
+
         let ledgerXML = ``
         let accountSfid = ``;
         if(ledgerData.length ){
@@ -802,6 +810,31 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     }
  }
 
+
+
+ let gerReuiredDetailsForLedgerC = async(payment_SFID)=>{
+    try{
+      let qry = await pool.query(`select distinct payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      from tlcsalesforce.payment__c
+    
+	  inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
+      inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
+	  inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.sfid = payment_line_item__c.membership_type_offer__c
+      --inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+      inner join tlcsalesforce.membershiptype__c on membershiptypeoffer__c.membership_type__c=membershiptype__c.sfid
+      inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
+      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      where 
+      payment__c.payment_status__c = 'CONSUMED' and 
+      payment__c.transaction_type__c in ('Certificates-Buy') and 
+      payment__c.sfid = '${payment_SFID}' 
+       `)  
+      return qry ? qry.rows : [] 
+    }catch(e){
+        return []
+    }
+ }
  let gerReuiredDetailsForLedgerUpdate = async(member_id , company_name)=>{
     try{
 
