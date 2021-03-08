@@ -498,7 +498,7 @@ let headerForPageCertificate=`
         <tbody>
             <tr >
             <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues.tlc_logo__c}' alt=""  height=60 width=80></img></td>
-                <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Sales report-${programName}</td>
+                <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Sales Report-${programName}</td>
                 <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${propertyName} </td>
             </tr>
         </tbody>

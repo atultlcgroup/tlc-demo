@@ -396,6 +396,7 @@ let DSRReport = async()=>{
         try{
             let dataObj = await getEPRSfid();
             console.log(dataObj)
+            // return
             let ind = 0;
              for(let e of dataObj.emailArr){
 
@@ -403,9 +404,8 @@ let DSRReport = async()=>{
             let emails = e;
             // req.property_sfid = 'a0Y1y000000EFBNEA4';
    
-            let DSRRecords=await getDSRReport(dataObj.propertyArr[ind]);
-            let DSRCertificateIssued =await getCertificateIssuedByPropertyId(dataObj.propertyArr[ind] , ``)
-            
+            let DSRRecords=await getDSRReport(dataObj.propertyArr[ind] , dataObj.programArr[ind] );
+            let DSRCertificateIssued =await getCertificateIssuedByPropertyId(dataObj.propertyArr[ind] , ``, dataObj.programArr[ind])
             console.log(`DSRCertificateIssued`)
              console.log(DSRCertificateIssued)
             //  let DSRRecords=await getDSRReport('a0Y1y000000EFBNEA4');
@@ -418,15 +418,16 @@ let DSRReport = async()=>{
                     console.log(`brand id = ${brandId}`)
                     let dynamicValues=await getDynamicValues(brandId);
                        if(dynamicValues.length){
-                           if(DSRRecords[0].program_name  == 'Club Marriott Old'){
-                            DSRRecords[0].program_name   =  'Club Marriott'
-                           }
+                           if(DSRRecords[0].program_unique_identifier == 'TLC_MAR_CLMOld')
+                           DSRRecords[0].program_name = 'Club Marriott';
+                           if(DSRRecords[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
+                            DSRRecords[0].program_name = 'Gourmet Club';
                       //get dsr file from SFDC
                       let sfdcFiles = await sfdcApiCall(dataObj.propertyArr[ind], convertDate())
                       console.log(`from drs attachment`)
                       let pdfFile = await generatePdf.generateDSRPDF(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       let excelFile = await generateExcel.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
-                      console.log(`------------------------------------------------------------`)
+                      console.log(`------------------------------------------------------------`) 
                         sendMail.sendDSRReport(`${pdfFile}`,`${excelFile}`,sfdcFiles,'Daily Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
                        }else{
@@ -453,8 +454,8 @@ let DSRReport = async()=>{
           let emails1 = e;
           // req.property_sfid = 'a0Y1y000000EFBNEA4';
           console.log("getting DSR report");
-           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1]);
-           let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1])
+           let DSRRecords1=await getDSRReportCS(dataObj1.customerSetArr[ind1] , dataObj1.programArr[ind1]);
+           let DSRCertificateIssued1 =await getCertificateIssuedByPropertyId(`` , dataObj1.customerSetArr[ind1] , dataObj1.programArr[ind1])
 
         //   let DSRRecords1=await getDSRReportCS('a0J1y000000u9BJEAY');
               if(DSRRecords1.length){
@@ -463,13 +464,16 @@ let DSRReport = async()=>{
             let brandId1 = await getBrandId(`` , dataObj1.customerSetArr[ind1])
             let dynamicValues1=await getDynamicValues(brandId1);
             if(dynamicValues1.length){
+                if(DSRRecords1[0].program_unique_identifier == 'TLC_MAR_CLMOld')
+                DSRRecords1[0].program_name = 'Club Marriott';
+                if(DSRRecords1[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
+                    DSRRecords1[0].program_name = 'Gourmet Club';       
             // get dsr file from SFDC
                   let sfdcFiles1 = await sfdcApiCall(dataObj.propertyArr[ind], convertDateFormat())
                    
                   let pdfFile1 = await generatePdf.generateDSRPDF(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1); 
                   let excelFile1 = await generateExcel.generateExcel(DSRRecords1,dataObj1.customerSetArr[ind1],DSRCertificateIssued1 , dynamicValues1[0] , sfdcFiles1);
-               
-                 sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile1}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
+                  sendMail.sendDSRReport(`${pdfFile1}`,`${excelFile1}`,sfdcFiles1,'Daily Sales Report',emails1 , dynamicValues1 ,  DSRRecords1[0].program_name)
                   updateLog(insertedId1, true ,'Success', '' , pdfFile1)
                   }else{
                     updateLog(insertedId1, false ,'Error', 'Email not found!' , '' )
@@ -493,18 +497,20 @@ let DSRReport = async()=>{
 
 let getEPRSfid = async()=>{
     try{
-      let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct property__c property_sfid, payment_email_rule__c.program__c  from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let propertyArr = [];
+      let programArr = [];
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           propertyArr.push(r.property_sfid)
+          programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,propertyArr : propertyArr}
+      let resultObj = {emailArr: finalArr,propertyArr : propertyArr , programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
@@ -513,25 +519,27 @@ let getEPRSfid = async()=>{
 
 let getEPRSfidCS = async()=>{
     try{
-      let qry = `select distinct customer_set__c customer_set_sfid from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct customer_set__c customer_set_sfid, payment_email_rule__c.program__c  from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_dsr__c = true or tlc_send_email_dsr__c = true) and (property__c is  NULL or property__c ='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let customerSetArr = [];
+      let programArr = []
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           customerSetArr.push(r.customer_set_sfid)
+         programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr}
+      let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr , programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
     }
 }
 
-let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
+let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid , programSFID)=>{
     try{
     //     let qry = ` Select payment__c.createddate, account.name membername,
     //     membership__c.membership_number__c, membershiptype__c.name membershiptypename,
@@ -560,7 +568,7 @@ let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
     //    qry+=`group by payment__c.createddate, account.name,
     //     membership__c.membership_number__c, membershiptype__c.name`
     let qry = `Select  property__c.sfid property_id ,date(payment__c.createddate) createddate, payment__c.sfid payment_id, membershiptype__c.customer_set_program_level__c membershiptypename, account.name membername, membership__c,membership__c.membership_number__c
-    , STRING_AGG(membership_offers__c.offer_unique_identifier__c , ',') as certificatenumber
+    , STRING_AGG(membership_offers__c.offer_unique_identifier__c , ', ') as certificatenumber
     from tlcsalesforce.payment__c
     Inner Join tlcsalesforce.account On
     payment__c.account__c = account.sfid 
@@ -570,10 +578,10 @@ let getCertificateIssuedByPropertyId =async(property_sfid,customer_set_sfid)=>{
     left join tlcsalesforce.membership_offers__c
     On membership_offers__c.membership2__c = membership__c.sfid
     where 
-    -- (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
-   --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-  --and 
-membership__c.membership_number__c is not Null and `
+     (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+   or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+  and 
+membership__c.membership_number__c is not Null and membershiptype__c.program__c = '${programSFID}' and `
          if(property_sfid)
       qry+=` (Property__c.sfid='${property_sfid}') `
             else
@@ -592,7 +600,7 @@ membership__c.membership_number__c is not Null and `
 }
 
 
-let getDSRReport=async(property_sfid)=>{
+let getDSRReport=async(property_sfid , programSFID)=>{
     try{
         let query=await pool.query(`select account.name,membership__c.membership_number__c,payment__c.payment_for__c,
         case
@@ -617,7 +625,7 @@ let getDSRReport=async(property_sfid)=>{
         membershiptype__c.name customer_set_name,
         membershiptype__c.customer_set_program_level__c customer_set_level_name,
         payment__c.bank_name__c || ' ' || payment__c.cheque_number__c || ' ' || payment__c.createddate cheque_details
-        ,program__c.name as program_name,
+        ,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier,
         payment__c.promocode__c
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
@@ -628,15 +636,15 @@ let getDSRReport=async(property_sfid)=>{
         Inner Join tlcsalesforce.program__c
         On membershiptype__c.program__c = program__c.sfid
        where
-        (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+       (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
         
-         or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+          or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
            and
            Membership__c is not Null and Membership_Offer__c is null
           and
            (Property__c.sfid='${property_sfid}'
            --or membership__c.customer_set__c IN ('')
-            )
+            ) and program__c.sfid  = '${programSFID}'
          `)
         console.log(`hiiiSS`)
         let result = query ? query.rows : [];
@@ -674,7 +682,7 @@ let getDSRReportCS=async(customer_set_sfid)=>{
         membershiptype__c.name customer_set_name,
         membershiptype__c.customer_set_program_level__c customer_set_level_name,
         payment__c.bank_name__c || ' ' || payment__c.cheque_number__c || ' ' || payment__c.createddate cheque_details
-        ,program__c.name as program_name,
+        ,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier,
         payment__c.promocode__c
         from tlcsalesforce.payment__c
         inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
