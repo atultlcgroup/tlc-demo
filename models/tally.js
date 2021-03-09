@@ -120,9 +120,26 @@ let scheduleTallyTasks = async()=>{
         console.log(e)
     }
 }
+
+let checkProgramid = async(programId)=>{
+    try {
+        console.log(`select * from tlcsalesforce.payment__c where sfid = '${programId}'`)
+            let prodgramData = await pool.query(`select * from tlcsalesforce.payment__c where sfid = '${programId}'`)
+            return prodgramData.rows.length ? 1 : 0
+    } catch (error) {
+            return 0;
+    }
+
+}
+
 let tally = (client_id, client_secret , paymentId)=>{
     return new Promise( async (resolve,reject)=>{
         try{
+            let isValidProgramId = await checkProgramid(paymentId);
+            if(isValidProgramId == 0){
+                resolve(`Invalid paymentId!`)
+                return
+            }
             // let eventData = await postgresNotifyEvent();
             // let paymentId = `a0y1y000000NMthAAG` // for e-cash
             // let paymentId = `a0y1y000000NDwfAAG` // for voucher
@@ -137,7 +154,8 @@ let tally = (client_id, client_secret , paymentId)=>{
                 let isProgramAllowed = await checkForAllowedProgram(paymentId , getTransactionType)
                 if(!isProgramAllowed){
                     console.log(`Invalid Program!!`)
-                    return
+                     resolve(`Invalid Program!!`)
+                     return
                 }
                 console.log(`create ledger`)
                 let createLedger = ``;
@@ -157,7 +175,7 @@ let tally = (client_id, client_secret , paymentId)=>{
          
                 resolve(`Success`)    
             }else{
-                resolve(`Success`)
+                resolve(`Payment does not exist!`)
             }
              }catch(e){
             console.log(`-----------`)
@@ -520,6 +538,15 @@ let insertUpdateIntegrationLog = async(requestObj)=>{
 }
 
 
+let checkMember = async(memberId)=>{
+    try {
+       let memberDetails = await pool.query(`select * from tlcsalesforce.account where member_id__c = '${memberId}'`) 
+       return memberDetails.rows.length ? 1 : 0; 
+    } catch (error) {
+        return 0;
+    }
+}
+
 let getCompaniesByMemberId = async(member_id)=>{
     try{
         let data = await pool.query(` 	   select distinct Supplier_Details__c.name supplier_company from tlcsalesforce.account inner join tlcsalesforce.membership__c on 
@@ -545,6 +572,10 @@ let getCompaniesByMemberId = async(member_id)=>{
 
 let updateLedger = async(client_id, client_secret  , member_id , current_name, new_name)=>{
     try{
+       let isvalidMember = await  checkMember(member_id);
+        if(isvalidMember == 0){
+            return `Please provide correct memberId !`
+        }
         let companiesBymemberId = await getCompaniesByMemberId(member_id)
         companiesBymemberId.map(d=>MuleApiCallCreateLedgerUpdate(client_id, client_secret  , member_id , current_name, new_name , d.supplier_company))
         return `Success` ;
