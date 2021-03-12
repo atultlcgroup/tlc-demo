@@ -1,231 +1,137 @@
-<ENVELOPE>
-        <HEADER>
-         <TALLYREQUEST>Import Data</TALLYREQUEST>
-        </HEADER>
-        <BODY>
-         <IMPORTDATA>
-          <REQUESTDESC>
-           <REPORTNAME>All Masters</REPORTNAME>
-           <STATICVARIABLES>
-            <SVCURRENTCOMPANY>TLC RELATIOSHIP MANAGEMENT PVT LTD-CHANDIGARH</SVCURRENTCOMPANY>
-           </STATICVARIABLES>
-          </REQUESTDESC>
-          <REQUESTDATA>
-           <TALLYMESSAGE xmlns:UDF="TallyUDF">
-            <LEDGER NAME="Mrinal Tripathi-600000" Action= "Create">
-             <ADDRESS.LIST TYPE="String">
-              <ADDRESS>Uday Street</ADDRESS>
-              <ADDRESS>TELANGANA</ADDRESS>
-             </ADDRESS.LIST>
-             <MAILINGNAME.LIST TYPE="String">
-              <MAILINGNAME>Mrinal Tripathi-600000</MAILINGNAME>
-             </MAILINGNAME.LIST>
-             <OLDAUDITENTRYIDS.LIST TYPE="Number">
-              <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
-             </OLDAUDITENTRYIDS.LIST>
-             <CREATEDDATE>Fri Jun 07 2019 06:41:01 GMT+0530 (India Standard Time)</CREATEDDATE>
-             <ALTEREDON></ALTEREDON>
-             <GUID>f654a57e-d3bc-4b86-90f5-28406b2c19ec-00000182</GUID>
-             <CURRENCYNAME>INR</CURRENCYNAME>
-             <PINCODE>21345556</PINCODE>
-             <EMAIL>null</EMAIL>
-             <PRIORSTATENAME>TELANGANA</PRIORSTATENAME>
-             <COUNTRYNAME>India</COUNTRYNAME>
-             <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
-             <PARENT>Sundry Debtors</PARENT>
-             <CREATEDBY></CREATEDBY>
-             <ALTEREDBY></ALTEREDBY>
-             <TAXCLASSIFICATIONNAME/>
-             <TAXTYPE>Others</TAXTYPE>
-             <COUNTRYOFRESIDENCE>TELANGANA</COUNTRYOFRESIDENCE>
-             <DESCRIPTION></DESCRIPTION>
-             <LEDGERCONTACT>null</LEDGERCONTACT>
-             <LEDGERMOBILE>null</LEDGERMOBILE>
-             <GSTTYPE/>
-             <APPROPRIATEFOR/>
-             <PARTYGSTIN>null</PARTYGSTIN>
-             <LEDSTATENAME>TELANGANA</LEDSTATENAME>
-             <EXCISELEDGERCLASSIFICATION/>
-             <EXCISEDUTYTYPE/>
-             <EXCISENATUREOFPURCHASE/>
-             <LEDGERFBTCATEGORY/>
-             <ISBILLWISEON>Yes</ISBILLWISEON>
-             <ISCOSTCENTRESON>No</ISCOSTCENTRESON>
-             <ISINTERESTON>No</ISINTERESTON>
-             <ALLOWINMOBILE>No</ALLOWINMOBILE>
-             <ISCOSTTRACKINGON>No</ISCOSTTRACKINGON>
-             <ISBENEFICIARYCODEON>No</ISBENEFICIARYCODEON>
-             <PLASINCOMEEXPENSE>No</PLASINCOMEEXPENSE>
-             <ISUPDATINGTARGETID>No</ISUPDATINGTARGETID>
-             <ASORIGINAL>Yes</ASORIGINAL>
-             <ISCONDENSED>No</ISCONDENSED>
-             <AFFECTSSTOCK>No</AFFECTSSTOCK>
-             <ISRATEINCLUSIVEVAT>No</ISRATEINCLUSIVEVAT>
-             <FORPAYROLL>No</FORPAYROLL>
-             <ISABCENABLED>No</ISABCENABLED>
-             <ISCREDITDAYSCHKON>No</ISCREDITDAYSCHKON>
-             <INTERESTONBILLWISE>No</INTERESTONBILLWISE>
-             <OVERRIDEINTEREST>No</OVERRIDEINTEREST>
-             <OVERRIDEADVINTEREST>No</OVERRIDEADVINTEREST>
-             <USEFORVAT>No</USEFORVAT>
-             <IGNORETDSEXEMPT>No</IGNORETDSEXEMPT>
-             <ISTCSAPPLICABLE>No</ISTCSAPPLICABLE>
-             <ISTDSAPPLICABLE>No</ISTDSAPPLICABLE>
-             <ISFBTAPPLICABLE>No</ISFBTAPPLICABLE>
-             <ISGSTAPPLICABLE>No</ISGSTAPPLICABLE>
-             <ISEXCISEAPPLICABLE>No</ISEXCISEAPPLICABLE>
-             <ISTDSEXPENSE>No</ISTDSEXPENSE>
-             <ISEDLIAPPLICABLE>No</ISEDLIAPPLICABLE>
-             <ISRELATEDPARTY>No</ISRELATEDPARTY>
-             <USEFORESIELIGIBILITY>No</USEFORESIELIGIBILITY>
-             <ISINTERESTINCLLASTDAY>No</ISINTERESTINCLLASTDAY>
-             <APPROPRIATETAXVALUE>No</APPROPRIATETAXVALUE>
-             <ISBEHAVEASDUTY>No</ISBEHAVEASDUTY>
-             <INTERESTINCLDAYOFADDITION>No</INTERESTINCLDAYOFADDITION>
-             <INTERESTINCLDAYOFDEDUCTION>No</INTERESTINCLDAYOFDEDUCTION>
-             <ISOTHTERRITORYASSESSEE>No</ISOTHTERRITORYASSESSEE>
-             <OVERRIDECREDITLIMIT>No</OVERRIDECREDITLIMIT>
-             <ISAGAINSTFORMC>No</ISAGAINSTFORMC>
-             <ISCHEQUEPRINTINGENABLED>Yes</ISCHEQUEPRINTINGENABLED>
-             <ISPAYUPLOAD>No</ISPAYUPLOAD>
-             <ISPAYBATCHONLYSAL>No</ISPAYBATCHONLYSAL>
-             <ISBNFCODESUPPORTED>No</ISBNFCODESUPPORTED>
-             <ALLOWEXPORTWITHERRORS>No</ALLOWEXPORTWITHERRORS>
-             <CONSIDERPURCHASEFOREXPORT>No</CONSIDERPURCHASEFOREXPORT>
-             <ISTRANSPORTER>No</ISTRANSPORTER>
-             <USEFORNOTIONALITC>No</USEFORNOTIONALITC>
-             <ISECOMMOPERATOR>No</ISECOMMOPERATOR>
-             <SHOWINPAYSLIP>No</SHOWINPAYSLIP>
-             <USEFORGRATUITY>No</USEFORGRATUITY>
-             <ISTDSPROJECTED>No</ISTDSPROJECTED>
-             <FORSERVICETAX>No</FORSERVICETAX>
-             <ISINPUTCREDIT>No</ISINPUTCREDIT>
-             <ISEXEMPTED>No</ISEXEMPTED>
-             <ISABATEMENTAPPLICABLE>No</ISABATEMENTAPPLICABLE>
-             <ISSTXPARTY>No</ISSTXPARTY>
-             <ISSTXNONREALIZEDTYPE>No</ISSTXNONREALIZEDTYPE>
-             <ISUSEDFORCVD>No</ISUSEDFORCVD>
-             <LEDBELONGSTONONTAXABLE>No</LEDBELONGSTONONTAXABLE>
-             <ISEXCISEMERCHANTEXPORTER>No</ISEXCISEMERCHANTEXPORTER>
-             <ISPARTYEXEMPTED>No</ISPARTYEXEMPTED>
-             <ISSEZPARTY>No</ISSEZPARTY>
-             <TDSDEDUCTEEISSPECIALRATE>No</TDSDEDUCTEEISSPECIALRATE>
-             <ISECHEQUESUPPORTED>No</ISECHEQUESUPPORTED>
-             <ISEDDSUPPORTED>No</ISEDDSUPPORTED>
-             <HASECHEQUEDELIVERYMODE>No</HASECHEQUEDELIVERYMODE>
-             <HASECHEQUEDELIVERYTO>No</HASECHEQUEDELIVERYTO>
-             <HASECHEQUEPRINTLOCATION>No</HASECHEQUEPRINTLOCATION>
-             <HASECHEQUEPAYABLELOCATION>No</HASECHEQUEPAYABLELOCATION>
-             <HASECHEQUEBANKLOCATION>No</HASECHEQUEBANKLOCATION>
-             <HASEDDDELIVERYMODE>No</HASEDDDELIVERYMODE>
-             <HASEDDDELIVERYTO>No</HASEDDDELIVERYTO>
-             <HASEDDPRINTLOCATION>No</HASEDDPRINTLOCATION>
-             <HASEDDPAYABLELOCATION>No</HASEDDPAYABLELOCATION>
-             <HASEDDBANKLOCATION>No</HASEDDBANKLOCATION>
-             <ISEBANKINGENABLED>No</ISEBANKINGENABLED>
-             <ISEXPORTFILEENCRYPTED>No</ISEXPORTFILEENCRYPTED>
-             <ISBATCHENABLED>No</ISBATCHENABLED>
-             <ISPRODUCTCODEBASED>No</ISPRODUCTCODEBASED>
-             <HASEDDCITY>No</HASEDDCITY>
-             <HASECHEQUECITY>No</HASECHEQUECITY>
-             <ISFILENAMEFORMATSUPPORTED>No</ISFILENAMEFORMATSUPPORTED>
-             <HASCLIENTCODE>No</HASCLIENTCODE>
-             <PAYINSISBATCHAPPLICABLE>No</PAYINSISBATCHAPPLICABLE>
-             <PAYINSISFILENUMAPP>No</PAYINSISFILENUMAPP>
-             <ISSALARYTRANSGROUPEDFORBRS>No</ISSALARYTRANSGROUPEDFORBRS>
-             <ISEBANKINGSUPPORTED>No</ISEBANKINGSUPPORTED>
-             <ISSCBUAE>No</ISSCBUAE>
-             <ISBANKSTATUSAPP>No</ISBANKSTATUSAPP>
-             <ISSALARYGROUPED>No</ISSALARYGROUPED>
-             <USEFORPURCHASETAX>No</USEFORPURCHASETAX>
-             <AUDITED>No</AUDITED>
-             <SORTPOSITION> 1000</SORTPOSITION>
-             <ALTERID> 1106</ALTERID>
-             <SERVICETAXDETAILS.LIST>      </SERVICETAXDETAILS.LIST>
-             <LBTREGNDETAILS.LIST>      </LBTREGNDETAILS.LIST>
-             <VATDETAILS.LIST>      </VATDETAILS.LIST>
-             <SALESTAXCESSDETAILS.LIST>      </SALESTAXCESSDETAILS.LIST>
-             <GSTDETAILS.LIST>      </GSTDETAILS.LIST>
-             <LANGUAGENAME.LIST>
-              <NAME.LIST TYPE="String">
-               <NAME>Mrinal Tripathi-600000</NAME>
-              <NAME>600000</NAME>
-              </NAME.LIST>
-              <LANGUAGEID> 1033</LANGUAGEID>
-             </LANGUAGENAME.LIST>
-             <XBRLDETAIL.LIST>      </XBRLDETAIL.LIST>
-             <AUDITDETAILS.LIST>      </AUDITDETAILS.LIST>
-             <SCHVIDETAILS.LIST>      </SCHVIDETAILS.LIST>
-             <EXCISETARIFFDETAILS.LIST>      </EXCISETARIFFDETAILS.LIST>
-             <TCSCATEGORYDETAILS.LIST>      </TCSCATEGORYDETAILS.LIST>
-             <TDSCATEGORYDETAILS.LIST>      </TDSCATEGORYDETAILS.LIST>
-             <SLABPERIOD.LIST>      </SLABPERIOD.LIST>
-             <GRATUITYPERIOD.LIST>      </GRATUITYPERIOD.LIST>
-             <ADDITIONALCOMPUTATIONS.LIST>      </ADDITIONALCOMPUTATIONS.LIST>
-             <EXCISEJURISDICTIONDETAILS.LIST>      </EXCISEJURISDICTIONDETAILS.LIST>
-             <EXCLUDEDTAXATIONS.LIST>      </EXCLUDEDTAXATIONS.LIST>
-             <BANKALLOCATIONS.LIST>      </BANKALLOCATIONS.LIST>
-             <PAYMENTDETAILS.LIST>      </PAYMENTDETAILS.LIST>
-             <BANKEXPORTFORMATS.LIST>      </BANKEXPORTFORMATS.LIST>
-             <BILLALLOCATIONS.LIST>      </BILLALLOCATIONS.LIST>
-             <INTERESTCOLLECTION.LIST>      </INTERESTCOLLECTION.LIST>
-             <LEDGERCLOSINGVALUES.LIST>      </LEDGERCLOSINGVALUES.LIST>
-             <LEDGERAUDITCLASS.LIST>      </LEDGERAUDITCLASS.LIST>
-             <OLDAUDITENTRIES.LIST>      </OLDAUDITENTRIES.LIST>
-             <TDSEXEMPTIONRULES.LIST>      </TDSEXEMPTIONRULES.LIST>
-             <DEDUCTINSAMEVCHRULES.LIST>      </DEDUCTINSAMEVCHRULES.LIST>
-             <LOWERDEDUCTION.LIST>      </LOWERDEDUCTION.LIST>
-             <STXABATEMENTDETAILS.LIST>      </STXABATEMENTDETAILS.LIST>
-             <LEDMULTIADDRESSLIST.LIST>
-              <ADDRESS.LIST TYPE="String">
-              <ADDRESS>Uday Street</ADDRESS>
-              <ADDRESS>TELANGANA</ADDRESS>
-               <ADDRESS></ADDRESS>
-               <ADDRESS></ADDRESS>
-              </ADDRESS.LIST>
-              <EMAIL>null</EMAIL>
-              <PRIORSTATENAME>Chandigarh</PRIORSTATENAME>
-              <PINCODE>21345556</PINCODE>
-              <PHONENUMBER>null</PHONENUMBER>
-              <COUNTRYNAME>India</COUNTRYNAME>
-              <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
-              <ADDRESSNAME>Uday Street</ADDRESSNAME>
-              <MOBILENUMBER>null</MOBILENUMBER>
-              <PARTYGSTIN>null</PARTYGSTIN>
-              <CONTACTPERSON>Mrinal Tripathi</CONTACTPERSON>
-              <STATE>TELANGANA</STATE>
-              <ISOTHTERRITORYASSESSEE>No</ISOTHTERRITORYASSESSEE>
-              <ISEXCISEMERCHANTEXPORTER>No</ISEXCISEMERCHANTEXPORTER>
-              <ISPARTYEXEMPTED>No</ISPARTYEXEMPTED>
-              <ISSEZPARTY>No</ISSEZPARTY>
-              <EXCISEJURISDICTIONDETAILS.LIST>       </EXCISEJURISDICTIONDETAILS.LIST>
-             </LEDMULTIADDRESSLIST.LIST>
-             <STXTAXDETAILS.LIST>      </STXTAXDETAILS.LIST>
-             <CHEQUERANGE.LIST>      </CHEQUERANGE.LIST>
-             <DEFAULTVCHCHEQUEDETAILS.LIST>      </DEFAULTVCHCHEQUEDETAILS.LIST>
-             <ACCOUNTAUDITENTRIES.LIST>      </ACCOUNTAUDITENTRIES.LIST>
-             <AUDITENTRIES.LIST>      </AUDITENTRIES.LIST>
-             <BRSIMPORTEDINFO.LIST>      </BRSIMPORTEDINFO.LIST>
-             <AUTOBRSCONFIGS.LIST>      </AUTOBRSCONFIGS.LIST>
-             <BANKURENTRIES.LIST>      </BANKURENTRIES.LIST>
-             <DEFAULTCHEQUEDETAILS.LIST>      </DEFAULTCHEQUEDETAILS.LIST>
-             <DEFAULTOPENINGCHEQUEDETAILS.LIST>      </DEFAULTOPENINGCHEQUEDETAILS.LIST>
-             <CANCELLEDPAYALLOCATIONS.LIST>      </CANCELLEDPAYALLOCATIONS.LIST>
-             <ECHEQUEPRINTLOCATION.LIST>      </ECHEQUEPRINTLOCATION.LIST>
-             <ECHEQUEPAYABLELOCATION.LIST>      </ECHEQUEPAYABLELOCATION.LIST>
-             <EDDPRINTLOCATION.LIST>      </EDDPRINTLOCATION.LIST>
-             <EDDPAYABLELOCATION.LIST>      </EDDPAYABLELOCATION.LIST>
-             <AVAILABLETRANSACTIONTYPES.LIST>      </AVAILABLETRANSACTIONTYPES.LIST>
-             <LEDPAYINSCONFIGS.LIST>      </LEDPAYINSCONFIGS.LIST>
-             <TYPECODEDETAILS.LIST>      </TYPECODEDETAILS.LIST>
-             <FIELDVALIDATIONDETAILS.LIST>      </FIELDVALIDATIONDETAILS.LIST>
-             <INPUTCRALLOCS.LIST>      </INPUTCRALLOCS.LIST>
-             <GSTCLASSFNIGSTRATES.LIST>      </GSTCLASSFNIGSTRATES.LIST>
-             <EXTARIFFDUTYHEADDETAILS.LIST>      </EXTARIFFDUTYHEADDETAILS.LIST>
-             <VOUCHERTYPEPRODUCTCODES.LIST>      </VOUCHERTYPEPRODUCTCODES.LIST>
-            </LEDGER>
-           </TALLYMESSAGE>
-          </REQUESTDATA>
-         </IMPORTDATA>
-        </BODY>
-       </ENVELOPE>
+let data = [
+        {
+            "name": "Ankush Choudhary",
+            "membership_number__c": "105095109",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-09T04:03:36.000Z",
+            "customer_set_sfid": "a0J1y000000uHcjEAE",
+            "customer_set_name": "JW Marriott Hotel New Delhi Aerocity Level 3",
+            "customer_set_level_name": "Level 3",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": "100OFF"
+        },
+        {
+            "name": "Prashant Kumar",
+            "membership_number__c": "101233436",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-09T05:29:35.000Z",
+            "customer_set_sfid": "a0J1y000000uHduEAE",
+            "customer_set_name": "Le Meridien Gurgaon Delhi Ncr Level 1",
+            "customer_set_level_name": "Level 1",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "testFXFRABRW testKXWQMTNU",
+            "membership_number__c": "108564744",
+            "membership_enrollment_date__c": "2021-03-10T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-11T06:49:05.000Z",
+            "customer_set_sfid": "a0J1y000000uHduEAE",
+            "customer_set_name": "Le Meridien Gurgaon Delhi Ncr Level 1",
+            "customer_set_level_name": "Level 1",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "Prashant Kumar",
+            "membership_number__c": "107567351",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": null,
+            "customer_set_sfid": "a0J1y000000uHchEAE",
+            "customer_set_name": "JW Marriott Hotel New Delhi Aerocity Level 1",
+            "customer_set_level_name": "Level 1",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "Ankush Choudhary",
+            "membership_number__c": "109945042",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-09T06:26:04.000Z",
+            "customer_set_sfid": "a0J1y000000uHdvEAE",
+            "customer_set_name": "Le Meridien Gurgaon Delhi Ncr Level 2",
+            "customer_set_level_name": "Level 2",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "Ankush Choudhary",
+            "membership_number__c": "109057289",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-09T06:33:39.000Z",
+            "customer_set_sfid": "a0J1y000000uHdbEAE",
+            "customer_set_name": "Sheraton Grand Bangalore Hotel at Brigade Gateway Level 1",
+            "customer_set_level_name": "Level 1",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "testVNHCNBNP testJNZCYGJC",
+            "membership_number__c": "106499925",
+            "membership_enrollment_date__c": "2021-03-10T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-11T06:51:07.000Z",
+            "customer_set_sfid": "a0J1y000000uHduEAE",
+            "customer_set_name": "Le Meridien Gurgaon Delhi Ncr Level 1",
+            "customer_set_level_name": "Level 1",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "Ankush Choudhary",
+            "membership_number__c": "109630443",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-09T06:34:19.000Z",
+            "customer_set_sfid": "a0J1y000000uHdZEAU",
+            "customer_set_name": "Sheraton Grand Bangalore Hotel at Brigade Gateway Level 2",
+            "customer_set_level_name": "Level 2",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "Ankush Choudhary",
+            "membership_number__c": "108137638",
+            "membership_enrollment_date__c": "2021-03-08T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-09T06:34:49.000Z",
+            "customer_set_sfid": "a0J1y000000uHdaEAE",
+            "customer_set_name": "Sheraton Grand Bangalore Hotel at Brigade Gateway Level 3",
+            "customer_set_level_name": "Level 3",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        },
+        {
+            "name": "testMHZKIDXI testWYSQCFMN",
+            "membership_number__c": "101421054",
+            "membership_enrollment_date__c": "2021-03-10T18:30:00.000Z",
+            "membership_renewal_date__c": null,
+            "membership_activation_date__c": "2021-03-11T07:05:53.000Z",
+            "customer_set_sfid": "a0J1y000000uHduEAE",
+            "customer_set_name": "Le Meridien Gurgaon Delhi Ncr Level 1",
+            "customer_set_level_name": "Level 1",
+            "program_name": "Club Marriott",
+            "program_unique_identifier": "TLC_MAR_CLMA",
+            "promocode__c": null
+        }
+    ]
+
+
+
+
+    console.log(finalObject)

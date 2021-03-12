@@ -16,6 +16,7 @@ const FReport = require("./routers/FReport")
 const RReport = require("./routers/RReport")
 const Logo = require("./routers/Logo")
 const UPL= require("./routers/updateProfileLinkURL")
+const CMReport= require("./routers/CMNewEnroll")
 const helmet = require('helmet')
 
 
@@ -53,6 +54,8 @@ app.use("/api/FR",FReport)
 app.use("/api/RR",RReport)
 app.use("/api/MemberSpend",memberSpentPOS)
 app.use("/api/tally" , tallyrouters)
+app.use("/api/CMNewEnroll" , CMReport)
+
 
 
 

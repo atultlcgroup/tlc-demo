@@ -423,8 +423,51 @@ let sendPOSErrorReport=(file,fileName,emails,logoName,dynamicValues,program_name
     }
 }   
 
+
+
 // End POS report error
 
+
+
+//ClubMarriott New Enroll
+
+let sendCMNewEnroll=(file,fileName,emails,program_name)=>{
+
+    try{
+        readHTMLFile(__dirname + `/cmNewEnroll.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForCMnewEnrollReport= new Date();
+            dateforCMnewEnrollReport = `${dateForCMnewEnrollReport.toLocaleString('default', { month: 'short' })} ${dateForCMnewEnrollReport.getFullYear()}`
+            //let subjectForPOSErrorReport = `POS Error Report`
+            let fromEmailForCMNewEnroll=`mis@clubmarriott.in` ;
+            let subjectForCMNewEnroll=`Club Marriott | New Enrollment `;
+            let displayName=`Club Marriott` ;
+
+            let template = handlebars.compile(html);
+            replacements={};
+           let htmlToSend = template(replacements);
+            console.log(`fromEmailForNewEnroll : ${fromEmailForCMNewEnroll} to ${emails} subject ${subjectForCMNewEnroll} File:${file} fileName:${fileName}`)
+             sendmail.smtpAttachmentNewEnroll(emails, `${displayName} <${fromEmailForCMNewEnroll}>` , subjectForCMNewEnroll,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}   
 
 
             module.exports={
@@ -437,7 +480,8 @@ let sendPOSErrorReport=(file,fileName,emails,logoName,dynamicValues,program_name
                 sendPOSErrorReport,
                 sendFReport,
                 sendRReport,
-                sendDRReport
+                sendDRReport,
+                sendCMNewEnroll
             }
 
         
