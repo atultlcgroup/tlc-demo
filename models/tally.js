@@ -826,7 +826,7 @@ let findTax= async(tax_master_sfid)=>{
 }
 let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select distinct payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select distinct payment__c.email__c,payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
       left join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c

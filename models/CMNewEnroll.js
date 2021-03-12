@@ -4,9 +4,10 @@ let generateCMNewEnrollPDF = require("../helper/generateCMNewEnrollPDF")
 let  dotenv = require('dotenv');
 dotenv.config();
 
-const CMNewEnrollEmails =  process.env.CM_NEW_ENROLL_EMAILS || ``; 
-const CMNewEnrollProgramId = process.env.CM_NEW_ENROLL_PROGRAM_ID || ``;
 
+let CMNewEnrollEmails =  process.env.CM_NEW_ENROLL_EMAILS || ``; 
+let CMNewEnrollProgramId = process.env.CM_NEW_ENROLL_PROGRAM_ID || ``;
+CMNewEnrollEmails = CMNewEnrollEmails ? CMNewEnrollEmails.split(',') : ``;
 
 let findPaymentRule= async(req)=>{
     try{
@@ -91,19 +92,46 @@ let getCMNewEnroll= async(program__c )=>{
     }
 }
 
+let updateLog = async(insertedId, isEmailSent ,status, errorDescription  )=>
+{
+    try{
+    await pool.query(`update  tlcsalesforce.reports_log set "isEmailSent"=${isEmailSent} , status= '${status}', "errorDescription"='${errorDescription}'  where id = ${insertedId}`)
+    }catch(e){
+        console.log(e)
+    }
+}
+
+let insertLog = async(emails , file)=>
+{
+    try{
+        emails =emails.length ? emails.join(","):''
+        let isEmailSent= false
+        let data = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent","propertyId",status,"typeBifurcation","customerSetId",emails , "fileName") values(${isEmailSent},'', 'New' , 'CM-NEW ENROLL' ,'' , '${emails}' , '${file}') RETURNING  id`)
+        return data.rows ? data.rows[0].id : 0;
+    }catch(e){
+        console.log(e)
+    }
+}
+
+
+
 let CMReport = async()=>{
     try{
+        console.log(`----from CM-New Enroll----`)
         let emails = CMNewEnrollEmails;
         let program__c= CMNewEnrollProgramId;
           let data =await getCMNewEnroll(program__c)
             if(data.length){
-                console.log(`------------------`)
                 //generatePdf for new enrollment 
-                let pdf =await generateCMNewEnrollPDF.generateCMNewEnrollPDF(data ,  data[0].program_name , data[0].program_id)
-                // sendMail.sendCMNewEnroll(`` , `` , emails , data[0].program_name)
+                let pdf =await generateCMNewEnrollPDF.generateCMNewEnrollPDF(data ,  data[0].program_name , data[0].program_id);
+                // let pdf = ``
+                let logid = await insertLog(emails , pdf);
+                console.log(`------------------ logid = ${logid}`)
+                sendMail.sendCMNewEnroll(`` , `` , emails , data[0].program_name , logid)
             }
         return data;
     }catch(e){
+        console.log(e)
         return e;
     }
 }

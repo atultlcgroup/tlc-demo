@@ -333,9 +333,14 @@ const sendMailAttachmentNewEnroll = (to, from, subject, text, html,file,fileName
         text,
         html,
         attachments:[{
-            filename: `${fileName}.csv`,
+            filename: `${fileName}.pdf`,
             path: `${file}`
 
+        },
+        {
+            filename: `logo-cm.png`,
+            path: `./helper/logo-cm.png`,
+            cid:'logocm'
         }]
     };
     return new Promise((resolve, reject) => {

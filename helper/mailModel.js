@@ -427,14 +427,23 @@ let sendPOSErrorReport=(file,fileName,emails,logoName,dynamicValues,program_name
 
 // End POS report error
 
+// update log for new enrollment 
+let updateLogForNewEnroll = async(insertedId, isEmailSent ,status, errorDescription )=>
+{
+    try{
+    await pool.query(`update  tlcsalesforce.reports_log set "isEmailSent"=${isEmailSent} , status= '${status}', "errorDescription"='${errorDescription}'  where id = ${insertedId}`)
+    }catch(e){
+        console.log(e)
+    }
+}
 
 
 //ClubMarriott New Enroll
 
-let sendCMNewEnroll=(file,fileName,emails,program_name)=>{
+let sendCMNewEnroll=(file,fileName,emails,program_name , logId)=>{
 
     try{
-        readHTMLFile(__dirname + `/cmNewEnroll.html`, function(err, html) {
+        readHTMLFile(__dirname + `/CMNew_Enroll.html`, function(err, html) {
             console.log('hi')
             if(err)
             console.log(err)
@@ -446,16 +455,17 @@ let sendCMNewEnroll=(file,fileName,emails,program_name)=>{
             let displayName=`Club Marriott` ;
 
             let template = handlebars.compile(html);
-            replacements={};
+            replacements={"programName": program_name};
            let htmlToSend = template(replacements);
             console.log(`fromEmailForNewEnroll : ${fromEmailForCMNewEnroll} to ${emails} subject ${subjectForCMNewEnroll} File:${file} fileName:${fileName}`)
              sendmail.smtpAttachmentNewEnroll(emails, `${displayName} <${fromEmailForCMNewEnroll}>` , subjectForCMNewEnroll,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
                 // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
-
+                    updateLogForNewEnroll(logId, 'true' ,'Success', `` )
                 // updatePayentLog(transactionIdsArr,'SUCCESS')
                 console.log(`Email Sent Successfully`)
         // res.status(200).send(`email sent from: ${from} to: ${to}`)
     }).catch((err)=>{
+        updateLogForNewEnroll(logId, 'false' ,'Error', `${err}` )
         // res.status(500).send(`${JSON.stringify(err)}`)
         // updatePayentLog(transactionIdsArr,'FAILED')
         console.log(err)

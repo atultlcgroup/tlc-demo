@@ -10,6 +10,9 @@ const RReport = require('../models/RReport')
 const getMembershipDetails=require('../models/memberSpentForPOS');
 const tally=require('../models/tally');
 
+const CMNewEnroll=require('../models/CMNewEnroll');
+
+
 
 
 
@@ -191,4 +194,18 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == true || process.env.IS_SCHEDULE
 {
   console.log(`schedule Tasks For Tally`);
   scheduleTasksForTally(process.env.SCHEDULER_TIME_FOR_TALLY);
+}
+
+
+// New enrollment  for CM 
+let scheduleTasksForCMNewEnroll=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR CM NEW ENROLL  ========================`)
+  CMNewEnroll.CMReport()
+ console.log(`================= CM NEW ENROLL: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_CM_NEW_ENROLL == true || process.env.IS_SCHEDULER_ALLOWED_FOR_CM_NEW_ENROLL == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_CM_NEW_ENROLL == 'TRUE')
+{
+  console.log(`schedule Tasks For CM New Enroll.`);
+  scheduleTasksForCMNewEnroll(process.env.SCHEDULER_TIME_FOR_CM_NEW_ENROLL);
 }
