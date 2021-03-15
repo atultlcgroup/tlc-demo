@@ -86,6 +86,7 @@ let getCMNewEnroll= async(program__c )=>{
            Membership__c is not Null and Membership_Offer__c is null
            and program__c.sfid  = '${program__c}' 
          `;
+         console.log(`  from here ---`) 
          let data = await pool.query(qry)
          console.log(data)
          console.log(`after query`)
