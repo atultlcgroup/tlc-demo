@@ -121,7 +121,10 @@ let CMReport = async()=>{
         let emails = CMNewEnrollEmails;
         let program__c= CMNewEnrollProgramId;
           let data =await getCMNewEnroll(program__c)
+          console.log(`-------------------------1`)
             if(data.length){
+                console.log(`-------------------------2`)
+
                 //generatePdf for new enrollment 
                 let pdf =await generateCMNewEnrollPDF.generateCMNewEnrollPDF(data ,  data[0].program_name , data[0].program_id);
                 // let pdf = ``
