@@ -63,7 +63,7 @@ let getEPRSfid = async()=>{
 
 let getCMNewEnroll= async(program__c )=>{
     try{
-        let qry =`select program__c.sfid program_id,account.name,membership__c.membership_number__c,membership__c.Membership_Enrollment_Date__c,membership__c.Membership_Renewal_Date__c,membership__c.membership_activation_date__c,
+        let qry =`select payment__c.email__c ,program__c.sfid program_id , account.type member_type__c,account.name,membership__c.membership_number__c,membership__c.Membership_Enrollment_Date__c,membership__c.Membership_Renewal_Date__c,membership__c.membership_activation_date__c,
         membershiptype__c.sfid as customer_set_sfid,
         membershiptype__c.name customer_set_name,
         membershiptype__c.customer_set_program_level__c customer_set_level_name,
@@ -83,7 +83,7 @@ let getCMNewEnroll= async(program__c )=>{
           or (Membership__c.Membership_Renewal_Date__c <= current_date - interval '1 day' and  Membership__c.Membership_Renewal_Date__c >= current_date - interval '7 day'))
            and
            Membership__c is not Null and Membership_Offer__c is null
-           and program__c.sfid  = '${program__c}' limit 10
+           and program__c.sfid  = '${program__c}' 
          `;
          let data = await pool.query(qry)
          return data.rows.length ? data.rows : []
@@ -125,9 +125,11 @@ let CMReport = async()=>{
                 //generatePdf for new enrollment 
                 let pdf =await generateCMNewEnrollPDF.generateCMNewEnrollPDF(data ,  data[0].program_name , data[0].program_id);
                 // let pdf = ``
+                console.log(`-----------------------`)
+                console.log(pdf)
                 let logid = await insertLog(emails , pdf);
                 console.log(`------------------ logid = ${logid}`)
-                sendMail.sendCMNewEnroll(`` , `` , emails , data[0].program_name , logid)
+                sendMail.sendCMNewEnroll(pdf , `Club Marriott Enrollment` , emails , data[0].program_name , logid)
             }
         return data;
     }catch(e){

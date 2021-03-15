@@ -9,8 +9,8 @@ let CMReport = async(req,res)=>{
             res.status(401).send({code: 401, message: 'Invalid Token'})
             return
         }
-        let CMReport =await CMModel.CMReport(req,res)
-        res.status(200).send({code :200 , message:'Success',data: CMReport})
+        let CMReport = CMModel.CMReport(req,res)
+        res.status(200).send({code :200 , message:'Success'})
 
     }catch(e){
         console.log(`${e}`)
