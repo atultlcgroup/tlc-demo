@@ -92,6 +92,8 @@ let getCMNewEnroll= async(program__c )=>{
 
          return data.rows.length ? data.rows : []
     }catch(e){
+        console.log(`  from error ---`)
+        console.log(e)
         return []
     }
 }
@@ -140,7 +142,7 @@ let CMReport = async()=>{
                 console.log(pdf)
                 let logid = await insertLog(emails , pdf);
                 console.log(`------------------ logid = ${logid}`)
-                sendMail.sendCMNewEnroll(pdf , `Club Marriott Enrolments` , emails , data[0].program_name , logid)
+                sendMail.sendCMNewEnroll(pdf , `Club Marriott Enrollments` , emails , data[0].program_name , logid)
             }
         return data;
     }catch(e){
