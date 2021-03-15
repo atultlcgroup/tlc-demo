@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 let  dotenv = require('dotenv');
 dotenv.config();
-console.log(`database URL = ` , DATABASE_URL)
+console.log(`database URL = ` , process.env.DATABASE_URL)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: true
