@@ -63,6 +63,7 @@ let getEPRSfid = async()=>{
 
 let getCMNewEnroll= async(program__c )=>{
     try{
+        console.log(`from query`)
         let qry =`select payment__c.email__c ,program__c.sfid program_id , account.type member_type__c,account.name,membership__c.membership_number__c,membership__c.Membership_Enrollment_Date__c,membership__c.Membership_Renewal_Date__c,membership__c.membership_activation_date__c,
         membershiptype__c.sfid as customer_set_sfid,
         membershiptype__c.name customer_set_name,
@@ -85,7 +86,10 @@ let getCMNewEnroll= async(program__c )=>{
            Membership__c is not Null and Membership_Offer__c is null
            and program__c.sfid  = '${program__c}' 
          `;
+         console.log(qry)
          let data = await pool.query(qry)
+         console.log(`after query`)
+
          return data.rows.length ? data.rows : []
     }catch(e){
         return []
@@ -123,7 +127,7 @@ let CMReport = async()=>{
         console.log(emails )
         let program__c= CMNewEnrollProgramId;
         console.log(`programs = ${program__c}`)
-        
+
           let data =await getCMNewEnroll(program__c)
           console.log(`-------------------------1`)
             if(data.length){
