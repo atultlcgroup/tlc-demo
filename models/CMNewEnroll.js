@@ -87,6 +87,7 @@ let getCMNewEnroll= async(program__c )=>{
            and program__c.sfid  = '${program__c}' 
          `;
          let data = await pool.query(qry)
+         console.log(data)
          console.log(`after query`)
 
          return data.rows.length ? data.rows : []
