@@ -451,7 +451,7 @@ let sendCMNewEnroll=(file,fileName,emails,program_name , logId)=>{
             dateforCMnewEnrollReport = `${dateForCMnewEnrollReport.toLocaleString('default', { month: 'short' })} ${dateForCMnewEnrollReport.getFullYear()}`
             //let subjectForPOSErrorReport = `POS Error Report`
             let fromEmailForCMNewEnroll=`mis@clubmarriott.in` ;
-            let subjectForCMNewEnroll=`Club Marriott | New Enrollment `;
+            let subjectForCMNewEnroll=`Club Marriott | New Enrollments `;
             let displayName=`Club Marriott` ;
 
             let template = handlebars.compile(html);
