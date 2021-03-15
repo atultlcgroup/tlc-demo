@@ -119,7 +119,11 @@ let CMReport = async()=>{
     try{
         console.log(`----from CM-New Enroll----`)
         let emails = CMNewEnrollEmails;
+        console.log(`emails =`)
+        console.log(emails )
         let program__c= CMNewEnrollProgramId;
+        console.log(`programs = ${program__c}`)
+        
           let data =await getCMNewEnroll(program__c)
           console.log(`-------------------------1`)
             if(data.length){
