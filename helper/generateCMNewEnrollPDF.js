@@ -57,6 +57,9 @@ let  generateCMNewEnrollPDF=async(cmValues , pName, pId)=>{
 let headerForPage = ` 
 </table>
 <table class="page-break tftable1" align="center" border="1" >
+<tr height="60px"></tr>
+
+<tr>
 <th width="8%" >Account Name</th>
 <th width="3%">Membership Name</th>
 <th width="5%">Email ID</th>
@@ -68,7 +71,7 @@ let headerForPage = `
 </tr>
 `;
 
-
+let pagebreakIndex = 0;
 
 for (let [key ,value] of Object.entries(finalObject)) {
     console.log(`key ------========${key}`)
@@ -87,6 +90,7 @@ for (let [key ,value] of Object.entries(finalObject)) {
      `
 
      for(let d of value){
+        
          let email = ``
          if(d.email__c.lastIndexOf('@') > - 1)
          d.email__c =  `${'*'.repeat(d.email__c.lastIndexOf('@') - 1)}${d.email__c.substr(d.email__c.lastIndexOf('@'))}`
@@ -99,6 +103,10 @@ for (let [key ,value] of Object.entries(finalObject)) {
         <td align="left">${d.promocode__c ? d.promocode__c : ``}</td>
         <td>${d.membership_activation_date__c}</td>
         </tr>`
+
+        if(pagebreakIndex % 8 ==0 &&   pagebreakIndex > 0)
+        clubMarriottReportRows +=headerForPage;
+        pagebreakIndex++;
      }
     }
     
