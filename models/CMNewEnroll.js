@@ -1,4 +1,4 @@
-const { pool } = require("../databases/db");
+const pool = require("../databases/db").pool;
 let sendMail= require("../helper/mailModel")
 let generateCMNewEnrollPDF = require("../helper/generateCMNewEnrollPDF")
 let  dotenv = require('dotenv');
