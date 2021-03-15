@@ -140,7 +140,7 @@ let CMReport = async()=>{
                 console.log(pdf)
                 let logid = await insertLog(emails , pdf);
                 console.log(`------------------ logid = ${logid}`)
-                sendMail.sendCMNewEnroll(pdf , `Club Marriott Enrollment` , emails , data[0].program_name , logid)
+                sendMail.sendCMNewEnroll(pdf , `Club Marriott Enrolments` , emails , data[0].program_name , logid)
             }
         return data;
     }catch(e){

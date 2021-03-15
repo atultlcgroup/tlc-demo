@@ -248,7 +248,7 @@ let htmlStr=`
       <tbody>
           <tr >
           <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='https://tlcgroup.secure.force.com/clubmarriott/resource/1611744960000/TLCLogo' alt=""  height=60 width=80></img></td>
-              <td align="center" style="font-size: 14px; width: 30%; color:black;">Club Marriott Enrolment</td>
+              <td align="center" style="font-size: 14px; width: 30%; color:black;">Club Marriott Enrollments</td>
               <td align="right"style="font-size: 14px; width: 30%; color:black;"> </td>
           </tr>
       </tbody>
