@@ -87,13 +87,16 @@ for (let [key ,value] of Object.entries(finalObject)) {
      `
 
      for(let d of value){
+         let email = ``
+         if(d.email__c.lastIndexOf('@') > - 1)
+         d.email__c =  `${'*'.repeat(d.email__c.lastIndexOf('@') - 1)}${d.email__c.substr(d.email__c.lastIndexOf('@'))}`
          clubMarriottReportRows += `<tr align="center" height="50">
-        <td>${d.name}</td>
+        <td align="left">${d.name}</td>
         <td>${d.membership_number__c}</td>
-        <td>${d.email__c}</td>
-        <td>${d.customer_set_name}</td>
-        <td>${d.member_type__c}</td>
-        <td>${d.promocode__c ? d.promocode__c : ``}</td>
+        <td align="left">${(d.email__c)}</td>
+        <td align="left">${d.customer_set_name}</td>
+        <td align="left">${d.member_type__c}</td>
+        <td align="left">${d.promocode__c ? d.promocode__c : ``}</td>
         <td>${d.membership_activation_date__c}</td>
         </tr>`
      }
