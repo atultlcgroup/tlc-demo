@@ -57,10 +57,10 @@ let  generateCMNewEnrollPDF=async(cmValues , pName, pId)=>{
 let headerForPage = ` 
 </table>
 <table class="page-break tftable1" align="center" border="1" >
-<th width="15%" >Account Name</th>
+<th width="8%" >Account Name</th>
 <th width="3%">Membership Name</th>
-<th width="3%">Email ID</th>
-<th width="3%">Customer Set 
+<th width="5%">Email ID</th>
+<th width="8%">Customer Set 
     <br/>Name</th>
 <th width="3%">Member Type</th>
     <th width="4%"> Promo code</th>
@@ -76,10 +76,10 @@ for (let [key ,value] of Object.entries(finalObject)) {
     if(value.length){
      clubMarriottReportRows +=`
      <tr >
-     <th width="15%" align="left" !important style="border-right-color: #C4B67E; font-size:10px" > <b>Created Date:</b>${key} (<b>${value.length}</b>)</th>
+     <th width="8%" align="left" !important style="border-right-color: #C4B67E; font-size:10px" > <b>Created Date:</b>${key} (<b>${value.length}</b>)</th>
      <th width="3%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"></th>
-     <th width="3%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"></th>
-     <th width="3%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"></th>
+     <th width="5%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"></th>
+     <th width="8%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"></th>
      <th width="3%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"></th>
          <th width="4%" style="border-left-color: #C4B67E;border-right-color: #C4B67E"> </th>
          <th width="4%" style="border-left-color: #C4B67E;border-right-color: #000000"></th> 
@@ -278,10 +278,10 @@ let htmlStr=`
      
           <table class="tftable1" align="center" border="1">
           <tr>
-              <th width="15%" >Account Name</th>
+              <th width="8%" >Account Name</th>
               <th width="3%">Membership Name</th>
-              <th width="3%">Email ID</th>
-              <th width="3%">Customer Set 
+              <th width="5%">Email ID</th>
+              <th width="8%">Customer Set 
                   <br/>Name</th>
               <th width="3%">Member Type</th>
                   <th width="4%"> Promo code</th>
