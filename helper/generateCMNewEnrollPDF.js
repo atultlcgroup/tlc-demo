@@ -316,7 +316,7 @@ console.log("new enrollmet ------")
 let pdfName = `./reports/CMNewEnroll/CM_Enroll_${pId}_${Date.now()}.pdf`
 
 const pdf = Promise.promisifyAll(require('html-pdf'));
-    let data = await pdf.createAsync(`${htmlStr}`, { footer: { "height": "20mm"},"height": "10.5in","width": "14.5in", filename: `${pdfName}` })
+    let data = await pdf.createAsync(`${htmlStr}`, { footer: { "height": "40mm"},"height": "10.5in","width": "14.5in", filename: `${pdfName}` })
     return pdfName
 }
 
