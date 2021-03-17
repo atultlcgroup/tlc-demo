@@ -9,11 +9,11 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program__c}'`;
         else if(req.property_sfid)
-        qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program__c}'`;
         else if(req.customer_set_sfid)
-        qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_rr__c,hotel_email_id_rr__c,tlc_email_id_rr__c,tlc_send_email_rr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program__c}'`;
         // console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
@@ -33,20 +33,23 @@ let findPaymentRule= async(req)=>{
     }
 }
 
+
 let getRRSfid = async()=>{
     try{
-      let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct property__c property_sfid, payment_email_rule__c.program__c from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_rr__c = true or tlc_send_email_rr__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let propertyArr = [];
+      let programArr = [];
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           propertyArr.push(r.property_sfid)
+          programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,propertyArr : propertyArr}
+      let resultObj = {emailArr: finalArr,propertyArr : propertyArr , programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
@@ -56,7 +59,7 @@ let getRRSfid = async()=>{
 
 let getFRSfidCS = async()=>{
     try{
-      let qry = `select distinct customer_set__c customer_set_sfid from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct customer_set__c customer_set_sfid, payment_email_rule__c.program__c from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_rr__c = true or tlc_send_email_rr__c = true) and  (property__c is  NULL or property__c ='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
@@ -66,8 +69,9 @@ let getFRSfidCS = async()=>{
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           customerSetArr.push(r.customer_set_sfid)
+          programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr}
+      let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr , programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
@@ -82,7 +86,7 @@ let getDRRData =async()=>{
 }
 
 
-let getRRData = async(property_id)=>{
+let getRRData = async(property_id , program_id)=>{
 try{
 let qry = `
 select  Distinct outlet__c.property__c property_id,property__c.name h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
@@ -90,7 +94,7 @@ outlet__c.name outlet_name,membershiptype__c.name,
 membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
 reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
 reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name
-,program__c.name as program_name
+,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier
 from tlcsalesforce.reservation__c
 inner join tlcsalesforce.account
 on reservation__c.member__c=account.sfid
@@ -106,14 +110,15 @@ Left join tlcsalesforce.membershiptype__c
 on membershiptype__c.property__c=property__c.sfid
 Left join tlcsalesforce.membershiptypeoffer__c
 on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c 
-inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid limit 50
---where
---date(reservation__c.createddate) = (current_date-1)
---and
---(outlet__c.property__c='${property_id}' 
+inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid
+where
+date(reservation__c.createddate) = (current_date-1)
+and
+(outlet__c.property__c='${property_id}' 
+and membershiptype__c.program__c = '${program_id}'
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
---)
+)
 `
 // console.log(qry)
 let data = await pool.query(qry)
@@ -123,13 +128,13 @@ return []
 }
 }
 
-let getRRDataCS=async(customer_set__c)=>{
+let getRRDataCS=async(customer_set__c , program_id)=>{
     try{
  let qry = `select  Distinct outlet__c.property__c property_id,membershiptype__c.name  h_name,reservation__c.name record_id,account.name member_name,reservation__c.reservation_status__c,membership_offers__c.name membership_offer_name,
  outlet__c.name outlet_name,
  membership__c.membership_number__c,concat(reservation__c.reservation_date__c,' ',reservation__c.reservation_time__c) r_date_time,reservation__c.number_of_guests__c,
  reservation__c.number_of_adults__c,reservation__c.number_of_kids__c,reservation__c.celebration_type__c,reservation__c.celebration_remark__c,
- reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name,program__c.name as program_name
+ reservation__c.specialrequest__c,membershiptypeoffer__c.name as customer_set_name,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier
  from tlcsalesforce.reservation__c
  inner join tlcsalesforce.account
  on reservation__c.member__c=account.sfid
@@ -146,12 +151,13 @@ let getRRDataCS=async(customer_set__c)=>{
  Left join tlcsalesforce.membershiptypeoffer__c
  on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
 Inner Join tlcsalesforce.program__c
- On membershiptype__c.program__c = program__c.sfid limit 20
- --where
- --date(reservation__c.createddate) = (current_date-1)
- --and (
+ On membershiptype__c.program__c = program__c.sfid
+ where
+ date(reservation__c.createddate) = (current_date-1)
+ and (
      --outlet__c.property__c='a0D0k000009PPsEEAW' or 
      membershiptype__c.sfid='${customer_set__c}'
+     and membershiptype__c.program__c = '${program_id}'
      --membershiptype__c.sfid='a0f0k000002bjhGAAQ'
  )`
 //  console.log(qry)
@@ -188,13 +194,15 @@ let RReport= ()=>{
         try{
             let getEmailandPropertyArr = await getRRSfid()
             console.log(getEmailandPropertyArr)
+            // return
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
                  
                 let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind];
+                let programId = getEmailandPropertyArr.programArr[ind];
                 ind++
-                let dataPropertyWise = await getRRData(propertyId)
+                let dataPropertyWise = await getRRData(propertyId , programId)
                 // console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
                     if(e.length){
@@ -206,6 +214,11 @@ let RReport= ()=>{
                         let dynamicValues=await getDynamicValues(brandId);
                         console.log(`dynamic value = ${dynamicValues}`)
                         if(dynamicValues.length){
+                            
+                        if(dataPropertyWise[0].program_unique_identifier == 'TLC_MAR_CLMOld')
+                        dataPropertyWise[0].program_name = 'Club Marriott';
+                        if(dataPropertyWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
+                        dataPropertyWise[0].program_name = 'Gourmet Club';
                             console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
                         let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
                         console.log(pdfFile)
@@ -230,7 +243,8 @@ let RReport= ()=>{
             for(let e of getEmailandCSArr.emailArr){
                 let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
                 let csId = getEmailandCSArr.customerSetArr[ind1];
-                let dataCSWise = await getRRDataCS(csId)
+                let programId1 = getEmailandCSArr.programArr[ind1];
+                let dataCSWise = await getRRDataCS(csId , programId1)
                 // console.log(dataCSWise)
                 if(dataCSWise.length){
                     if(e.length){
@@ -242,6 +256,10 @@ let RReport= ()=>{
                         let dynamicValues1=await getDynamicValues(brandId1);
                         console.log("dynamicValuesdynamicValues",dynamicValues1,dynamicValues1.length);
                         if(dynamicValues.length){
+                            if(dataCSWise[0].program_unique_identifier == 'TLC_MAR_CLMOld')
+                            dataCSWise[0].program_name = 'Club Marriott';
+                            if(dataCSWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
+                            dataCSWise[0].program_name = 'Gourmet Club';
                             let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
                         console.log(pdfFile)
                         sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues1 , dataCSWise[0].program_name)

@@ -999,9 +999,18 @@ let postgresNotifyEvent = async()=>{
      console.log(e)
  }
 }
+
+let staticLedgers = (client_id, client_secret )=>{
+    try{
+        return `success`
+    }catch(e){
+        return e
+    }
+}
 postgresNotifyEvent()
 module.exports={
     scheduleTallyTasks,
     tally,
-    updateLedger
+    updateLedger,
+    staticLedgers
 }

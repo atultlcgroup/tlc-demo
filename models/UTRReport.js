@@ -1,4 +1,3 @@
-
 const { writeFileSync } = require("fs");
 const excelToJson = require('convert-excel-to-json');
 const ObjectsToCsv = require('objects-to-csv')
@@ -36,16 +35,16 @@ let createLogForUTRReport=async(fileName,fileStatus,isEmailSent,errorDescription
 
 
 
-let findPaymentRule= async(req,fileName)=>{
+let findPaymentRule= async(req,fileName )=>{
     try{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_id}'`;
         else if(req.property_sfid)
-        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program_id}'`;
         else if(req.customer_set_sfid)
-        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_id}'`;
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         let resultArray=[];
@@ -438,12 +437,27 @@ let getDynamicValues=async(brandId)=>{
     } 
 }
 
-
 let getProgramIdByMemberShip = async(membership_type_id)=>{
     try{
-        console.log(`select program__c.name program_name from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
-            let data = await pool.query(`select program__c.name program_name from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+        console.log(`select program__c.name program_name,program__c.unique_identifier__c as program_unique_identifier from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+            let data = await pool.query(`select program__c.name program_name,program__c.unique_identifier__c as program_unique_identifier from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+            if(data.rows && data.rows[0].program_unique_identifier == 'TLC_MAR_CLMOld'){
+                data.rows[0].program_name = 'Club Marriott'
+            }
+            if(data.rows && data.rows[0].program_unique_identifier == 'TLC_OLE_GRMTOld'){
+                data.rows[0].program_name = 'Gourmet Club'
+            }
             return data.rows ? data.rows[0].program_name : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+let getProgramIdForProgramByMemberShip = async(membership_type_id)=>{
+    try{
+        console.log(`select program__c.name program_name,program__c.unique_identifier__c as program_unique_identifier from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+            let data = await pool.query(`select program__c.sfid program_id,program__c.name program_name,program__c.unique_identifier__c as program_unique_identifier from tlcsalesforce.membershiptype__c inner join tlcsalesforce.program__c on program__c.sfid = membershiptype__c.program__c where membershiptype__c.sfid = '${membership_type_id}'`)
+            return data.rows ? data.rows[0].program_id : ``
     }catch(e){
         return ``;
     }
@@ -465,7 +479,8 @@ let UTRReport2=async(UTRData,fileName,userid)=>{
       for(let [key,value] of Object.entries(dataSchemeCodeWise)){
           console.log(`++++++++++++++++++++++++++++-----------++++++++++++`)
             console.log(`---------propertyId =${value[0].property_id}----------`)
-            let obj = {property_sfid: value[0].property_id}
+            let getProgramId = await getProgramIdForProgramByMemberShip(value[0].membership_type_id)
+            let obj = {property_sfid: value[0].property_id , program_id : getProgramId}
             let emails = await findPaymentRule(obj,fileName)
             console.log(emails)
             if(emails.length){

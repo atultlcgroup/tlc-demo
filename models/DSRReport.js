@@ -314,11 +314,11 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program__c}'`;
         else if(req.property_sfid)
-         qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+         qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program__c}'`;
          else if(req.customer_set_sfid)
-        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_dsr__c,hotel_email_id_dsr__c,tlc_email_id_dsr__c,tlc_send_email_dsr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program__c}'`;
         console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []

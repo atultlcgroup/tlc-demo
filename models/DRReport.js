@@ -7,11 +7,11 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select hotel_email_send_drr__c,hotel_email_id_drr__c,tlc_email_id_drr__c,tlc_send_email_drr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_drr__c,hotel_email_id_drr__c,tlc_email_id_drr__c,tlc_send_email_drr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program__c}'`;
         else if(req.property_sfid)
-        qry = `select hotel_email_send_drr__c,hotel_email_id_drr__c,tlc_email_id_drr__c,tlc_send_email_drr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}'`;
+        qry = `select hotel_email_send_drr__c,hotel_email_id_drr__c,tlc_email_id_drr__c,tlc_send_email_drr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program__c}'`;
         else if(req.customer_set_sfid)
-        qry = `select hotel_email_send_drr__c,hotel_email_id_drr__c,tlc_email_id_drr__c,tlc_send_email_drr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}'`;
+        qry = `select hotel_email_send_drr__c,hotel_email_id_drr__c,tlc_email_id_drr__c,tlc_send_email_drr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program__c}'`;
         console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
@@ -33,18 +33,20 @@ let findPaymentRule= async(req)=>{
 
 let getDRRSfid = async()=>{
     try{
-      let qry = `select distinct property__c property_sfid from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct property__c property_sfid, payment_email_rule__c.program__c  from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_drr__c = true or tlc_send_email_drr__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let propertyArr = [];
+      let programArr = [];
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           propertyArr.push(r.property_sfid)
+          programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,propertyArr : propertyArr}
+      let resultObj = {emailArr: finalArr,propertyArr : propertyArr , programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
@@ -53,18 +55,20 @@ let getDRRSfid = async()=>{
 
 let getDRRSfidCS = async()=>{
     try{
-      let qry = `select distinct customer_set__c customer_set_sfid from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct customer_set__c customer_set_sfid,  payment_email_rule__c.program__c  from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_drr__c = true or tlc_send_email_drr__c = true) and  (property__c is  NULL or property__c ='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let customerSetArr = [];
+      let programArr = []
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           customerSetArr.push(r.customer_set_sfid)
+          programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr}
+      let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr ,  programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
@@ -74,13 +78,13 @@ let getDRRSfidCS = async()=>{
 
 
 
-let getDRRData =async(property_id)=>{
+let getDRRData =async(property_id , program_id)=>{
     try{
         let qry = `select property__c.sfid property_sfid,membershiptype__c.name membership_type_name,membershiptypeoffer__c.name as offer_name,redemption_log__c.redemption_date_time__c,account.name member_name,
         membership__c.membership_number__c,membership_offers__c.certifcate_number__c,
         reservation__c.redemption_transaction_code__c,reservation__c.assigned_staff_member__c,
         pos_cheque_details__c.net_amount__c,property__c.name as hotel_name,outlet__c.name as outlet_name,
-        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c,program__c.name as program_name
+        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier
         from tlcsalesforce.redemption_log__c
         inner join tlcsalesforce.membership_offers__c
         on membership_offers__c.sfid=redemption_log__c.membership_offer__c
@@ -107,6 +111,8 @@ let getDRRData =async(property_id)=>{
         where 
         (
             membershiptype__c.property__c='${property_id}' 
+            and membershiptype__c.program__c = '${program_id}'
+
        -- membershiptype__c.property__c='a0D0k000009PPsEEAW' 
         --or membershiptype__c.sfid='a0f0k000003FSKyAAO'
         )
@@ -121,13 +127,13 @@ let getDRRData =async(property_id)=>{
     }
 }
 
-let getDRRDataCS =async(customer_set__c)=>{
+let getDRRDataCS =async(customer_set__c , program__c)=>{
     try{
         let qry = `select property__c.sfid property_sfid,membershiptype__c.name membership_type_name,membershiptypeoffer__c.name as offer_name,redemption_log__c.redemption_date_time__c,account.name member_name,
         membership__c.membership_number__c,membership_offers__c.certifcate_number__c,
         reservation__c.redemption_transaction_code__c,reservation__c.assigned_staff_member__c,
         pos_cheque_details__c.net_amount__c,property__c.name as hotel_name,outlet__c.name as outlet_name,
-        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c,program__c.name as program_name
+        reservation__c.check_number__c as cheque_number__c,a.name as Hotel_app_user,membership_offers__c.offer_unique_identifier__c,reservation__c.redemption_transaction_code__c,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier
         from tlcsalesforce.redemption_log__c
         inner join tlcsalesforce.membership_offers__c
         on membership_offers__c.sfid=redemption_log__c.membership_offer__c
@@ -154,7 +160,9 @@ let getDRRDataCS =async(customer_set__c)=>{
         where 
         (
         --membershiptype__c.property__c='a0D0k000009PPsEEAW' or 
-        membershiptype__c.sfid='${customer_set__c}')
+        membershiptype__c.sfid='${customer_set__c}'
+        and membershiptype__c.program__c = '${program_id}'
+        )
         --membershiptype__c.sfid='a0f0k000003FSKyAAO')
         and 
         date(redemption_log__c.redemption_date_time__c) =(current_date-1) --'2020-08-25'`;
@@ -215,12 +223,14 @@ let DRReport= ()=>{
         try{
             console.log(`-------------`)
             let getEmailandPropertyArr = await getDRRSfid()
-            // console.log(getEmailandPropertyArr)
+            console.log(getEmailandPropertyArr)
+            // return
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
                 let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind];
-                let dataPropertyWise = await getDRRData(propertyId)
+                let programId = getEmailandPropertyArr.programArr[ind];
+                let dataPropertyWise = await getDRRData(propertyId , programId )
 
                 console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
@@ -231,7 +241,12 @@ let DRReport= ()=>{
                     let dynamicValues=await getDynamicValues(brandId);
                     console.log(dynamicValues)
                     if(dynamicValues.length){
-                      //get DRR file from SFDC
+                        if(dataPropertyWise[0].program_unique_identifier == 'TLC_MAR_CLMOld')
+                        dataPropertyWise[0].program_name = 'Club Marriott';
+                        if(dataPropertyWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
+                        dataPropertyWise[0].program_name = 'Gourmet Club';
+                        
+                                              //get DRR file from SFDC
          
                     let pdfFile = await generatePdf.generateDRRPDF(dataPropertyWise);
                     console.log(pdfFile)
@@ -255,8 +270,9 @@ let DRReport= ()=>{
             for(let e of getEmailandCSArr.emailArr){
                 let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
                 let csId = getEmailandCSArr.customerSetArr[ind1];
+                let programId1 = getEmailandPropertyArr.programArr[ind];
                 ind1++;
-                let dataCSWise = await getDRRDataCS(csId)
+                let dataCSWise = await getDRRDataCS(csId , programId1)
                 console.log(dataCSWise)
                 if(dataCSWise.length){
                 if(e.length){
@@ -266,6 +282,10 @@ let DRReport= ()=>{
                         let dynamicValues1=await getDynamicValues(brandId1);
                         console.log(dynamicValues1)
                            if(dynamicValues1.length){
+                            if(dataCSWise[0].program_unique_identifier == 'TLC_MAR_CLMOld')
+                            dataCSWise[0].program_name = 'Club Marriott';
+                            if(dataCSWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
+                            dataCSWise[0].program_name = 'Gourmet Club';
                           //get DRR file from SFDC
 
                         let pdfFile = await generatePdf.generateDRRPDF(dataCSWise);
