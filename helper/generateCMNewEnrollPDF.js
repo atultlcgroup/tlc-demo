@@ -61,10 +61,9 @@ let headerForPage = `
 
 <tr>
 <th width="8%" >Account Name</th>
-<th width="3%">Membership Name</th>
+<th width="3%">Membership Number</th>
 <th width="5%">Email ID</th>
-<th width="8%">Customer Set 
-    <br/>Name</th>
+<th width="8%">Customer Set Name</th>
 <th width="3%">Member Type</th>
     <th width="4%"> Promo code</th>
     <th width="4%">Time</th> 

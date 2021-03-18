@@ -1000,8 +1000,51 @@ let postgresNotifyEvent = async()=>{
  }
 }
 
+let membershiptypeinfo = async(sfid)=>{
+   try {
+       let qry = `
+       select  Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+    tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
+    where mt.sfid = '${sfid}' and mt.available_for_selection_online__c = true;`
+       let data = await pool.query(qry)
+       return data.rows.length ? data.rows : []
+   } catch (error) {
+       return []
+       
+   }
+}
+
+let membershiptypeofferinfo = async(sfid)=>{
+   try {
+       let qry = `
+       select  Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+       from tlcsalesforce.membershiptype__c mt 
+       inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
+       left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
+       inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+       where membershiptypeoffer__c.sfid = '${sfid}' and available_for_sale__c = true;
+       `
+    let data = await pool.query(qry)
+    return data.rows.length ? data.rows : []
+   } catch (error) {
+       return [];
+   }
+}
+
+let getAllRecordToCreateMembershipTypeInTally = async()=>{
+    try {
+        let qry = ``
+    } catch (error) {
+        return [];
+    }
+}
+
 let staticLedgers = (client_id, client_secret )=>{
     try{
+        //for all 
+        //expose an api 
+        //automated
+
         return `success`
     }catch(e){
         return e
