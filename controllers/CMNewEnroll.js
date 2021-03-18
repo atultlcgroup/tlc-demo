@@ -5,6 +5,7 @@ dotenv.config();
 
 let CMReport = async(req,res)=>{
     try{
+        console.log(`hiiiii`)
         if(req.headers.token != process.env.POS_VARIFICATION_KEY ){      
             res.status(401).send({code: 401, message: 'Invalid Token'})
             return

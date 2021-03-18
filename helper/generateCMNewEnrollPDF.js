@@ -98,7 +98,7 @@ for (let [key ,value] of Object.entries(finalObject)) {
         <td>${d.membership_number__c}</td>
         <td align="left">${(d.email__c)}</td>
         <td align="left">${d.customer_set_name}</td>
-        <td align="left">${d.member_type__c}</td>
+        <td align="left">${d.customer_set_name == 'Visitor' ? 'Visitor' : d.member_type__c}</td>
         <td align="left">${d.promocode__c ? d.promocode__c : ``}</td>
         <td>${d.membership_activation_date__c}</td>
         </tr>`
@@ -286,10 +286,9 @@ let htmlStr=`
           <table class="tftable1" align="center" border="1">
           <tr>
               <th width="8%" >Account Name</th>
-              <th width="3%">Membership Name</th>
+              <th width="3%">Membership Number</th>
               <th width="5%">Email ID</th>
-              <th width="8%">Customer Set 
-                  <br/>Name</th>
+              <th width="8%">Customer Set Name</th>
               <th width="3%">Member Type</th>
                   <th width="4%"> Promo code</th>
                   <th width="4%">Time</th> 

@@ -64,27 +64,27 @@ let getEPRSfid = async()=>{
 let getCMNewEnroll= async(program__c )=>{
     try{
         console.log(`from query`)
-        let qry =`select payment__c.email__c ,program__c.sfid program_id , account.type member_type__c,account.name,membership__c.membership_number__c,membership__c.Membership_Enrollment_Date__c,membership__c.Membership_Renewal_Date__c,membership__c.membership_activation_date__c,
+        let qry =`select payment__c.sfid as payment_id,account.email_for_notification__c email__c ,program__c.sfid program_id , account.type member_type__c,account.name,membership__c.membership_number__c,membership__c.Membership_Enrollment_Date__c,membership__c.Membership_Renewal_Date__c,membership__c.membership_activation_date__c,
         membershiptype__c.sfid as customer_set_sfid,
         membershiptype__c.name customer_set_name,
         membershiptype__c.customer_set_program_level__c customer_set_level_name,
         program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier,
         payment__c.promocode__c
-        from tlcsalesforce.payment__c
-        inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
-        inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
-        inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
-        inner join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
-        inner join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
-        Inner Join tlcsalesforce.program__c
-        On membershiptype__c.program__c = program__c.sfid
+        from  tlcsalesforce.account
+        inner join tlcsalesforce.membership__c on membership__c.member__c=account.sfid
+        left  join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+        left join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
+        left join tlcsalesforce.city__c on city__c.sfid=property__c.city__c
+        left Join tlcsalesforce.program__c On membershiptype__c.program__c = program__c.sfid
+		left join tlcsalesforce.payment__c on payment__c.membership__c =  membership__c.sfid
        where
        ((Membership__c.Membership_Enrollment_Date__c <= current_date - interval '1 day'  and Membership__c.Membership_Enrollment_Date__c >= current_date - interval '7 day' )
         
           or (Membership__c.Membership_Renewal_Date__c <= current_date - interval '1 day' and  Membership__c.Membership_Renewal_Date__c >= current_date - interval '7 day'))
-           and
-           Membership__c is not Null and Membership_Offer__c is null
-           and program__c.sfid  = '${program__c}' 
+           --and
+          -- Membership__c is not Null and Membership_Offer__c is null 
+           and program__c.sfid  = '${program__c}'
+		   and account.email_for_notification__c not like '%@tlcgroup.com';
          `;
          console.log(`  from here ---`) 
          let data = await pool.query(qry)
