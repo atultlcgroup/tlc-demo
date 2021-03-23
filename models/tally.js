@@ -2,12 +2,15 @@ const pool = require("../databases/db").pool;
 // const poolUAT = require("../databases/dbUAT").pool;
 
 const client = require("../databases/dbNotifyEvent").client;
+const clientForMTO = require("../databases/dbNotifyEvent").clientForMTO;
+
 const tallyApiUrl = process.env.TALLY_API_URL || ``
 const tallyApiClentId = process.env.TALLY_API_CLIENT_ID || ``
 const tallyApiClientSecret = process.env.TALLY_API_SECRET || ``
 let ledgerTemplate = require('../tally/ledger_XML')
 let voucherTemplate = require('../tally/sales_voucher_XML')
 let certificateTemplate = require('../tally/certificate_with_e_cash_XML')
+let staticLedgerTemplate  = require('../tally/static_ledger_XML')
 const tallyMaximumRetrialCount = process.env.TALLY_MAXIMUM_RETRIAL_COUNT || 5;
 
 const allowedProgramUniqueIdentifiers = process.env.TALLY_ALLOWED_PROGRAM_UNIQUE_IDENTIFIER || ''
@@ -918,6 +921,18 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
        and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
        
        `)  
+       console.log(`select  distinct program__c.unique_identifier__c, membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,account.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+       from tlcsalesforce.payment__c
+       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
+       inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+       inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+       inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
+       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+       where payment__c.sfid = '${payment_SFID}' 
+        and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
+        
+        `)
       return qry ? qry.rows : [] 
     }catch(e){
         return []
@@ -1002,10 +1017,18 @@ let postgresNotifyEvent = async()=>{
 
 let membershiptypeinfo = async(sfid)=>{
    try {
-       let qry = `
-       select  Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
-    tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
-    where mt.sfid = '${sfid}' and mt.available_for_selection_online__c = true;`
+       let qry = ``
+       if(sfid){
+        qry = `
+        select   p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+        tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
+        where mt.sfid = '${sfid}' and mt.available_for_selection_online__c = true`;
+       }else{
+        qry = `
+        select   p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+        tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
+        where mt.available_for_selection_online__c = true`;    
+       }
        let data = await pool.query(qry)
        return data.rows.length ? data.rows : []
    } catch (error) {
@@ -1016,14 +1039,27 @@ let membershiptypeinfo = async(sfid)=>{
 
 let membershiptypeofferinfo = async(sfid)=>{
    try {
-       let qry = `
-       select  Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+    let qry = ``;
+       if(sfid){
+        qry = `
+       select  p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c ,p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
        from tlcsalesforce.membershiptype__c mt 
        inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
        left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
        inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
        where membershiptypeoffer__c.sfid = '${sfid}' and available_for_sale__c = true;
-       `
+       `}
+       else{
+        qry = `
+        select  p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c, p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+        from tlcsalesforce.membershiptype__c mt 
+        inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
+        left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
+        inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+        where  available_for_sale__c = true;
+        `   
+       }
+    //    console.log(qry)
     let data = await pool.query(qry)
     return data.rows.length ? data.rows : []
    } catch (error) {
@@ -1031,26 +1067,177 @@ let membershiptypeofferinfo = async(sfid)=>{
    }
 }
 
-let getAllRecordToCreateMembershipTypeInTally = async()=>{
+// let getAllRecordToCreateMembershipTypeInTally = async()=>{
+//     try {
+//         let qry = `select * from tlcsalesforce.`
+//     } catch (error) {
+//         return [];
+//     }
+// }
+
+let createStaticLedgers  = async(data , client_id , client_secret )=>{
     try {
-        let qry = ``
+            for(let d of data){
+            try{
+                console.log(`---------------------------------------------------------`)
+                // console.log(tallyApiUrl)
+                console.log(`---------------------------------------------------------`)
+                // d.supplier_company = 'TLC Testing';
+                    ledgerXML = staticLedgerTemplate.getStaticLedgerTemplate(d) 
+                    let config = {
+                    method: 'post',
+                    url: tallyApiUrl,
+                    headers: { 
+                        'client_id': client_id || tallyApiClentId, 
+                        'client_secret': client_secret || tallyApiClientSecret,
+                        'Content-Type': 'application/xml'
+                    },
+                    data : ledgerXML
+                    };  
+                    console.log(`---------------------------------------------------------12`)
+                    // console.log(ledgerXML)
+                    console.log(`---------------------------------------------------------13`)      
+                    let data = await axios(config)
+                        console.log(data.data)
+                        console.log((`${data.data}`).indexOf(`LINEERROR`))
+                        // if((`${data.data}`).indexOf(`LINEERROR`) > -1){
+                        //     updateAccountStatus(ledgerData[0].member_id__c,'Failure')
+                        //     requestObj.status = 'Failure'
+                        //     insertUpdateIntegrationLog(requestObj)
+                        // }
+                        console.log({code:data.status ,data :data.data })
+                        //  resolve({code:data.status ,data :data.data })
+                    }catch(e){
+                        console.log(e)
+                        console.log({code:e.response.status ,data :e.response.data })
+                        // reject({code:e.response.status ,data :e.response.data })
+                    }
+            }
+
+        return `Success`;
     } catch (error) {
-        return [];
+        console.log(error);
+        return `${error}`
+    }
+
+}
+
+
+let findTypeFormSFIDFORAPIForType  = async(sfid)=>{
+    try {
+        let findType = ``;
+        let qry1 = await pool.query(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        // console.log(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        if(qry1.rows.length)
+            findType = `membershipType`   
+        return findType
+    } catch (error) {
+        return ``  
     }
 }
 
-let staticLedgers = (client_id, client_secret )=>{
+let findTypeFormSFIDFORAPIForTypeOffer  = async(sfid)=>{
+    try {
+        let findType = ``;
+        let qry2 = await pool.query(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        if(qry2.rows.length)
+            findType  = `MembershipTypeOffer`;
+        return findType
+    } catch (error) {
+        return ``  
+    }
+}
+
+
+let staticLedgers = async(client_id, client_secret , membership_type_id , membership_type_offer_id , byAPi )=>{
     try{
         //for all 
         //expose an api 
         //automated
+        if( (membership_type_offer_id == 'All' || membership_type_id == 'All')){
 
+        }else{
+            if(byAPi){        
+                let data1 = await findTypeFormSFIDFORAPIForType(membership_type_id)
+                let data2 = await findTypeFormSFIDFORAPIForTypeOffer(membership_type_offer_id)
+                console.log(`data1 = ${data1} and data2 = ${data2}`)
+                if(data1 || data2)
+                {}
+                else
+                return `Please provide correct membership_type_id or membership_type_offer_id!`
+            }
+        }
+       
+        console.log(`membership_type_id =  ${membership_type_id}`)
+        console.log(`membership_type_offer_sfid =  ${membership_type_offer_id}`)
+            if(membership_type_id || membership_type_id == 'All'){
+                membership_type_id == 'All' ? membership_type_id = '' : ''
+                let membership_type_data = await membershiptypeinfo(membership_type_id)
+                console.log(membership_type_data)
+                let membership_type_data_result = await createStaticLedgers(membership_type_data , client_id , client_secret);
+            }
+            if(membership_type_offer_id || membership_type_offer_id == 'All'){
+                membership_type_offer_id == 'All' ? membership_type_offer_id = '' : ''
+                let membership_type_offer_data = await membershiptypeofferinfo(membership_type_offer_id)
+                console.log(membership_type_offer_data)
+                let membership_type_offer_data_result = await createStaticLedgers(membership_type_offer_data , client_id , client_secret);    
+            }
         return `success`
     }catch(e){
         return e
     }
 }
+
+let findTypeFormSFID  = async(sfid)=>{
+    try {
+        let findType = ``;
+        let qry1 = await pool.query(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        console.log(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        if(qry1.rows.length == 0){
+            console.log(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
+            let qry2 = await pool.query(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
+            if(qry2.rows.length){
+                await staticLedgers(process.env.TALLY_API_CLIENT_ID , process.env.TALLY_API_SECRET ,   '' , sfid , false)
+                findType  = `MembershipTypeOffer`;
+            }
+        }else{
+              await staticLedgers(process.env.TALLY_API_CLIENT_ID , process.env.TALLY_API_SECRET , sfid , '' , false)
+              findType = `MembershipType`;
+        }
+
+        return findType
+    } catch (error) {
+        return ``  
+    }
+}
+
+let postgresNotifyEventForMembershipTypeAndOffer = async()=>{
+    try{
+       clientForMTO.connect((err, clientForMTO)=>{
+           if(err) {
+             throw err;
+           }
+           clientForMTO.on('notification',async function(msg) {
+               console.log(`----------------postgresNotifyEventForMembershipTypeAndOffer-------11`)
+               // console.log(msg)
+               let notificationData =  JSON.parse(msg.payload)
+                console.log(notificationData)
+               let data = await findTypeFormSFID(notificationData.sfid)
+               console.log(data)
+           });
+           clientForMTO.on('error', function(error) {
+             console.error('This never even runs:', error);
+           });
+           let query =clientForMTO.query("LISTEN membership_type_and_offer_notifier");
+       });
+    }catch(e){
+        console.log(e)
+    }
+   }
+
+
 postgresNotifyEvent()
+postgresNotifyEventForMembershipTypeAndOffer()
 module.exports={
     scheduleTallyTasks,
     tally,

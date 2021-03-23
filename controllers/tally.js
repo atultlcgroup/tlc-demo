@@ -28,8 +28,9 @@ let staticLedgers  = async(req,res)=>{
     try{    
         if(!req.headers.client_id || !req.headers.client_secret ){
             res.status(401).send({code: 401 , message : 'Invalid inputs!'})
+            return
         }
-        let tally =await TallyModel.staticLedgers(req.headers.client_id , req.headers.client_secret)
+        let tally =await TallyModel.staticLedgers(req.headers.client_id , req.headers.client_secret , req.body.membership_type_id , req.body.membership_type_offer_id , true)
         res.status(200).send({code :200 , message: tally})
     }catch(e){
         console.log(`${e}`)
