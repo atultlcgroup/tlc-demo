@@ -296,12 +296,13 @@ let htmlStr=`
 
           </table>
       
-    </div>
     <div class="arilFont" id="pageFooter" style="font-size: 8px; height:500px; bottom:100px;" ><p><b>
     This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
    <p align="left"> ${dynamicValues[0].page_footer_1_rr__c} </p>
    <p>${dynamicValues[0].page_footer_2_rr__c}</p>
    </div>
+   </div>
+
   </body>
 
   </html>

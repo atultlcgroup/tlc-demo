@@ -1,12 +1,17 @@
-let findSum =(a, b)=>{
-    return new Promise((resolve , reject) =>{
-        setTimeout(()=>{console.log(a + b)
-            return ``} ,2000) ;        
-    })
+let arr = [3,9,3,4,-7,6,3,2];
+
+let checkSum= ()=>{
+
+for(let i =0 ;i< arr.length ; i++){
+    let sum = 0; 
+    for(let j =i+1  ; j < arr.length ; j++){
+        sum += arr[j];
+        if(sum == 0){
+            return true
+        }
+    }
+}
 }
 
-findSum(10 , 30).then(d=>{
-    console.log(`hii`)
-}).catch(e=>{
-    console.log(e)
-})
+
+console.log(checkSum())
