@@ -112,7 +112,7 @@ dailySalesReportRows+=`   <td align="center">${getEmptyIfNull(obj.member_name)}<
                     `
 
                     indexForPage++;
-                    if(indexForPage %10 == 0 && indexForPage != 0 && resultArr[indexForPage]){
+                    if(indexForPage %8 == 0 && indexForPage != 0 && resultArr[indexForPage]){
                         dailySalesReportRows+=`${headerForPage}`
                     }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
