@@ -1,55 +1,50 @@
-let getStaticLedgerTemplate = (data)=>{
-    try{
-            let template= `<ENVELOPE>
+<ENVELOPE>
             <HEADER>
              <TALLYREQUEST>Import Data</TALLYREQUEST>
             </HEADER>
             <BODY>
              <IMPORTDATA>
               <REQUESTDESC>
-               <REPORTNAME>All Masters</REPORTNAME> 
+               <REPORTNAME>All Masters</REPORTNAME>
                <STATICVARIABLES>
-                <SVCURRENTCOMPANY>${data.supplier_company}</SVCURRENTCOMPANY> 
+                <SVCURRENTCOMPANY>TLC RELATIONSHIP MANAGEMENT PVT LTD-DELHI</SVCURRENTCOMPANY>
                </STATICVARIABLES>
               </REQUESTDESC>
               <REQUESTDATA>
                <TALLYMESSAGE xmlns:UDF="TallyUDF">
-                <LEDGER NAME="${data.name}" RESERVEDNAME="">
+                <LEDGER NAME="JW Marriott Hotel New Delhi Aerocity Level 19" RESERVEDNAME="">
                  <ADDRESS.LIST TYPE="String">
-                  <ADDRESS>${data.street__c}</ADDRESS> 
-                  <ADDRESS></ADDRESS> 
+                  <ADDRESS>Lal Street</ADDRESS>
+                  <ADDRESS></ADDRESS>
                  </ADDRESS.LIST>
                  <MAILINGNAME.LIST TYPE="String">
-                  <MAILINGNAME>${data.name}</MAILINGNAME> 
+                  <MAILINGNAME>JW Marriott Hotel New Delhi Aerocity Level 19</MAILINGNAME>
                  </MAILINGNAME.LIST>
                  <OLDAUDITENTRYIDS.LIST TYPE="Number">
                   <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
                  </OLDAUDITENTRYIDS.LIST>
-                 <CREATEDDATE>20200908</CREATEDDATE> 
+                 <CREATEDDATE>20200908</CREATEDDATE>
                  <ALTEREDON>20200908</ALTEREDON>
-                 <GUID>f654a57e-d3bc-4b86-90f5-28406b2c19ec-00000182</GUID> 
-                 <CURRENCYNAME>INR</CURRENCYNAME> 
-                 <PINCODE>${data.postal_code__c}</PINCODE>
-                 <EMAIL>${data.email__c}</EMAIL>
-                 <PRIORSTATENAME>${data.state__c}</PRIORSTATENAME> 
-                 <COUNTRYNAME>${data.country__c}</COUNTRYNAME> 
-                 <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE> 
-                 <PARENT>${data.property_name}</PARENT>
+                 <GUID>f654a57e-d3bc-4b86-90f5-28406b2c19ec-00000182</GUID>
+                 <CURRENCYNAME>INR</CURRENCYNAME>
+                 <PINCODE>110001</PINCODE>
+                 <EMAIL>null</EMAIL>
+                 <PRIORSTATENAME>Delhi</PRIORSTATENAME>
+                 <COUNTRYNAME>India</COUNTRYNAME>
+                 <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
+                 <PARENT>JW Marriott Hotel New Delhi Aerocity</PARENT>
                  <CREATEDBY></CREATEDBY>
                  <ALTEREDBY></ALTEREDBY>
                  <TAXCLASSIFICATIONNAME/>
-                 <TAXTYPE>Rate</TAXTYPE> 
-                 <COUNTRYOFRESIDENCE>India</COUNTRYOFRESIDENCE> 
+                 <TAXTYPE>Rate</TAXTYPE>
+                 <COUNTRYOFRESIDENCE>India</COUNTRYOFRESIDENCE>
                  <DESCRIPTION>The Westin Gurgaon New Delhi</DESCRIPTION>
-                 <LEDGERCONTACT>${data.helpline_number__c}</LEDGERCONTACT>
-                 <LEDGERMOBILE>${data.helpline_number__c}</LEDGERMOBILE>
+                 <LEDGERCONTACT>null</LEDGERCONTACT>
+                 <LEDGERMOBILE>null</LEDGERMOBILE>
                  <GSTTYPE/>
                  <APPROPRIATEFOR/>
-                 
-
-
                  <GSTDETAILS.LIST>
-                 <GSTAPPLICABLE>&#4; Applicable</GSTAPPLICABLE>
+                <GSTAPPLICABLE>'&#4; Applicable'</GSTAPPLICABLE>
                   <APPLICABLEFROM>20170701</APPLICABLEFROM>
                   <HSNCODE>999599</HSNCODE>
                   <HSNMASTERNAME/>
@@ -59,11 +54,11 @@ let getStaticLedgerTemplate = (data)=>{
                   <GSTINELIGIBLEITC>No</GSTINELIGIBLEITC>
                   <INCLUDEEXPFORSLABCALC>No</INCLUDEEXPFORSLABCALC>
                   <STATEWISEDETAILS.LIST>
-                   <STATENAME>&#4; Any</STATENAME>
+                   <STATENAME>'&#4; Any'</STATENAME>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Central Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                    <GSTRATE> 9</GSTRATE>
+                   <GSTRATE> 9</GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>State Tax</GSTRATEDUTYHEAD>
@@ -91,10 +86,10 @@ let getStaticLedgerTemplate = (data)=>{
                   </STATEWISEDETAILS.LIST>
                   <TEMPGSTDETAILSLABRATES.LIST>       </TEMPGSTDETAILSLABRATES.LIST>
                  </GSTDETAILS.LIST>
-        
 
-                 <PARTYGSTIN></PARTYGSTIN> 
-                 <LEDSTATENAME>${data.state__c}</LEDSTATENAME> 
+
+                 <PARTYGSTIN></PARTYGSTIN>
+                 <LEDSTATENAME>Delhi</LEDSTATENAME>
                  <EXCISELEDGERCLASSIFICATION/>
                  <EXCISEDUTYTYPE/>
                  <EXCISENATUREOFPURCHASE/>
@@ -194,11 +189,11 @@ let getStaticLedgerTemplate = (data)=>{
                  <SERVICETAXDETAILS.LIST>      </SERVICETAXDETAILS.LIST>
                  <LBTREGNDETAILS.LIST>      </LBTREGNDETAILS.LIST>
                  <VATDETAILS.LIST>      </VATDETAILS.LIST>
-                 <SALESTAXCESSDETAILS.LIST>      </SALESTAXCESSDETAILS.LIST>         
+                 <SALESTAXCESSDETAILS.LIST>      </SALESTAXCESSDETAILS.LIST>
                  <LANGUAGENAME.LIST>
                   <NAME.LIST TYPE="String">
-                   <NAME>${data.name}</NAME>
-                  <NAME></NAME>       
+                   <NAME>JW Marriott Hotel New Delhi Aerocity Level 19</NAME>
+                  <NAME></NAME>
                   </NAME.LIST>
                   <LANGUAGEID> 1033</LANGUAGEID>
                  </LANGUAGENAME.LIST>
@@ -232,17 +227,17 @@ let getStaticLedgerTemplate = (data)=>{
                    <ADDRESS>Ins Chandigarh Add3</ADDRESS>
                    <ADDRESS>ins Chandigarh Add4</ADDRESS>
                   </ADDRESS.LIST>
-                  <EMAIL>${data.email__c}</EMAIL>
-                  <PRIORSTATENAME>${data.state__c}</PRIORSTATENAME>
-                  <PINCODE>${data.postal_code__c}</PINCODE>
-                  <PHONENUMBER>${data.helpline_number__c}</PHONENUMBER>
-                  <COUNTRYNAME>${data.country__c}</COUNTRYNAME>
+                  <EMAIL>null</EMAIL>
+                  <PRIORSTATENAME>Delhi</PRIORSTATENAME>
+                  <PINCODE>110001</PINCODE>
+                  <PHONENUMBER>null</PHONENUMBER>
+                  <COUNTRYNAME>India</COUNTRYNAME>
                   <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
-                  <ADDRESSNAME>${data.street__c}</ADDRESSNAME>
-                  <MOBILENUMBER>${data.helpline_number__c}</MOBILENUMBER>
+                  <ADDRESSNAME>Lal Street</ADDRESSNAME>
+                  <MOBILENUMBER>null</MOBILENUMBER>
                   <PARTYGSTIN></PARTYGSTIN>
                   <CONTACTPERSON>Hari</CONTACTPERSON>
-                  <STATE>${data.state__c}</STATE>
+                  <STATE>Delhi</STATE>
                   <ISOTHTERRITORYASSESSEE>No</ISOTHTERRITORYASSESSEE>
                   <ISEXCISEMERCHANTEXPORTER>No</ISEXCISEMERCHANTEXPORTER>
                   <ISPARTYEXEMPTED>No</ISPARTYEXEMPTED>
@@ -251,22 +246,22 @@ let getStaticLedgerTemplate = (data)=>{
                  </LEDMULTIADDRESSLIST.LIST>
                  <LEDMULTIADDRESSLIST.LIST>
                   <ADDRESS.LIST TYPE="String">
-                   <ADDRESS>${data.state__c}</ADDRESS>
-                   <ADDRESS>${data.state__c}</ADDRESS>
+                   <ADDRESS>Delhi</ADDRESS>
+                   <ADDRESS>Delhi</ADDRESS>
                    <ADDRESS></ADDRESS>
                    <ADDRESS></ADDRESS>
                   </ADDRESS.LIST>
-                  <EMAIL>${data.email__c}</EMAIL>
-                  <PRIORSTATENAME>${data.state__c}</PRIORSTATENAME>
-                  <PINCODE>${data.postal_code__c}</PINCODE>
-                  <PHONENUMBER>${data.helpline_number__c}</PHONENUMBER>
-                  <COUNTRYNAME>${data.country__c}</COUNTRYNAME>
+                  <EMAIL>null</EMAIL>
+                  <PRIORSTATENAME>Chandigarh</PRIORSTATENAME>
+                  <PINCODE>110001</PINCODE>
+                  <PHONENUMBER>null</PHONENUMBER>
+                  <COUNTRYNAME>India</COUNTRYNAME>
                   <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE>
-                  <ADDRESSNAME>${data.street__c}</ADDRESSNAME>
-                  <MOBILENUMBER>${data.helpline_number__c}</MOBILENUMBER>
+                  <ADDRESSNAME>Lal Street</ADDRESSNAME>
+                  <MOBILENUMBER>null</MOBILENUMBER>
                   <PARTYGSTIN></PARTYGSTIN>
                   <CONTACTPERSON></CONTACTPERSON>
-                  <STATE>${data.state__c}</STATE>
+                  <STATE>Delhi</STATE>
                   <ISOTHTERRITORYASSESSEE>No</ISOTHTERRITORYASSESSEE>
                   <ISEXCISEMERCHANTEXPORTER>No</ISEXCISEMERCHANTEXPORTER>
                   <ISPARTYEXEMPTED>No</ISPARTYEXEMPTED>
@@ -302,14 +297,3 @@ let getStaticLedgerTemplate = (data)=>{
              </IMPORTDATA>
             </BODY>
            </ENVELOPE>
-           `
-           return template
-    }catch(e){
-        return ``
-    }
-}
-
-
-module.exports = {
-    getStaticLedgerTemplate
-}

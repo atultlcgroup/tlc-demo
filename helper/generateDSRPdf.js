@@ -164,14 +164,14 @@ let headerForPageCertificate=`
                     `
 
 
-        // if (obj.payment_mode__c != 'Complimentary') {
+        if (obj.payment_mode__c != 'Complimentary') {
             salesCount++;
             salesAmount += obj.amount__c ? obj.amount__c : 0
             salesTax += (obj.total_amount__c - obj.amount__c) ? (obj.total_amount__c - obj.amount__c) : 0
             //salesTax += obj.tax ? obj.tax : 0
             salesTotalAmount += obj.total_amount__c
             // salesTotalAmount += (obj.amount__c ? obj.amount__c : 0 ) + (obj.tax ? obj.tax : 0);
-        // }
+        }
         summaryTotalSale += 1
         summaryTotalAmount += obj.total_amount__c
         if (pyamnetObj[obj.payment_mode__c]) {

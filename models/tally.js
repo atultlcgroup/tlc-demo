@@ -1083,6 +1083,8 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
                 // console.log(tallyApiUrl)
                 console.log(`---------------------------------------------------------`)
                 // d.supplier_company = 'TLC Testing';
+                // d.name = `JW Marriott Hotel New Delhi Aerocity Level 21`
+                // d.property_name = 'JW Marriott Hotel New Delhi Aerocity'
                     ledgerXML = staticLedgerTemplate.getStaticLedgerTemplate(d) 
                     let config = {
                     method: 'post',
@@ -1096,7 +1098,7 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
                     };  
                     console.log(`---------------------------------------------------------12`)
                     // console.log(ledgerXML)
-                    console.log(`---------------------------------------------------------13`)      
+                    console.log(`---------------------------------------------------------13`) 
                     let data = await axios(config)
                         console.log(data.data)
                         console.log((`${data.data}`).indexOf(`LINEERROR`))

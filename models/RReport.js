@@ -112,13 +112,13 @@ Left join tlcsalesforce.membershiptypeoffer__c
 on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c 
 inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid
 where
-date(reservation__c.createddate) = (current_date-1)
-and
+--date(reservation__c.createddate) = (current_date-1)
+--and
 (outlet__c.property__c='${property_id}' 
 and membershiptype__c.program__c = '${program_id}'
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
 --or membershiptype__c.sfid='a0f0k000002bjhGAAQ'
-)
+) 
 `
 // console.log(qry)
 let data = await pool.query(qry)
@@ -203,6 +203,7 @@ let RReport= ()=>{
                 let programId = getEmailandPropertyArr.programArr[ind];
                 ind++
                 let dataPropertyWise = await getRRData(propertyId , programId)
+                // console.log(`DSR DATA = ${dataPropertyWise}`)
                 // console.log(dataPropertyWise)
                 if(dataPropertyWise.length){
                     if(e.length){
@@ -212,7 +213,7 @@ let RReport= ()=>{
                         console.log(brandId)
                         console.log(`brand id = ${brandId}`)
                         let dynamicValues=await getDynamicValues(brandId);
-                        console.log(`dynamic value = ${dynamicValues}`)
+                        console.log(`dynamic value = ${JSON.stringify(dataPropertyWise)}`)
                         if(dynamicValues.length){
                             
                         if(dataPropertyWise[0].program_unique_identifier == 'TLC_MAR_CLMOld')
@@ -220,7 +221,7 @@ let RReport= ()=>{
                         if(dataPropertyWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
                         dataPropertyWise[0].program_name = 'Gourmet Club';
                             console.log("dynamicValuesdynamicValues",dynamicValues,dynamicValues.length);
-                        let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise);
+                        let pdfFile = await generatePdf.generateRRPDF(dataPropertyWise , dynamicValues);
                         console.log(pdfFile)
                         sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues,dataPropertyWise[0].program_name)
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
