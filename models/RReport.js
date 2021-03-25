@@ -112,7 +112,7 @@ Left join tlcsalesforce.membershiptypeoffer__c
 on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c 
 inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid
 where
---date(reservation__c.createddate) = (current_date-1)
+date(reservation__c.createddate) = (current_date)
 --and
 (outlet__c.property__c='${property_id}' 
 and membershiptype__c.program__c = '${program_id}'
