@@ -258,7 +258,7 @@ let htmlStr=`
       <tbody>
           <tr >
           <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues[0].tlc_logo__c}' alt=""  height=60 width=80></img></td>
-              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Sales Report-${resultArr[0].program_name}</td>
+              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Reservation Report-${resultArr[0].program_name}</td>
               <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${resultArr[0].h_name} </td>
           </tr>
       </tbody>

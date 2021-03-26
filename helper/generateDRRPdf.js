@@ -4,6 +4,23 @@ let today = new Date();
 today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
 
+let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+let convertDateFormatForPDF = (date1) => {
+    if (date1) {
+        let today1 = new Date(date1);
+        let hours1 = date1.getHours();
+        let minutes = date1.getMinutes();
+        let ampm = hours1 >= 12 ? 'pm' : 'am';
+        hours1 = hours1 % 12;
+        hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+        minutes = minutes < 10 ? '0' + minutes : minutes;
+        let strTime = hours1 + ':' + minutes + ' ' + ampm;
+        dateTime = `${String(days[today1.getDay()] || '')} ${String(today1.getDate()).padStart(2, '0')}/${today1.getMonth() +1}/${today1.getFullYear()} ${strTime}`
+    }
+    console.log("dateTime----",dateTime);
+    return dateTime
+}
 
 let convertDateFormat= (date1)=>{
     if(date1){
@@ -26,7 +43,7 @@ let convertDateFormat= (date1)=>{
 let getEmptyIfNull = (val) => {
     return val?val:'';
 }
-let  generateDRRPDF=async(drrValues)=>{
+let  generateDRRPDF=async(drrValues , dynamicValues)=>{
     let pyamnetObj={}
     let summaryTotalSale =0
 
@@ -50,7 +67,7 @@ let headerForPage = `
 </table>
 <table class="page-break tftable1" align="center" border="1" >
 <tr height="60px"></tr>
-<tr  style="margin-top:10px; " height="50"><th width="2%">S.N.</th>
+<tr  style="margin-top:10px; " height="50" style="background-color:#C4B67E; color:white;"><th width="2%">S.N.</th>
     <th width="3%">Hotel Name</th>
     <th width="7%" >Member Name</th>
     <th width="5%">Membership Type</th>
@@ -73,7 +90,13 @@ let slNo =1;
 let dailySalesReportRows =``;
 let indexForPage = 0;
 for(obj of drrValues){
-dailySalesReportRows += `<tr align="center"  height="50"><td>${slNo++}</td>
+
+    if(slNo % 2== 0)
+ dailySalesReportRows += `<tr align="center"  height="50" bgcolor= "#E3E3E3" >`;
+ else
+ dailySalesReportRows += `<tr align="center"  height="50" bgcolor= "#F2F2F2">`;
+
+dailySalesReportRows += `<td>${slNo++}</td>
                     <td align="center">${getEmptyIfNull(obj.hotel_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.member_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_type_name)}</td>
@@ -91,7 +114,7 @@ dailySalesReportRows += `<tr align="center"  height="50"><td>${slNo++}</td>
                     </tr>
                     `
                     indexForPage++;
-                    if(indexForPage %10 == 0 && indexForPage != 0 && drrValues[indexForPage]){
+                    if(indexForPage %8 == 0 && indexForPage != 0 && drrValues[indexForPage]){
                         dailySalesReportRows+=`${headerForPage}`
                     }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
@@ -176,7 +199,7 @@ let htmlStr=`
           }
           .tftable th {
               font-size: 10px;
-              background-color: #bfa57d;
+              background-color: #C4B67E;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
@@ -200,7 +223,7 @@ let htmlStr=`
         }
         .tftable1 th {
             font-size: 7px;
-            background-color: #bfa57d;
+            background-color: #C4B67E;
             border: 1px solid black;
             padding: 6px;
             text-align: center;
@@ -227,30 +250,26 @@ let htmlStr=`
 
   <body style="font-family:sans-serif;" >
   <div>
-      <table style="width: 100%;">
-          <tr>
-              <td style="font-size: 20px;color: #438282; border-bottom: 2px solid black; width: 100%">${drrValues[0].hotel_name}</td>
+      <table style="width: 100%; font-size: 11px; background-color: #C4B67E; padding: 4px; margin-bottom: 4px; color:white;">
+      <tbody>
+          <tr >
+          <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues[0].tlc_logo__c}' alt=""  height=60 width=80></img></td>
+              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Redemption Report-${drrValues[0].program_name}</td>
+              <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${drrValues[0].hotel_name} </td>
           </tr>
-          <tr>
-              <td style="width: 85%; font-size: 11px; padding-bottom: 10px;">
-                  <apex:outputText value="{0, date,EEE dd/MM/yyyy HH:mm a}">
-                      <apex:param value="{!Now()}" />
-                  </apex:outputText>
-              </td>
-          </tr>
-      </table>
-      <table style="width: 100%; font-size: 11px; background-color: #408080; padding: 4px; margin-bottom: 10px; color:white;">
-          <tr>
-              <td>Daily Redemption Report</td>
-              <td style="text-align: right">
-              ${today}
-              </td>
-          </tr>
-      </table>
-
-     
+      </tbody>
+  </table>  
+  <table style="width: 100%; font-size: 10px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
+  <tr>
+      
+      <td style="text-align: left; color:black">
+      ${convertDateFormatForPDF(new Date())}
+      </td>
+  </tr>
+</table>
           <table class="tftable1" align="center" border="1">
-              <tr height="50"><th width="2%">S.N.</th>
+              <tr "height="50" style="background-color:#C4B67E; color:white;">
+              <th width="2%">S.N.</th>
                   <th width="3%">Hotel Name</th>
                   <th width="7%" >Member Name</th>
                   <th width="5%">Membership Type</th>
@@ -272,7 +291,12 @@ let htmlStr=`
                  ${dailySalesReportRows}
 
           </table>
-      
+          <div class="arilFont" id="pageFooter" style="font-size: 8px; height:500px; bottom:100px;" ><p><b>
+          This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
+         <p align="left"> ${dynamicValues[0].page_footer_1_drr__c} </p>
+         <p>${dynamicValues[0].page_footer_2_drr__c}</p>
+         </div>
+         </div>
     </div>
   </body>
 

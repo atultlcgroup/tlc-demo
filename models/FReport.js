@@ -4,7 +4,7 @@ let sendMail= require("../helper/mailModel")
 let generateFRPdf = require("../helper/generateFRPdf");
 
 
-let findPaymentRule= async(req )=>{
+let findPaymentRule= async(req)=>{
     try{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
@@ -34,20 +34,20 @@ let findPaymentRule= async(req )=>{
 
 let getFRSfid = async()=>{
     try{
-      let qry = `select distinct property__c property_sfid,payment_email_rule__c.program__c from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct property__c property_sfid , payment_email_rule__c.program__c from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_fr__c = true or tlc_send_email_fr__c = true) and  (property__c is not NULL or property__c !='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let propertyArr = [];
-      let programArr = []
+      let programArr = [];
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           propertyArr.push(r.property_sfid)
           programArr.push(r.program__c)
       }
-      let resultObj = {emailArr: finalArr,propertyArr : propertyArr ,  programArr : programArr ,  programArr : programArr}
+      let resultObj = {emailArr: finalArr,propertyArr : propertyArr , programArr : programArr}
       return resultObj;
     }catch(e){
       return [];
@@ -59,18 +59,16 @@ let getFRSfid = async()=>{
 
 let getFRSfidCS = async()=>{
     try{
-      let qry = `select distinct customer_set__c customer_set_sfid,payment_email_rule__c.program__c from tlcsalesforce.payment_email_rule__c where
+      let qry = `select distinct customer_set__c customer_set_sfid from tlcsalesforce.payment_email_rule__c where
       (hotel_email_send_fr__c = true or tlc_send_email_fr__c = true) and  (property__c is  NULL or property__c ='')`
       let data = await pool.query(`${qry}`)
       let result = data ? data.rows : []
       let finalArr = []
       let customerSetArr = [];
-      let programArr = []
       for(r of result){
           let emails = await findPaymentRule(r)
           finalArr.push(emails)
           customerSetArr.push(r.customer_set_sfid)
-          programArr.push(r.program__c)
       }
       let resultObj = {emailArr: finalArr,customerSetArr : customerSetArr}
       return resultObj;
@@ -90,7 +88,7 @@ let getDRRData =async()=>{
 let getFRData=async(property__c , program_id)=>{
     try{
         console.log(`property__c:` , property__c)
-        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
+        let qry =`select Distinct  member_feedback__c.feedback_response__c,casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
         ,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
@@ -104,15 +102,15 @@ let getFRData=async(property__c , program_id)=>{
         Left join tlcsalesforce.case c
         on c.sfid=member_feedback__c.case__c 
         inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid 
-       where
+       --where
          --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        date(member_feedback__c.createddate) =(current_date-1)
-       and (outlet__c.property__c='${property__c}' 
-       and membershiptype__c.program__c = '${program_id}'
+        --date(member_feedback__c.createddate) =(current_date-1)
+       --and (outlet__c.property__c='${property__c}' 
         --or membershiptype__c.sfid=''
-        )
+       -- )
+        --and membershiptype__c.program__c = '${program_id}' limit 100
         `
-        console.log(qry)
+        // console.log(qry)
         let data = await pool.query(qry)
         return data.rows? data.rows : []
     }catch(e){
@@ -121,10 +119,10 @@ let getFRData=async(property__c , program_id)=>{
 }
 
 
-let getFRDataCS=async( customer_set__c , program_id)=>{
+let getFRDataCS=async( customer_set__c)=>{
     try{
         console.log(`customer_set__c:${customer_set__c}`)
-        let qry =`select Distinct casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
+        let qry =`select Distinct  member_feedback__c.feedback_response__c,casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
         ,program__c.name as program_name,property__c.sfid as property_id,program__c.unique_identifier__c as program_unique_identifier
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
@@ -145,8 +143,6 @@ let getFRDataCS=async( customer_set__c , program_id)=>{
         (
             --outlet__c.property__c='' or 
         membershiptype__c.sfid='${customer_set__c}'
-        and membershiptype__c.program__c = '${program_id}'
-
         )
         `
         let data = await pool.query(qry)
@@ -201,12 +197,11 @@ let FReport= ()=>{
         try{
             let getEmailandPropertyArr = await getFRSfid();
             console.log(getEmailandPropertyArr)
-            // return
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
                 let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)
                 let propertyId =  getEmailandPropertyArr.propertyArr[ind];
-                let programId =  getEmailandPropertyArr.programArr[ind];
+                let programId = getEmailandPropertyArr.programArr[ind];
                 ind++
                 let dataPropertyWise = await getFRData(propertyId , programId)
                 if(dataPropertyWise.length){
@@ -221,7 +216,7 @@ let FReport= ()=>{
                     if(dynamicValues.length){
                     if(dataPropertyWise[0].program_unique_identifier == 'TLC_MAR_CLMOld')
                     dataPropertyWise[0].program_name = 'Club Marriott';
-                        let pdfFile = await generateFRPdf.generateFRPDF(dataPropertyWise, propertyName , propertyId)
+                        let pdfFile = await generateFRPdf.generateFRPDF(dataPropertyWise, propertyName , propertyId , dynamicValues)
                         if(dataPropertyWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
                         dataPropertyWise[0].program_name = 'Gourmet Club';
                         console.log(pdfFile)
@@ -247,10 +242,8 @@ let FReport= ()=>{
             for(let e of getEmailandCSArr.emailArr){
                 let insertedId1 = await insertLog('',getEmailandCSArr.customerSetArr[ind1],e)
                 let csId = getEmailandCSArr.customerSetArr[ind1];
-                let programId1 = getEmailandCSArr.programArr[ind1];
-
                 ind1++;
-                let dataCSWise = await getFRDataCS(csId , programId1)
+                let dataCSWise = await getFRDataCS(csId)
                 if(dataCSWise.length){
                     let customersetName = await getCSName(csId)
                     if(e.length){
@@ -264,7 +257,7 @@ let FReport= ()=>{
                         dataCSWise[0].program_name = 'Club Marriott';
                         if(dataCSWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
                         dataCSWise[0].program_name = 'Gourmet Club';
-                        let pdfFile = await generateFRPdf.generateFRPDF(dataCSWise,customersetName,csId)
+                        let pdfFile = await generateFRPdf.generateFRPDF(dataCSWise,customersetName,csId , dynamicValues)
                         console.log("dynamicValuesdynamicValuesCS",dynamicValues1,dynamicValues1.length);
                             sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues1,dataCSWise[0].program_name)
                             updateLog(insertedId1, true ,'Success', '' , pdfFile)

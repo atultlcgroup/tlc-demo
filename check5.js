@@ -1,17 +1,23 @@
-let arr = [3,9,3,4,-7,6,3,2];
+let arr = [1 ,7 ,2];
 
-let checkSum= ()=>{
-
-for(let i =0 ;i< arr.length ; i++){
-    let sum = 0; 
-    for(let j =i+1  ; j < arr.length ; j++){
-        sum += arr[j];
-        if(sum == 0){
-            return true
+findTrangle = ()=>{
+    for(let i  =0; i< arr.length  -1 ; i++){
+        let ind  = arr[i];
+        let iden = 0;
+        for(let j=0;j< arr.length ;j++){
+            if(j != i && j != i +1){
+                    if(arr[i + 1]  + arr[j] > ind  )
+                    iden++ ;
+                    if(arr[i + 1]  + ind  > arr[j]    )
+                    iden++ ;
+                    if(  arr[j] + ind > arr[i + 1]   )
+                    iden++ ;            
+            }
+  
+         if(iden == 3)
+         return true 
         }
     }
-}
+    return false;
 }
 
-
-console.log(checkSum())

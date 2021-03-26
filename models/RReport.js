@@ -113,7 +113,7 @@ on membershiptypeoffer__c.sfid=membership_offers__c.customer_Set_offer__c
 inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid
 where
 date(reservation__c.createddate) = (current_date)
---and
+and
 (outlet__c.property__c='${property_id}' 
 and membershiptype__c.program__c = '${program_id}'
 --and (outlet__c.property__c='a0D0k000009PPsEEAW' 
@@ -261,7 +261,7 @@ let RReport= ()=>{
                             dataCSWise[0].program_name = 'Club Marriott';
                             if(dataCSWise[0].program_unique_identifier == 'TLC_OLE_GRMTOld')
                             dataCSWise[0].program_name = 'Gourmet Club';
-                            let pdfFile = await generatePdf.generateRRPDF(dataCSWise);
+                            let pdfFile = await generatePdf.generateRRPDF(dataCSWise , dynamicValues1);
                         console.log(pdfFile)
                         sendMail.sendRReport(`${pdfFile}`,'Todays Reservation Report',e,dynamicValues1 , dataCSWise[0].program_name)
                         updateLog(insertedId1, true ,'Success', '' , pdfFile)
