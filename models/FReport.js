@@ -102,13 +102,14 @@ let getFRData=async(property__c , program_id)=>{
         Left join tlcsalesforce.case c
         on c.sfid=member_feedback__c.case__c 
         inner Join tlcsalesforce.program__c on  membershiptype__c.program__c = program__c.sfid 
-       where
+       --where
          --date(member_feedback__c.createddate) ='2020-04-21'--(current_date-1)
-        date(member_feedback__c.createddate) =(current_date-1)
-       and (outlet__c.property__c='${property__c}' 
+        --date(member_feedback__c.createddate) =(current_date-1)
+       --and (outlet__c.property__c='${property__c}' 
         --or membershiptype__c.sfid=''
-       )
-        and membershiptype__c.program__c = '${program_id}' limit 100
+       --)
+        --and membershiptype__c.program__c = '${program_id}' 
+        limit 100
         `
         // console.log(qry)
         let data = await pool.query(qry)

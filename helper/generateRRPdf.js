@@ -96,18 +96,18 @@ else
 dailySalesReportRows += `<tr align="center"  height="50" background-color: #F2F2F2;><td>${slNo++}</td>`;
 
 
-dailySalesReportRows+=`   <td align="center">${getEmptyIfNull(obj.member_name)}</td>
-                    <td align="center">${getEmptyIfNull(obj.reservation_status__c)}</td>
-                    <td align="center">${getEmptyIfNull(obj.customer_set_name)}</td>
-                    <td align="center">${getEmptyIfNull(obj.outlet_name)}</td>
+dailySalesReportRows+=`   <td style="text-align: left;">${getEmptyIfNull(obj.member_name)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.reservation_status__c)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.customer_set_name)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.outlet_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_number__c)}</td>
                     <td align="center">${(getEmptyIfNull(obj.r_date_time) ? convertDateFormat(new Date(obj.r_date_time)) : '')}</td>
                     <td align="center">${getEmptyIfNull(obj.number_of_guests__c)}</td>
                     <td align="center">${getEmptyIfNull(obj.number_of_adults__c)}</td>
                     <td align="center">${getEmptyIfNull(obj.number_of_kids__c)}</td>
-                    <td align="center">${getEmptyIfNull(obj.celebration_type__c)}</td>
-                    <td align="center">${getEmptyIfNull(obj.celebration_remark__c)}</td>
-                    <td align="center">${getEmptyIfNull(obj.specialrequest__c)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.celebration_type__c)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.celebration_remark__c)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.specialrequest__c)}</td>
                     </tr>
                     `
 
@@ -258,7 +258,7 @@ let htmlStr=`
       <tbody>
           <tr >
           <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues[0].tlc_logo__c}' alt=""  height=60 width=80></img></td>
-              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Reservation Report-${resultArr[0].program_name}</td>
+              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Reservation Report - ${resultArr[0].program_name}</td>
               <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${resultArr[0].h_name} </td>
           </tr>
       </tbody>

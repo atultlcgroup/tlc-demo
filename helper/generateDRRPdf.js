@@ -1,5 +1,6 @@
 const Promise = require('bluebird');
 
+
 let today = new Date();
 today.setDate(today.getDate() - 1); 
 today = `${String(today.getDate()).padStart(2, '0')} ${today.toLocaleString('default', { month: 'short' })} ${today.getFullYear()}`;
@@ -68,8 +69,7 @@ let headerForPage = `
 <table class="page-break tftable1" align="center" border="1" >
 <tr height="60px"></tr>
 <tr  style="margin-top:8px; " height="50" style="background-color:#C4B67E; color:white;"><th width="2%">S.N.</th>
-    <th width="3%">Hotel Name</th>
-    <th width="7%" >Member Name</th>
+    <th width="7%"  >Member Name</th>
     <th width="5%">Membership Type</th>
     <th width="3%">Membership Offer</th>
     <th width="5%">Outlet</th>
@@ -97,11 +97,10 @@ for(obj of drrValues){
  dailySalesReportRows += `<tr align="center"  height="50" bgcolor= "#F2F2F2">`;
 
 dailySalesReportRows += `<td>${slNo++}</td>
-                    <td align="center">${getEmptyIfNull(obj.hotel_name)}</td>
-                    <td align="center">${getEmptyIfNull(obj.member_name)}</td>
-                    <td align="center">${getEmptyIfNull(obj.membership_type_name)}</td>
-                    <td align="center">${getEmptyIfNull(obj.offer_name)}</td>
-                    <td align="center">${getEmptyIfNull(obj.outlet_name)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.member_name)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.membership_type_name)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.offer_name)}</td>
+                    <td style="text-align: left;">${getEmptyIfNull(obj.outlet_name)}</td>
                     <td align="center">${getEmptyIfNull(obj.membership_number__c)}</td> 
                     <td align="center">${(getEmptyIfNull(obj.redemption_date_time__c) ? convertDateFormat(new Date(obj.redemption_date_time__c)):'')}</td>
                     <td align="center">${getEmptyIfNull(obj.cheque_number__c)}</td>
@@ -254,7 +253,7 @@ let htmlStr=`
       <tbody>
           <tr >
           <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues[0].tlc_logo__c}' alt=""  height=60 width=80></img></td>
-              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Redemption Report-${drrValues[0].program_name}</td>
+              <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Redemption Report - ${drrValues[0].program_name}</td>
               <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${drrValues[0].hotel_name} </td>
           </tr>
       </tbody>
@@ -270,7 +269,6 @@ let htmlStr=`
           <table class="tftable1" align="center" border="1">
               <tr "height="50" style="background-color:#C4B67E; color:white;">
               <th width="2%">S.N.</th>
-                  <th width="3%">Hotel Name</th>
                   <th width="7%" >Member Name</th>
                   <th width="5%">Membership Type</th>
                   <th width="3%">Membership Offer</th>

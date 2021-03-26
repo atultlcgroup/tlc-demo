@@ -725,8 +725,8 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
             //for voucher 
             // ledgerData[0].name = 'voucher1';
             // ledgerData[0].member_id__c = '3258'
-            ledgerData[0].current_name = ledgerData[0].name
-            ledgerData[0].new_name = ledgerData[0].name 
+            ledgerData[0].current_name = ledgerData[0].name ;
+            ledgerData[0].new_name = ledgerData[0].name ;
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;  
         }
