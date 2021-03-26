@@ -88,7 +88,7 @@ let getDRRData =async()=>{
 let getFRData=async(property__c , program_id)=>{
     try{
         console.log(`property__c:` , property__c)
-        let qry =`select Distinct  member_feedback__c.feedback_response__c,casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
+        let qry =`select Distinct  property__c.name property_name,member_feedback__c.feedback_response__c,casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
         ,program__c.name as program_name,program__c.unique_identifier__c as program_unique_identifier
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account
@@ -122,7 +122,7 @@ let getFRData=async(property__c , program_id)=>{
 let getFRDataCS=async( customer_set__c)=>{
     try{
         console.log(`customer_set__c:${customer_set__c}`)
-        let qry =`select Distinct  member_feedback__c.feedback_response__c,casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
+        let qry =`select Distinct  property__c.name property_name,member_feedback__c.feedback_response__c,casenumber,member_feedback__c.name  Feedbacknumber,member_feedback__c.sfid ID,account.name as AccountOwner,outlet__c.name outlet,member_feedback__c.rating__c,member_feedback__c.createddate,member_feedback__c.member_comments__c
         ,program__c.name as program_name,property__c.sfid as property_id,program__c.unique_identifier__c as program_unique_identifier
         from tlcsalesforce.member_feedback__c
         inner join tlcsalesforce.account

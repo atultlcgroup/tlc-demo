@@ -241,7 +241,7 @@ let htmlStr=`
           <tr >
           <td align="left" style="font-size: 14px;color: #808000;  width: 30%"><img src='${dynamicValues[0].tlc_logo__c}' alt=""  height=60 width=80></img></td>
               <td align="center" style="font-size: 14px; width: 30%; color:black;">Daily Feedback Report-${frValues[0].program_name}</td>
-              <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${frValues[0].hotel_name} </td>
+              <td align="right"style="font-size: 14px; width: 30%; color:black;"> ${frValues[0].property_name} </td>
           </tr>
       </tbody>
   </table>  
@@ -268,7 +268,6 @@ let htmlStr=`
               
                  ${dailySalesReportRows}
 
-          </table>
           </table>
           <div class="arilFont" id="pageFooter" style="font-size: 8px; height:500px; bottom:100px;" ><p><b>
           This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
