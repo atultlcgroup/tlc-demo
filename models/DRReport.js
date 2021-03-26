@@ -106,18 +106,21 @@ let getDRRData =async(property_id , program_id)=>{
         on a.sfid=reservation__c.assigned_staff_member__c
         Inner Join tlcsalesforce.program__c
         On membershiptype__c.program__c = program__c.sfid 
-        where 
-        (
-            membershiptype__c.property__c='${property_id}' 
-            and membershiptype__c.program__c = '${program_id}'
+        --where 
+       -- (
+           -- membershiptype__c.property__c='${property_id}' 
+          --  and membershiptype__c.program__c = '${program_id}'
 
        -- membershiptype__c.property__c='a0D0k000009PPsEEAW' 
         --or membershiptype__c.sfid='a0f0k000003FSKyAAO'
-        ) limit 100
-        and 
+        --) 
+        limit 100
+       -- and 
         --date(redemption_log__c.redemption_date_time__c) = '2020-10-20'
-       date(redemption_log__c.redemption_date_time__c) = (current_date-1) --'2020-08-25'
+       --date(redemption_log__c.redemption_date_time__c) = (current_date-1) --'2020-08-25'
         `;
+        
+        // console.log(qry)
         let data = await pool.query(qry)
         return data.rows ? data.rows : []
     }catch(e){
@@ -219,7 +222,7 @@ let DRReport= ()=>{
         try{
             console.log(`-------------`)
             let getEmailandPropertyArr = await getDRRSfid()
-            // console.log(getEmailandPropertyArr)
+            console.log(getEmailandPropertyArr)
             let ind = 0;
             for(let e of getEmailandPropertyArr.emailArr){
                 let insertedId = await insertLog(getEmailandPropertyArr.propertyArr[ind],'',e)

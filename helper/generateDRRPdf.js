@@ -67,7 +67,7 @@ let headerForPage = `
 </table>
 <table class="page-break tftable1" align="center" border="1" >
 <tr height="60px"></tr>
-<tr  style="margin-top:10px; " height="50" style="background-color:#C4B67E; color:white;"><th width="2%">S.N.</th>
+<tr  style="margin-top:8px; " height="50" style="background-color:#C4B67E; color:white;"><th width="2%">S.N.</th>
     <th width="3%">Hotel Name</th>
     <th width="7%" >Member Name</th>
     <th width="5%">Membership Type</th>
@@ -114,7 +114,7 @@ dailySalesReportRows += `<td>${slNo++}</td>
                     </tr>
                     `
                     indexForPage++;
-                    if(indexForPage %8 == 0 && indexForPage != 0 && drrValues[indexForPage]){
+                    if(indexForPage %7 == 0 && indexForPage != 0 && drrValues[indexForPage]){
                         dailySalesReportRows+=`${headerForPage}`
                     }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
@@ -191,21 +191,21 @@ let htmlStr=`
 
           
           .tftable {
-              font-size: 10px;
+              font-size: 8px;
               color: #333333;
               width: 35%;
               border: 1px solid black;
               border-collapse: collapse;
           }
           .tftable th {
-              font-size: 10px;
+              font-size: 8px;
               background-color: #C4B67E;
               border: 1px solid black;
               padding: 6px;
               text-align: center;
           }
           .tftable td {
-              font-size: 10px;
+              font-size: 8px;
               border: 1px solid black;
               padding: 6px;
           }
@@ -259,7 +259,7 @@ let htmlStr=`
           </tr>
       </tbody>
   </table>  
-  <table style="width: 100%; font-size: 10px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
+  <table style="width: 100%; font-size: 8px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
   <tr>
       
       <td style="text-align: left; color:black">
@@ -291,7 +291,7 @@ let htmlStr=`
                  ${dailySalesReportRows}
 
           </table>
-          <div class="arilFont" id="pageFooter" style="font-size: 8px; height:500px; bottom:100px;" ><p><b>
+          <div class="arilFont" id="pageFooter" style="font-size: 8px; style="font-size: 8px; height:auto; margin-top:0px; " ><p><b>
           This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
          <p align="left"> ${dynamicValues[0].page_footer_1_drr__c} </p>
          <p>${dynamicValues[0].page_footer_2_drr__c}</p>

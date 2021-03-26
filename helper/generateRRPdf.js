@@ -112,7 +112,7 @@ dailySalesReportRows+=`   <td align="center">${getEmptyIfNull(obj.member_name)}<
                     `
 
                     indexForPage++;
-                    if(indexForPage %8 == 0 && indexForPage != 0 && resultArr[indexForPage]){
+                    if(indexForPage %7 == 0 && indexForPage != 0 && resultArr[indexForPage]){
                         dailySalesReportRows+=`${headerForPage}`
                     }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
@@ -263,7 +263,7 @@ let htmlStr=`
           </tr>
       </tbody>
   </table>
-  <table style="width: 100%; font-size: 10px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
+  <table style="width: 100%; font-size: 8px; background-color: white; padding: 0; margin-bottom: 0px; color:white;">
   <tr>
       
       <td style="text-align: left; color:black">
@@ -296,7 +296,7 @@ let htmlStr=`
 
           </table>
       
-    <div class="arilFont" id="pageFooter" style="font-size: 8px; height:500px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter"  style="font-size: 8px; height:auto; margin-top:0px; " ><p><b>
     This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
    <p align="left"> ${dynamicValues[0].page_footer_1_rr__c} </p>
    <p>${dynamicValues[0].page_footer_2_rr__c}</p>
