@@ -221,7 +221,7 @@ let FReport= ()=>{
                         dataPropertyWise[0].program_name = 'Gourmet Club';
                         console.log(pdfFile)
 
-                        sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataPropertyWise[0].program_name)
+                        // sendMail.sendFReport(`${pdfFile}`,'Feedback Report',e,dynamicValues,dataPropertyWise[0].program_name)
                     updateLog(insertedId, true ,'Success', '' , pdfFile)
 
                     }else{

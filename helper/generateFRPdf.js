@@ -272,7 +272,7 @@ let htmlStr=`
                  ${dailySalesReportRows}
 
           </table>
-          <div class="arilFont" id="pageFooter" style="font-size: 5px; height:600px; bottom:200px;" ><p><b>
+          <div class="arilFont" id="pageFooter" style="font-size: 7px; height:700px; bottom:100px;"  margin-bottom: 10px;><p><b>
           This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
          <p align="left"> ${dynamicValues[0].page_footer_1_fr__c} </p>
          <p>${dynamicValues[0].page_footer_2_fr__c}</p>
