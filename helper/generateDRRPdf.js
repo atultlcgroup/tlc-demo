@@ -291,7 +291,7 @@ let htmlStr=`
                  ${dailySalesReportRows}
 
           </table>
-          <div class="arilFont" id="pageFooter" style="font-size: 8px; style="font-size: 8px; height:auto; margin-top:0px; " ><p><b>
+          <div class="arilFont" id="pageFooter" style="font-size: 8px; height:auto; margin-top:0px; " ><p><b>
           This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
          <p align="left"> ${dynamicValues[0].page_footer_1_drr__c} </p>
          <p>${dynamicValues[0].page_footer_2_drr__c}</p>
