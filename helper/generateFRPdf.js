@@ -98,7 +98,7 @@ for(obj of frValues){
                     </tr>
                     `
                     indexForPage++;
-                    if(indexForPage %8 == 0 && indexForPage != 0  && frValues[indexForPage]){
+                    if(indexForPage %7 == 0 && indexForPage != 0  && frValues[indexForPage]){
                         dailySalesReportRows+=`${headerForPage}`
                     }
                 // if((obj.payment_mode__c).indexOf('Complimentary') >= 0)
