@@ -78,10 +78,10 @@ let getCMNewEnroll= async(program__c )=>{
         left Join tlcsalesforce.program__c On membershiptype__c.program__c = program__c.sfid
 		left join tlcsalesforce.payment__c on payment__c.membership__c =  membership__c.sfid
        where
-       ((Membership__c.Membership_Enrollment_Date__c <= current_date - interval '1 day'  and Membership__c.Membership_Enrollment_Date__c >= current_date - interval '7 day' )
+       ((Membership__c.Membership_Enrollment_Date__c = current_date  )
         
-          or (Membership__c.Membership_Renewal_Date__c <= current_date - interval '1 day' and  Membership__c.Membership_Renewal_Date__c >= current_date - interval '7 day'))
-           --and
+       or (Membership__c.Membership_Renewal_Date__c = current_date ))
+        --and
           -- Membership__c is not Null and Membership_Offer__c is null 
            and program__c.sfid  = '${program__c}'
 		   and account.email_for_notification__c not like '%@tlcgroup.com';

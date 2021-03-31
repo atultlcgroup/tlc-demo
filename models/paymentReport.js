@@ -77,12 +77,13 @@ let formatDate=(date)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' limit 1`;
+        qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_sfid}' limit 1`;
         else if(req.property_sfid)
-        qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' limit 1`;
+        qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program_sfid}' limit 1`;
         else if(req.customer_set_sfid)
-        qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' limit 1`;
+        qry = `select sfid from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_sfid}' limit 1`;
         console.log(qry)
+        console.log(`----------------`)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
         if(result.length )
@@ -100,11 +101,11 @@ let findPaymentRule= async(req)=>{
         console.log(`${req.property_sfid} || ${req.customer_set_sfid}`)
         let qry = ``;
         if(req.property_sfid && req.customer_set_sfid)
-        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' limit 1`;
+        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_sfid}' limit 1`;
         else if(req.property_sfid)
-        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' limit 1`;
+        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program_sfid}' limit 1`;
         else if(req.customer_set_sfid)
-        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' limit 1`;
+        qry = `select * from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_sfid}' limit 1`;
         console.log(qry)
         let emailData = await pool.query(`${qry}`)
         let result = emailData ? emailData.rows : []
@@ -155,6 +156,7 @@ let paymentReport =async (req)=>{
         // lastRunTime = runTime
         // idenLastRunTime = 2;
         let qry1= `Select  distinct 
+        membershiptype__c.program__c program_sfid,
         membershiptype__c.property__c property_sfid,
         membershiptype__c.sfid customer_set_sfid,
         property__c.name hotel_name,
@@ -211,7 +213,7 @@ let paymentReport =async (req)=>{
 
             // req.property_sfid ='a0g6D000000ruT7QAI'
         let emails = await findPaymentRule(req);
-       
+       console.log(`emails= ${emails}`)
         if(emails.length > 0){
                       //get brand Id
             let brandId = await getBrandId(req.property_sfid,``)
@@ -221,6 +223,7 @@ let paymentReport =async (req)=>{
             let emailRuleId = await getEmailRuleId(req)
             insertUpdateLogsForPayments(req.transaction_id__c,"PENING","EPR",emails.join(","), process.env.EMAIL_FOR_PAYMENT_REPORT,emailRuleId)
         let hotelName = req.hotel_name ? req.hotel_name : '';
+
         // let subject = `Notification - Payment Confirmation - ${hotelName}`;
         let subject = dynamicValues[0].subject_epr__c
         // let dateFormat1 = (req.createddate?req.createddate:  "")
