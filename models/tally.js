@@ -1095,8 +1095,8 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
 
                     let config = {
                     method: 'post',
-                    // url: tallyApiUrl,
-                    url: `http://164.52.200.15:9000/`,
+                    url: tallyApiUrl,
+                    // url: `http://164.52.200.15:9000/`,
                     headers: { 
                         'client_id': client_id || tallyApiClentId, 
                         'client_secret': client_secret || tallyApiClientSecret,
