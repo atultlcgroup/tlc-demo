@@ -63,17 +63,17 @@ let getStaticLedgerTemplate = (data)=>{
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Central Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                    <GSTRATE> 9</GSTRATE>
+                    <GSTRATE> ${data.CGST} </GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>State Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                    <GSTRATE> 9</GSTRATE>
+                    <GSTRATE> ${data.SGST} </GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Integrated Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                    <GSTRATE> 18 </GSTRATE>
+                    <GSTRATE> ${data.IGST} </GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Cess</GSTRATEDUTYHEAD>

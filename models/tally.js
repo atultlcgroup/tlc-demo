@@ -1020,12 +1020,12 @@ let membershiptypeinfo = async(sfid)=>{
        let qry = ``
        if(sfid){
         qry = `
-        select   p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+        select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
         tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
         where mt.sfid = '${sfid}' and mt.available_for_selection_online__c = true`;
        }else{
         qry = `
-        select   p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+        select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
         tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
         where mt.available_for_selection_online__c = true`;    
        }
@@ -1042,7 +1042,7 @@ let membershiptypeofferinfo = async(sfid)=>{
     let qry = ``;
        if(sfid){
         qry = `
-       select  p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c ,p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+       select  mt.tax_master__c ,p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c ,p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
        from tlcsalesforce.membershiptype__c mt 
        inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
        left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
@@ -1051,7 +1051,7 @@ let membershiptypeofferinfo = async(sfid)=>{
        `}
        else{
         qry = `
-        select  p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c, p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+        select  mt.tax_master__c ,p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c, p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
         from tlcsalesforce.membershiptype__c mt 
         inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
         left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
@@ -1082,13 +1082,21 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
                 console.log(`---------------------------------------------------------`)
                 // console.log(tallyApiUrl)
                 console.log(`---------------------------------------------------------`)
+                let taxData = await findTax(d.tax_master__c)
+                d.IGST = taxData.IGST;
+                d.CGST = taxData.CGST;
+                d.SGST = taxData.SGST;
+                d.UTGST = taxData.UTGST;
                 // d.supplier_company = 'TLC Testing';
                 // d.name = `JW Marriott Hotel New Delhi Aerocity Level 21`
                 // d.property_name = 'JW Marriott Hotel New Delhi Aerocity'
+                console.log(d)
                     ledgerXML = staticLedgerTemplate.getStaticLedgerTemplate(d) 
+
                     let config = {
                     method: 'post',
-                    url: tallyApiUrl,
+                    // url: tallyApiUrl,
+                    url: `http://164.52.200.15:9000/`,
                     headers: { 
                         'client_id': client_id || tallyApiClentId, 
                         'client_secret': client_secret || tallyApiClientSecret,
