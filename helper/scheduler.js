@@ -196,6 +196,17 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY == true || process.env.IS_SCHEDULE
   scheduleTasksForTally(process.env.SCHEDULER_TIME_FOR_TALLY);
 }
 
+let scheduleTasksForTallyPayment=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR Tally : Payment ========================`)
+  tally.scheduleTallyTasksFromPayments()
+ console.log(`================= Tally: Payment : Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY_PAYMENT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY_PAYMENT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_TALLY_PAYMENT == 'TRUE')
+{
+  console.log(`schedule Tasks For Tally: Payment`);
+  scheduleTasksForTallyPayment(process.env.SCHEDULER_TIME_FOR_TALLY_PAYMENT);
+}
 
 // New enrollment  for CM 
 let scheduleTasksForCMNewEnroll=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{

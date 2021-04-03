@@ -124,6 +124,20 @@ let scheduleTallyTasks = async()=>{
     }
 }
 
+let scheduleTallyTasksFromPayments = async()=>{
+    try{
+        console.log(`select sfid from tlcsalesforce.payment__c where createddate > (current_date - 3) and (tally_status__c = 'Not-Processed' or tally_status__c is Null)`)
+        let data = await pool.query(`select sfid from tlcsalesforce.payment__c where createddate > current_date - 4 and (tally_status__c = 'Not-Processed' or tally_status__c is Null)`)
+        if(data.rows.length){
+            data.rows.map(d=>{
+                tally(tallyApiClentId,tallyApiClientSecret,d.sfid)
+            })
+        }
+    }catch(e){
+        console.log(e)
+    }
+}
+
 let checkProgramid = async(programId)=>{
     try {
         console.log(`select * from tlcsalesforce.payment__c where sfid = '${programId}'`)
@@ -998,7 +1012,9 @@ let postgresNotifyEvent = async()=>{
                 console.log(`previous payment id = ${previousPaymentId}  , previous_payment_status = ${previousPaymentStatus},  new paymentid = ${notificationData['sfid']} and payment_status = ${notificationData['payment_status__c']} ---- 1`)
                 // tallyNotify( tallyApiClentId ,tallyApiClientSecret,msg.payload.sfid)
             }else{
-                tallyNotify( tallyApiClentId ,tallyApiClientSecret,notificationData['sfid'])
+                 setTimeout(()=>{
+                    tallyNotify( tallyApiClentId ,tallyApiClientSecret,notificationData['sfid'])
+                 }, 5 * 60 * 1000)
                 console.log(`previous payment id = ${previousPaymentId}  , previous_payment_status = ${previousPaymentStatus},  new paymentid = ${notificationData['sfid']} and payment_status = ${notificationData['payment_status__c']} } ----2`)
             }
             previousPaymentId = notificationData['sfid'];
@@ -1095,8 +1111,8 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
 
                     let config = {
                     method: 'post',
-                    url: tallyApiUrl,
-                    // url: `http://164.52.200.15:9000/`,
+                    // url: tallyApiUrl,
+                    url: `http://164.52.200.15:9000/`,
                     headers: { 
                         'client_id': client_id || tallyApiClentId, 
                         'client_secret': client_secret || tallyApiClientSecret,
@@ -1252,5 +1268,6 @@ module.exports={
     scheduleTallyTasks,
     tally,
     updateLedger,
-    staticLedgers
+    staticLedgers,
+    scheduleTallyTasksFromPayments
 }

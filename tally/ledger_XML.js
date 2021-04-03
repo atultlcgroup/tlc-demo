@@ -22,7 +22,7 @@ let getLedgerTemplate =(data)=> {
               <ADDRESS>${data.billingstate}</ADDRESS> 
              </ADDRESS.LIST>
              <MAILINGNAME.LIST TYPE="String">
-              <MAILINGNAME>${data.name}-${data.member_id__c}</MAILINGNAME> 
+              <MAILINGNAME>${data.new_name}-${data.member_id__c}</MAILINGNAME> 
              </MAILINGNAME.LIST>
              <OLDAUDITENTRYIDS.LIST TYPE="Number">
               <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>

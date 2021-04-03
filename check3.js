@@ -1,13 +1,3 @@
-class A {
-  a = ``;
-  A(){
-    if(a)
-    return a;
-    else{
-      a = new A()
-      return a;
-  }
-}
 
-}
-
+for(let i =0 ;i< 3 ; i++)
+setTimeout(()=>{console.log(i)},5 * 60 * 1000)
