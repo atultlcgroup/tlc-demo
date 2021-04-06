@@ -12,7 +12,7 @@ const tally=require('../models/tally');
 
 const CMNewEnroll=require('../models/CMNewEnroll');
 
-
+const DROPOFFAMV = require('../models/mobileVerificationCase')
 
 
 
@@ -219,4 +219,17 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_CM_NEW_ENROLL == true || process.env.IS_
 {
   console.log(`schedule Tasks For CM New Enroll.`);
   scheduleTasksForCMNewEnroll(process.env.SCHEDULER_TIME_FOR_CM_NEW_ENROLL);
+}
+
+// DROP OFF AFTER MOBILE VERIFICATION
+let scheduleTasksForDROPOFFAMV=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START DROPOFFAMV ========================`)
+  DROPOFFAMV.mobileVerificationCase()
+ console.log(`================= DROPOFFAMV: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DROP_OFF_AFTER_MV == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DROP_OFF_AFTER_MV == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_DROP_OFF_AFTER_MV == 'TRUE')
+{
+  console.log(`schedule Tasks For DROPOFFAMV.`);
+  scheduleTasksForDROPOFFAMV(process.env.SCHEDULER_TIME_FOR_DROP_OFF_AFTER_MV);
 }

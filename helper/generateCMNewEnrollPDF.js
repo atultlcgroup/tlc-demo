@@ -20,7 +20,7 @@ let getDateFormDate = (date1) => {
 
 let getTimeFromdate  = (date)=>{
     if(date){
-        let today1 = new Date(date);
+        let today1 = (new Date((new Date(date)).getTime() + 330*60000));
         let hours1 = today1.getHours();
         let minutes = today1.getMinutes();
         let ampm = hours1 >= 12 ? 'pm' : 'am';
