@@ -204,7 +204,7 @@ let mobileVerificationCase=async()=>{
     }
 }
 
-mobileVerificationCase();
+// mobileVerificationCase();
 module.exports={
     mobileVerificationCase
 }
