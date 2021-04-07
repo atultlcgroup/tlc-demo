@@ -145,14 +145,14 @@ let htmlStr=`
 
         
         .tftable {
-            font-size: 7px;
+            font-size: 10px;
             color: #333333;
             width: 35%;
             border: 1px solid black;
             border-collapse: collapse;
         }
         .tftable th {
-            font-size: 7px;
+            font-size: 10px;
             color:white;
             background-color: #bfa57d;
             border: 1px solid black;
@@ -160,7 +160,7 @@ let htmlStr=`
             text-align: center;
         }
         .tftable td {
-            font-size: 7px;
+            font-size: 10px;
             border: 1px solid black;
             padding: 6px;
             text-align: center;
@@ -194,21 +194,21 @@ let htmlStr=`
      
 
         .tftable1 {
-          font-size: 7px;
+          font-size: 10px;
           color: #333333;
           width: 100%;
           border: 1px solid black;
           border-collapse: collapse;
       }
       .tftable1 th {
-          font-size: 7px;
+          font-size: 10px;
           background-color: #C4B67E;
           border: 1px solid black;
           padding: 6px;
           text-align: center;
       }
       .tftable1 td {
-          font-size: 7px;
+          font-size: 10px;
           border: 1px solid black;
           padding: 6px;
       }
@@ -304,7 +304,7 @@ let htmlStr=`
           </table>
       
     </div>
-    <div class="arilFont" id="pageFooter" style="font-size: 7px; height:700px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter" style="font-size: 10px; height:700px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
     <p align="left"> MARRIOTT CONFIDENTIAL & PROPRIETARY INFORMATION</p>
     <p>The contents of the document are confidential and proprietary to TLC Relationship Management Private Limited and may not be reproduced, disclosed, distributed or used without the express permission of an authorized representative of TLC Relationship Management Private Limited. Any other use is expressly prohibited.</p>
