@@ -1,5 +1,8 @@
 const pool = require("../databases/db").pool;
+const dotenv = require('dotenv');
 
+
+dotenv.config();
 
 let logInApiURLOfSfdc = process.env.SFDC_LOGIN_API_URL || '';
 let sfdcGrandType = process.env.SFDC_LOGIN_GRAND_TYPE || '';
@@ -40,9 +43,9 @@ let loginApiCall = async ()=>{
 
 let getRecordFromOtpLog = async(hr)=>{
     try {
-        let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log ol where  "OTP Request Date/Time" > NOW() - INTERVAL  '${hr} hour 15 minute' and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
-        // let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log  ol where  DATE("OTP Request Date/Time") = CURRENT_DATE  and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
-
+        let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" order by "OTP Request Date/Time" desc limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log ol where  "OTP Request Date/Time" > NOW() - INTERVAL  '${hr} hour 15 minute' and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
+        // let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) created_at,DATE((select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1)) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log  ol where   "OTP For" = 'verifyMobile'`;
+        console.log(qry)
         let record = await pool.query(qry)
         return record.rows ? record.rows : [];
     } catch (error) {
@@ -62,10 +65,13 @@ let getAccountData = async(token , hr , mobileStr)=>{
        'Authorization': `Bearer ${token}`
        };
        let dateTime = (new Date((new Date()).getTime() + 330*60000 - (hr * 60 * 60 * 1000))).toISOString();
-       console.log(`${sfdcFileApisURL}/services/data/v47.0/query?q=select id, createdDate,PersonEmail,PersonMobilePhone  from Account where PersonMobilePhone IN(${mobileStr})`)
-       let  config = {
+    //    console.log(`${sfdcFileApisURL}/services/data/v47.0/query?q=select id, createdDate,PersonEmail,PersonMobilePhone  from Account where PersonMobilePhone IN(${mobileStr})`)
+    // console.log(`${sfdcFileApisURL}/services/data/v47.0/query?q=select id, createdDate,PersonEmail,PersonMobilePhone  from Account where createdDate >  2021-03-01T19:26:58.523Z`)   
+    // console.log(data)
+    let  config = {
         method: 'get',
-        url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select id, createdDate,PersonEmail,PersonMobilePhone  from Account where PersonMobilePhone IN(${mobileStr})`,
+    //    url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select id, createdDate,PersonEmail,PersonMobilePhone  from Account where PersonMobilePhone IN(${mobileStr})`,
+       url: `${sfdcFileApisURL}/services/data/v47.0/query?q=select id, createdDate,PersonEmail,PersonMobilePhone  from Account`,
         headers: data
       };
        try{
@@ -176,27 +182,29 @@ let getMobileStr = (otpLogArr)=>{
 }
 let mobileVerificationCase=async()=>{
     try {
-        let hr = 100;
+        let hr = 1;
         let otpLogData = await getRecordFromOtpLog(hr);
         console.log(otpLogData.length)
-        let mobileStr = getMobileStr(otpLogData)
+        if(otpLogData.length){
+            let mobileStr = getMobileStr(otpLogData)
 
-        // console.log(mobileStr)
-        let userDataFromSFDC = await getUserDataFromSFDC(hr,mobileStr);
-        console.log(userDataFromSFDC.length)
-        let notRegisteredUsers = await getNotRegisterUsers(otpLogData , userDataFromSFDC)
-
-        // console.log(notRegisteredUsers)
-        // let data =await arrayToCSV(notRegisteredUsers)
-        // console.log(dateFormat)
-        let createCaseInSFDC = await createCaseInSfdc(notRegisteredUsers)
+            // console.log(mobileStr)
+            let userDataFromSFDC = await getUserDataFromSFDC(hr,mobileStr);
+            console.log(userDataFromSFDC.length)
+            let notRegisteredUsers = await getNotRegisterUsers(otpLogData , userDataFromSFDC)
+            console.log(notRegisteredUsers.length)
+            // let data =await arrayToCSV(notRegisteredUsers)
+            // console.log(dateFormat)
+            let createCaseInSFDC = await createCaseInSfdc(notRegisteredUsers)
+        }
+ 
         return `Success`
     } catch (error) {
         return `${error}`
     }
 }
 
-// mobileVerificationCase();
+mobileVerificationCase();
 module.exports={
     mobileVerificationCase
 }

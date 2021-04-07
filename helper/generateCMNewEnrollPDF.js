@@ -40,14 +40,18 @@ let  generateCMNewEnrollPDF=async(cmValues , pName, pId)=>{
 
     let finalObject  = {}
     cmValues.map(d=>{
-                if(d.membership_renewal_date__c)
-                d.membership_enrollment_date__c = d.membership_renewal_date__c;
+                if(d.membership_renewal_date__c){
+                    d.membership_enrollment_date__c = d.membership_renewal_date__c;
+                    d.membership_activation_date__c = d.renewal_date_time__c ? d.renewal_date_time__c : d.membership_activation_date__c ;
+                }
                 d.membership_enrollment_date__c =  getDateFormDate (d.membership_enrollment_date__c);
                 d.membership_activation_date__c = getTimeFromdate(d.membership_activation_date__c)
-                if(finalObject[d.membership_enrollment_date__c]){
-                    finalObject[d.membership_enrollment_date__c].push(d)
-                }else{
-                    finalObject[d.membership_enrollment_date__c] = [d]
+                if(d.membership_activation_date__c){
+                    if(finalObject[d.membership_enrollment_date__c]){
+                        finalObject[d.membership_enrollment_date__c].push(d)
+                    }else{
+                        finalObject[d.membership_enrollment_date__c] = [d]
+                    }
                 }
         })
         clubMarriottReportRows = []
@@ -89,7 +93,6 @@ for (let [key ,value] of Object.entries(finalObject)) {
      `
 
      for(let d of value){
-        
          let email = ``
          if(d.email__c.lastIndexOf('@') > - 1)
          d.email__c =  `${'*'.repeat(d.email__c.lastIndexOf('@') - 1)}${d.email__c.substr(d.email__c.lastIndexOf('@'))}`
@@ -106,6 +109,7 @@ for (let [key ,value] of Object.entries(finalObject)) {
         if(pagebreakIndex % 8 ==0 &&   pagebreakIndex > 0)
         clubMarriottReportRows +=headerForPage;
         pagebreakIndex++;
+
      }
     }
     
