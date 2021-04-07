@@ -179,7 +179,7 @@ let getMobileStr = (otpLogArr)=>{
 }
 let mobileVerificationCase=async()=>{
     try {
-        let hr = 1;
+        let hr = 20;
         let otpLogData = await getRecordFromOtpLog(hr);
         console.log(otpLogData.length)
         if(otpLogData.length){
@@ -190,7 +190,7 @@ let mobileVerificationCase=async()=>{
             console.log(userDataFromSFDC.length)
             let notRegisteredUsers = await getNotRegisterUsers(otpLogData , userDataFromSFDC)
     
-            // console.log(notRegisteredUsers)
+            console.log(notRegisteredUsers)
             // let data =await arrayToCSV(notRegisteredUsers)
             // console.log(dateFormat)
             let createCaseInSFDC = await createCaseInSfdc(notRegisteredUsers)
@@ -202,7 +202,7 @@ let mobileVerificationCase=async()=>{
     }
 }
 
-// mobileVerificationCase();
+mobileVerificationCase();
 module.exports={
     mobileVerificationCase
 }

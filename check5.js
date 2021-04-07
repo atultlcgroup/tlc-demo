@@ -1,23 +1,3 @@
-let arr = [1 ,7 ,2];
+let arr = [1406439072,1406645172,1406602340,1406609970,1406490596,1406375430,140637543,1406538199,1406552038,1406648935,1406746947,1406604647,1406408807,1406341411,1406400727,1406400942,1406483197]
 
-findTrangle = ()=>{
-    for(let i  =0; i< arr.length  -1 ; i++){
-        let ind  = arr[i];
-        let iden = 0;
-        for(let j=0;j< arr.length ;j++){
-            if(j != i && j != i +1){
-                    if(arr[i + 1]  + arr[j] > ind  )
-                    iden++ ;
-                    if(arr[i + 1]  + ind  > arr[j]    )
-                    iden++ ;
-                    if(  arr[j] + ind > arr[i + 1]   )
-                    iden++ ;            
-            }
-  
-         if(iden == 3)
-         return true 
-        }
-    }
-    return false;
-}
-
+console.log(arr.map(d=>`${d}`))
