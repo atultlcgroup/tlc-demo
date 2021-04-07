@@ -304,7 +304,7 @@ let htmlStr=`
           </table>
       
     </div>
-    <div class="arilFont" id="pageFooter" style="font-size: 10px; height:700px; bottom:100px;" ><p><b>
+    <div class="arilFont" id="pageFooter" style="font-size: 7px; height:700px; bottom:100px;" ><p><b>
      This is an auto generated report by TLC Relationship Management Private Limited (TLC), (<a href="www.tlcgroup.com">www.tlcgroup.com</a>) and does not require a signature</b></p>
     <p align="left"> MARRIOTT CONFIDENTIAL & PROPRIETARY INFORMATION</p>
     <p>The contents of the document are confidential and proprietary to TLC Relationship Management Private Limited and may not be reproduced, disclosed, distributed or used without the express permission of an authorized representative of TLC Relationship Management Private Limited. Any other use is expressly prohibited.</p>
