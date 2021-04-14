@@ -45,7 +45,7 @@ let getCertificateTemplate =(data)=> {
              <PERSISTEDVIEW>Invoice Voucher View</PERSISTEDVIEW>
              <VATDOCUMENTTYPE>1. Invoice</VATDOCUMENTTYPE>
              <CONSIGNEEGSTIN>${data[0].member_gst_details__c}</CONSIGNEEGSTIN>
-             <BASICBUYERNAME>${data[0].name}-${data[0].member_id__c}</BASICBUYERNAME>
+             <BASICBUYERNAME>${d.certificate_name}</BASICBUYERNAME>
              <BASICDATETIMEOFINVOICE>${data[0].createddate}</BASICDATETIMEOFINVOICE>
              <BASICDATETIMEOFREMOVAL>${data[0].createddate}</BASICDATETIMEOFREMOVAL>
              <VCHGSTCLASS/>

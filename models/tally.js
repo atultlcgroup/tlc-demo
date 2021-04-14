@@ -3,19 +3,28 @@ const pool = require("../databases/db").pool;
 
 const client = require("../databases/dbNotifyEvent").client;
 const clientForMTO = require("../databases/dbNotifyEvent").clientForMTO;
-
 const tallyApiUrl = process.env.TALLY_API_URL || ``
 const tallyApiClentId = process.env.TALLY_API_CLIENT_ID || ``
 const tallyApiClientSecret = process.env.TALLY_API_SECRET || ``
 let ledgerTemplate = require('../tally/ledger_XML')
 let voucherTemplate = require('../tally/sales_voucher_XML')
 let certificateTemplate = require('../tally/certificate_with_e_cash_XML')
-let staticLedgerTemplate  = require('../tally/static_ledger_XML')
 const tallyMaximumRetrialCount = process.env.TALLY_MAXIMUM_RETRIAL_COUNT || 5;
-
+let staticLedgerTemplate  = require('../tally/static_ledger_XML')
 const allowedProgramUniqueIdentifiers = process.env.TALLY_ALLOWED_PROGRAM_UNIQUE_IDENTIFIER || ''
 const axios = require('axios');
 
+
+let getPinCodeAndStateByMembershipType = async(membership_type_id)=>{
+    try{
+      let qry = `select postal_code__c,state__c from tlcsalesforce.property__c left join tlcsalesforce.membershiptype__c on membershiptype__c.property__c = property__c.sfid left join tlcsalesforce.city__c on property__c.city__c = city__c.sfid  where membershiptype__c.sfid = '${membership_type_id}' limit 1`
+      console.log(qry)
+      let data = await pool.query(qry)
+      return data.rows.length ? data.rows : []
+    }catch(e){
+      return [];
+    }
+}
 
 
 let checkForAllowedProgram = async(paymentId, transactionType)=>{
@@ -71,6 +80,7 @@ let updateAccountStatus = async(account_id, status )=>{
 
 let getPaymentDetails= async(paymentId)=>{
     try{
+        console.log(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`);
         let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' and (tally_status__c NOT IN('Processed') Or tally_status__c is NULL)`)
         // let data =await pool. query(`select transaction_type__c from tlcsalesforce.payment__c where sfid = '${paymentId}' `)
 
@@ -123,7 +133,6 @@ let scheduleTallyTasks = async()=>{
         console.log(e)
     }
 }
-
 let scheduleTallyTasksFromPayments = async()=>{
     try{
         console.log(`select sfid from tlcsalesforce.payment__c where createddate > (current_date - 3) and (tally_status__c = 'Not-Processed' or tally_status__c is Null)`)
@@ -262,6 +271,14 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
         if(voucherData.length ){
             if(!voucherData[0].member_state)
             voucherData[0].member_state= voucherData[0].account_billingstate
+            if(!voucherData[0].billingpostalcode){
+                let postalData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
+                voucherData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+            }
+            if(!voucherData[0].member_state){
+                let stateData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
+                voucherData[0].member_state = stateData.length ? stateData[0].state__c : ``;
+            }
             voucherData[0].createddate = (convertDateFormat(voucherData[0].createddate)) 
             voucherData[0].CGST =0;
             voucherData[0].IGST = 0;
@@ -292,7 +309,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             //    d.SGST= d.membership_amount ? ((d.membership_amount * 9) / 100): 0;;
             // }
             accountSfid = voucherData[0].account_sfid
-            voucherData[0].company_name = voucherData[0].supplier_company || 'TLC Testing'
+            voucherData[0].company_name = voucherData[0].supplier_company 
             voucherData[0].grand_total__c =voucherData[0].CGST + voucherData[0].IGST + voucherData[0].SGST +voucherData[0].net_amount__c + voucherData[0].UTGST;
              // for voucher
             // voucherData[0].name = 'voucher1';
@@ -403,6 +420,14 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
         if(certificateData.length ){
             if(!certificateData[0].member_state)
             certificateData[0].member_state= certificateData[0].account_billingstate
+            if(!certificateData[0].billingpostalcode){
+                let postalData = await getPinCodeAndStateByMembershipType(certificateData[0].membership_id) 
+                certificateData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+            }
+            if(!certificateData[0].member_statee){
+                let stateData = await getPinCodeAndStateByMembershipType(certificateData[0].membership_id) 
+                certificateData[0].member_state = stateData.length ? stateData[0].state__c : ``;
+            }
             let taxPerc = await findTax( certificateData[0].tax_master__c)
             // certificateData[0].member_state = 'Delhi'   to check UTGST
             console.log(certificateData[0].supplier_state ,  certificateData[0].member_state )       
@@ -434,7 +459,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].CGST = CGST;
             certificateData[0].UTGST = UTGST;
             certificateData[0].createddate = (convertDateFormat(certificateData[0].createddate)) 
-            certificateData[0].company_name = certificateData[0].supplier_company || 'TLC Testing'
+            certificateData[0].company_name = certificateData[0].supplier_company 
             // certificateData[0].company_name = 'TLC Testing'
             ecash_value = await getEcash(paymentId);
             
@@ -460,6 +485,7 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             operationType : `Create`, 
             paymentSfid : `${paymentId}`
         } 
+
         if(ecash_value)
         requestObj.requestFor = 'E-Cash'
         let integrationLogSFID= await getIntegrationLogSFID(paymentId,accountSfid, requestObj.requestFor)
@@ -566,19 +592,19 @@ let checkMember = async(memberId)=>{
 
 let getCompaniesByMemberId = async(member_id)=>{
     try{
-        let data = await pool.query(` 	   select distinct Supplier_Details__c.name supplier_company from tlcsalesforce.account inner join tlcsalesforce.membership__c on 
+        let data = await pool.query(`      select distinct Supplier_Details__c.name supplier_company from tlcsalesforce.account inner join tlcsalesforce.membership__c on 
         membership__c.member__c = account.sfid inner join tlcsalesforce.membershiptype__c 
         on membershiptype__c.sfid = membership__c.customer_set__c 
            inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+       left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
         where member_id__c = '${member_id}' 
         union select distinct Supplier_Details__c.name supplier_company from tlcsalesforce.account inner join tlcsalesforce.membership__c on 
         membership__c.member__c = account.sfid inner join tlcsalesforce.membershiptype__c 
         on membershiptype__c.sfid = membership__c.customer_set__c 
         inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  =membershiptype__c.sfid 
         inner join tlcsalesforce.membership_offers__c on membership_offers__c.customer_set_offer__c = membershiptypeoffer__c.sfid 
-           inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+           inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+       left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
         where member_id__c = '${member_id}';`)
         return data.rows.length ? data.rows : []
     }catch(e){
@@ -618,12 +644,24 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
         console.log(`-----------------------------Company Name = ${company_name}`)
         let logData = 0
         let ledgerData = await  gerReuiredDetailsForLedgerUpdate(member_id ,company_name);
+        console.log(ledgerData)
         let ledgerXML = ``
         let accountSfid = ``;
         let payment_SFID = ``
         if(ledgerData.length ){
-            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company 
             console.log(ledgerData[0].company_name)
+            console.log(`---------------------------------------------------111`)
+            console.log(await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id))
+            if(!ledgerData[0].billingpostalcode){
+                let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
+                ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+            }
+            
+            if(!ledgerData[0].billingstate){
+                let stateData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
+                ledgerData[0].billingstate = stateData.length ? stateData[0].state__c : ``;
+            }
             // ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
@@ -730,7 +768,7 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
             console.log(ledgerData)
             console.log(`----------------------------------------1`)
 
-            ledgerData[0].company_name = ledgerData[0].supplier_company || 'TLC Testing'
+            ledgerData[0].company_name = ledgerData[0].supplier_company 
             // ledgerData[0].company_name ='TLC Testing'
 
             //for certificate
@@ -739,8 +777,18 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
             //for voucher 
             // ledgerData[0].name = 'voucher1';
             // ledgerData[0].member_id__c = '3258'
-            ledgerData[0].current_name = ledgerData[0].name ;
-            ledgerData[0].new_name = ledgerData[0].name ;
+            if(!ledgerData[0].billingpostalcode){
+                let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
+                ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+            }
+            
+            if(!ledgerData[0].billingstate){
+                let stateData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
+                ledgerData[0].billingstate = stateData.length ? stateData[0].state__c : ``;
+            }
+
+            ledgerData[0].current_name = ledgerData[0].name
+            ledgerData[0].new_name = ledgerData[0].name 
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;  
         }
@@ -843,15 +891,16 @@ let findTax= async(tax_master_sfid)=>{
 }
 let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select distinct payment__c.email__c,payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select distinct payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+     ,membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
       left join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
       where payment__c.sfid = '${payment_SFID}' 
-      and payment__c.payment_status__c = 'CONSUMED'
+      and UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS')
        `)  
       return qry ? qry.rows : [] 
     }catch(e){
@@ -864,18 +913,19 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
  let gerReuiredDetailsForLedgerC = async(payment_SFID)=>{
     try{
       let qry = await pool.query(`select distinct payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+     , membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
     
-	  inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
+      inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
-	  inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.sfid = payment_line_item__c.membership_type_offer__c
+      inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.sfid = payment_line_item__c.membership_type_offer__c
       --inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       inner join tlcsalesforce.membershiptype__c on membershiptypeoffer__c.membership_type__c=membershiptype__c.sfid
       inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
-      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
       where 
-      payment__c.payment_status__c = 'CONSUMED' and 
+      UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') and 
       payment__c.transaction_type__c in ('Certificates-Buy') and 
       payment__c.sfid = '${payment_SFID}' 
        `)  
@@ -888,23 +938,25 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     try{
 
       let qry = await pool.query(`select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+     , membershiptype__c.sfid membershiptype_id
       from  tlcsalesforce.account
       left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
       left join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
       where  account.member_id__c = '${member_id}' and Supplier_Details__c.name = '${company_name}'
-       and payment__c.payment_status__c = 'CONSUMED' union 
+       and UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') union 
        select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
-      from  tlcsalesforce.account
+      , membershiptype__c.sfid membershiptype_id
+       from  tlcsalesforce.account
       left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
       left join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       left join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
       inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  =membershiptype__c.sfid 
       inner join tlcsalesforce.membership_offers__c on membership_offers__c.customer_set_offer__c = membershiptypeoffer__c.sfid 
-    inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-     left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+    inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+     left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
       where  account.member_id__c = '${member_id}' and Supplier_Details__c.name = '${company_name}' limit 1
        `)  
       return qry ? qry.rows : [] 
@@ -921,32 +973,21 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
         // inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         // inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         // where payment__c.sfid = '${payment_SFID}' 
-        //  and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
+        //  and UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
         //  `)
       let qry = await pool.query(`select  distinct program__c.unique_identifier__c, membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      ,membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
       inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
       inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
-	  left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
-	  where payment__c.sfid = '${payment_SFID}' 
-       and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
+      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
+      where payment__c.sfid = '${payment_SFID}' 
+       and UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
        
        `)  
-       console.log(`select  distinct program__c.unique_identifier__c, membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
-       from tlcsalesforce.payment__c
-       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
-       inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
-       inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
-       inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
-       left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-       left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
-       where payment__c.sfid = '${payment_SFID}' 
-        and payment__c.payment_status__c = 'CONSUMED' and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
-        
-        `)
       return qry ? qry.rows : [] 
     }catch(e){
         return []
@@ -956,20 +997,21 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
  let gerReuiredDetailsForCertificate = async(payment_SFID)=>{
     try{
       let qry = await pool.query(`select  distinct  program__c.unique_identifier__c,payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,payment__c.membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      ,membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
-	  inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
+      inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
-	  inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.sfid = payment_line_item__c.membership_type_offer__c
+      inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.sfid = payment_line_item__c.membership_type_offer__c
       --inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
       inner join tlcsalesforce.membershiptype__c on membershiptypeoffer__c.membership_type__c=membershiptype__c.sfid
       inner join tlcsalesforce.program__c on membershiptype__c.program__c = program__c.sfid
-      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptype__c.supplier__c
-      left join tlcsalesforce.city__c on Supplier_Details__c.state_code__c = city__c.state_code__c
+      left join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+      left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
       where 
-      payment__c.payment_status__c = 'CONSUMED' and 
+      UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') and 
       payment__c.transaction_type__c in ('Certificates-Buy') and 
       payment__c.sfid = '${payment_SFID}' 
-	  `)  
+      `)  
       return qry ? qry.rows : [] 
     }catch(e){
         return []
@@ -1008,11 +1050,15 @@ let postgresNotifyEvent = async()=>{
             console.log(`-----------------------11`)
             // console.log(msg)
             let notificationData =  JSON.parse(msg.payload)
-            if(previousPaymentId == notificationData['sfid'] && previousPaymentStatus == 'CONSUMED' &&   notificationData['payment_status__c'] == 'CONSUMED'){
+            if(!previousPaymentStatus)
+            previousPaymentStatus=``
+            if(!notificationData['payment_status__c'])
+            notificationData['payment_status__c'] = ``;
+            if(previousPaymentId == notificationData['sfid'] && (previousPaymentStatus.toUpperCase() == 'CONSUMED' || previousPaymentStatus.toUpperCase() == 'SUCCESS') &&  ( notificationData['payment_status__c'].toUpperCase() == 'CONSUMED' || notificationData['payment_status__c'].toUpperCase() == 'SUCCESS')){
                 console.log(`previous payment id = ${previousPaymentId}  , previous_payment_status = ${previousPaymentStatus},  new paymentid = ${notificationData['sfid']} and payment_status = ${notificationData['payment_status__c']} ---- 1`)
                 // tallyNotify( tallyApiClentId ,tallyApiClientSecret,msg.payload.sfid)
             }else{
-                 setTimeout(()=>{
+                setTimeout(()=>{
                     tallyNotify( tallyApiClentId ,tallyApiClientSecret,notificationData['sfid'])
                  }, 5 * 60 * 1000)
                 console.log(`previous payment id = ${previousPaymentId}  , previous_payment_status = ${previousPaymentStatus},  new paymentid = ${notificationData['sfid']} and payment_status = ${notificationData['payment_status__c']} } ----2`)
@@ -1031,67 +1077,56 @@ let postgresNotifyEvent = async()=>{
  }
 }
 
+
+let findTypeFormSFIDFORAPIForType  = async(sfid)=>{
+    try {
+        let findType = ``;
+        let qry1 = await pool.query(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        // console.log(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        if(qry1.rows.length)
+            findType = `membershipType`   
+        return findType
+    } catch (error) {
+        return ``  
+    }
+}
+
+let findTypeFormSFIDFORAPIForTypeOffer  = async(sfid)=>{
+    try {
+        let findType = ``;
+        let qry2 = await pool.query(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        if(qry2.rows.length)
+            findType  = `MembershipTypeOffer`;
+        return findType
+    } catch (error) {
+        return ``  
+    }
+}
+
+
 let membershiptypeinfo = async(sfid)=>{
-   try {
-       let qry = ``
-       if(sfid){
-        qry = `
-        select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
-        tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
-        where mt.sfid = '${sfid}' and mt.available_for_selection_online__c = true`;
-       }else{
-        qry = `
-        select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
-        tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
-        where mt.available_for_selection_online__c = true`;    
-       }
-       let data = await pool.query(qry)
-       return data.rows.length ? data.rows : []
-   } catch (error) {
-       return []
-       
-   }
-}
+    try {
+        let qry = ``
+        if(sfid){
+         qry = `
+         select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+         tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
+         where mt.sfid = '${sfid}' and  mt.supplier__c is not null`;
+        }else{
+         qry = `
+         select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+         tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
+         where mt.supplier__c is not null`;    
+        }
+        let data = await pool.query(qry)
+        return data.rows.length ? data.rows : []
+    } catch (error) {
+        return []
+        
+    }
+ }
 
-let membershiptypeofferinfo = async(sfid)=>{
-   try {
-    let qry = ``;
-       if(sfid){
-        qry = `
-       select  mt.tax_master__c ,p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c ,p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
-       from tlcsalesforce.membershiptype__c mt 
-       inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
-       left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
-       inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
-       where membershiptypeoffer__c.sfid = '${sfid}' and available_for_sale__c = true;
-       `}
-       else{
-        qry = `
-        select  mt.tax_master__c ,p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c, p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
-        from tlcsalesforce.membershiptype__c mt 
-        inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
-        left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
-        inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
-        where  available_for_sale__c = true;
-        `   
-       }
-    //    console.log(qry)
-    let data = await pool.query(qry)
-    return data.rows.length ? data.rows : []
-   } catch (error) {
-       return [];
-   }
-}
-
-// let getAllRecordToCreateMembershipTypeInTally = async()=>{
-//     try {
-//         let qry = `select * from tlcsalesforce.`
-//     } catch (error) {
-//         return [];
-//     }
-// }
-
-let createStaticLedgers  = async(data , client_id , client_secret )=>{
+ let createStaticLedgers  = async(data , client_id , client_secret )=>{
     try {
             for(let d of data){
             try{
@@ -1111,8 +1146,8 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
 
                     let config = {
                     method: 'post',
-                    // url: tallyApiUrl,
-                    url: `http://164.52.200.15:9000/`,
+                    url: tallyApiUrl,
+                    // url: `http://164.52.200.15:9000/`,
                     headers: { 
                         'client_id': client_id || tallyApiClentId, 
                         'client_secret': client_secret || tallyApiClientSecret,
@@ -1148,26 +1183,78 @@ let createStaticLedgers  = async(data , client_id , client_secret )=>{
 
 }
 
+let membershiptypeofferinfo = async(sfid)=>{
+    try {
+     let qry = ``;
+        if(sfid){
+         qry = `
+        select  mt.tax_master__c ,p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c ,p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+        from tlcsalesforce.membershiptype__c mt 
+        inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
+        left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
+        inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+        where membershiptypeoffer__c.sfid = '${sfid}' and membershiptypeoffer__c.supplier__c is not null;
+        `}
+        else{
+         qry = `
+         select  mt.tax_master__c ,p.name as property_name,mt.helpline_number__c, membershiptypeoffer__c.sfid,Supplier_Details__c.name supplier_company,membershiptypeoffer__c.name,mt.createddate,p.street__c ,c.state__c, p.email__c,p.currencyisocode,c.country__c,p.postal_code__c  
+         from tlcsalesforce.membershiptype__c mt 
+         inner join tlcsalesforce.membershiptypeoffer__c on membershiptypeoffer__c.membership_type__c  = mt.sfid 
+         left join tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c 
+         inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = membershiptypeoffer__c.supplier__c
+         where  membershiptypeoffer__c.supplier__c is not null;
+         `   
+        }
+     //    console.log(qry)
+     let data = await pool.query(qry)
+     return data.rows.length ? data.rows : []
+    } catch (error) {
+        return [];
+    }
+ }
+ 
 
-let findTypeFormSFIDFORAPIForType  = async(sfid)=>{
+ let postgresNotifyEventForMembershipTypeAndOffer = async()=>{
+    try{
+       clientForMTO.connect((err, clientForMTO)=>{
+           if(err) {
+             throw err;
+           }
+           clientForMTO.on('notification',async function(msg) {
+               console.log(`----------------postgresNotifyEventForMembershipTypeAndOffer-------11`)
+               // console.log(msg)
+               let notificationData =  JSON.parse(msg.payload)
+                console.log(notificationData)
+               let data = await findTypeFormSFID(notificationData.sfid)
+               console.log(data)
+           });
+           clientForMTO.on('error', function(error) {
+             console.error('This never even runs:', error);
+           });
+           let query =clientForMTO.query("LISTEN membership_type_and_offer_notifier");
+       });
+    }catch(e){
+        console.log(e)
+    }
+   }
+
+ let findTypeFormSFID  = async(sfid)=>{
     try {
         let findType = ``;
         let qry1 = await pool.query(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
-        // console.log(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
-        if(qry1.rows.length)
-            findType = `membershipType`   
-        return findType
-    } catch (error) {
-        return ``  
-    }
-}
+        console.log(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
+        if(qry1.rows.length == 0){
+            console.log(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
+            let qry2 = await pool.query(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
+            if(qry2.rows.length){
+                await staticLedgers(process.env.TALLY_API_CLIENT_ID , process.env.TALLY_API_SECRET ,   '' , sfid , false)
+                findType  = `MembershipTypeOffer`;
+            }
+        }else{
+              await staticLedgers(process.env.TALLY_API_CLIENT_ID , process.env.TALLY_API_SECRET , sfid , '' , false)
+              findType = `MembershipType`;
+        }
 
-let findTypeFormSFIDFORAPIForTypeOffer  = async(sfid)=>{
-    try {
-        let findType = ``;
-        let qry2 = await pool.query(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
-        if(qry2.rows.length)
-            findType  = `MembershipTypeOffer`;
         return findType
     } catch (error) {
         return ``  
@@ -1213,54 +1300,6 @@ let staticLedgers = async(client_id, client_secret , membership_type_id , member
         return e
     }
 }
-
-let findTypeFormSFID  = async(sfid)=>{
-    try {
-        let findType = ``;
-        let qry1 = await pool.query(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
-        console.log(`select sfid from tlcsalesforce.membershiptype__c where sfid = '${sfid}' and supplier__c is not NULL`)
-        if(qry1.rows.length == 0){
-            console.log(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
-            let qry2 = await pool.query(`select * from tlcsalesforce.membershiptypeoffer__c where sfid = '${sfid}' and supplier__c is not NULL`)
-            if(qry2.rows.length){
-                await staticLedgers(process.env.TALLY_API_CLIENT_ID , process.env.TALLY_API_SECRET ,   '' , sfid , false)
-                findType  = `MembershipTypeOffer`;
-            }
-        }else{
-              await staticLedgers(process.env.TALLY_API_CLIENT_ID , process.env.TALLY_API_SECRET , sfid , '' , false)
-              findType = `MembershipType`;
-        }
-
-        return findType
-    } catch (error) {
-        return ``  
-    }
-}
-
-let postgresNotifyEventForMembershipTypeAndOffer = async()=>{
-    try{
-       clientForMTO.connect((err, clientForMTO)=>{
-           if(err) {
-             throw err;
-           }
-           clientForMTO.on('notification',async function(msg) {
-               console.log(`----------------postgresNotifyEventForMembershipTypeAndOffer-------11`)
-               // console.log(msg)
-               let notificationData =  JSON.parse(msg.payload)
-                console.log(notificationData)
-               let data = await findTypeFormSFID(notificationData.sfid)
-               console.log(data)
-           });
-           clientForMTO.on('error', function(error) {
-             console.error('This never even runs:', error);
-           });
-           let query =clientForMTO.query("LISTEN membership_type_and_offer_notifier");
-       });
-    }catch(e){
-        console.log(e)
-    }
-   }
-
 
 postgresNotifyEvent()
 postgresNotifyEventForMembershipTypeAndOffer()

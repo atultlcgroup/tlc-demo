@@ -60,7 +60,8 @@
     "request": "^2.88.2",
     "simple-excel-to-json": "^2.2.1",
     "socket.io": "^2.3.0",
-    "twilio": "^3.49.0"
+    "twilio": "^3.49.0",
+    "worker-farm": "^1.7.0"
   },
   "devDependencies": {},
   "scripts": {

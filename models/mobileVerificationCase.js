@@ -43,8 +43,8 @@ let loginApiCall = async ()=>{
 
 let getRecordFromOtpLog = async(hr)=>{
     try {
-        let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" order by "OTP Request Date/Time" desc limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log ol where  "OTP Request Date/Time" > NOW() - INTERVAL  '${hr} hour 15 minute' and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
-        // let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log  ol where  DATE("OTP Request Date/Time") = CURRENT_DATE  and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
+        let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" order by "OTP Request Date/Time" desc limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log ol where "Mobile"= '911352584123' and "OTP Request Date/Time" > NOW() - INTERVAL  '${hr} hour 15 minute' and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
+        // let qry = `select distinct "Mobile" ,(select "OTP Request Date/Time" from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" order by "OTP Request Date/Time" desc limit 1) created_at,(select count(*) from tlcsalesforce.otp_log  where "Mobile" = ol."Mobile" limit 1) number_of_attempt from tlcsalesforce.otp_log  ol where  DATE("OTP Request Date/Time") = CURRENT_DATE  and "OTP Request Date/Time" <= NOW() - INTERVAL  '15 minute' and "OTP For" = 'verifyMobile'`;
         console.log(qry)
         let record = await pool.query(qry)
         return record.rows ? record.rows : [];
@@ -191,9 +191,9 @@ let mobileVerificationCase=async()=>{
             let notRegisteredUsers = await getNotRegisterUsers(otpLogData , userDataFromSFDC)
     
             console.log(notRegisteredUsers)
-            // let data =await arrayToCSV(notRegisteredUsers)
-            // console.log(dateFormat)
-            let createCaseInSFDC = await createCaseInSfdc(notRegisteredUsers)
+            let data =await arrayToCSV(notRegisteredUsers)
+            console.log(dateFormat)
+            // let createCaseInSFDC = await createCaseInSfdc(notRegisteredUsers)
         }
  
         return `Success`
@@ -202,7 +202,7 @@ let mobileVerificationCase=async()=>{
     }
 }
 
-mobileVerificationCase();
+// mobileVerificationCase();
 module.exports={
     mobileVerificationCase
 }

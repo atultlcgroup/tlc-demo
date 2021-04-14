@@ -58,17 +58,17 @@
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Central Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                   <GSTRATE> 0</GSTRATE>
+                   <GSTRATE> 9</GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>State Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                    <GSTRATE> 0</GSTRATE>
+                    <GSTRATE> 9</GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Integrated Tax</GSTRATEDUTYHEAD>
                     <GSTRATEVALUATIONTYPE>Based on Value</GSTRATEVALUATIONTYPE>
-                    <GSTRATE> 0 </GSTRATE>
+                    <GSTRATE> 18 </GSTRATE>
                    </RATEDETAILS.LIST>
                    <RATEDETAILS.LIST>
                     <GSTRATEDUTYHEAD>Cess</GSTRATEDUTYHEAD>
