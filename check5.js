@@ -1,3 +1,46 @@
-let arr = [1406439072,1406645172,1406602340,1406609970,1406490596,1406375430,140637543,1406538199,1406552038,1406648935,1406746947,1406604647,1406408807,1406341411,1406400727,1406400942,1406483197]
+let cityOBJ = {"35" : "Andaman and Nicobar Islands",
+"28" : "Andhra Pradesh",
+"37" : "Andhra Pradesh (New)",
+"12" : "Arunachal Pradesh",
+"18" : "Assam",
+"10" : "Bihar",
+"04" : "Chandigarh",
+"22" : "Chattisgarh",
+"26" : "Dadra and Nagar Haveli",
+"25" : "Daman and Diu",
+"07" : "Delhi",
+"30" : "Goa",
+"24" : "Gujarat",
+"06" : "Haryana",
+"02" : "Himachal Pradesh",
+"01" : "Jammu and Kashmir",
+"20" : "Jharkhand",
+"29" : "Karnataka",
+"32" : "Kerala",
+"38" : "Ladakh",
+"31" : "Lakshadweep Islands",
+"23" : "Madhya Pradesh",
+"27" : "Maharashtra",
+"14" : "Manipur",
+"17" : "Meghalaya",
+"15" : "Mizoram",
+"13" : "Nagaland",
+"21" : "Odisha",
+"34" : "Pondicherry",
+"03" : "Punjab",
+"08" : "Rajasthan",
+"11" : "Sikkim",
+"33" : "Tamil Nadu",
+"36" : "Telangana",
+"16" : "Tripura",
+"09" : "Uttar Pradesh",
+"05" : "Uttarakhand",
+"19" : "West Bengal"}
 
-console.log(arr.map(d=>`${d}`))
+
+let GSTState = cityOBJ[`068shhsghdfu`.substring(0,2)];
+if(GSTState){
+    console.log(GSTState)
+}else{
+        console.log(`GSTState=${GSTState}`)
+}

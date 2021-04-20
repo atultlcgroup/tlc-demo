@@ -227,10 +227,10 @@ let getStaticLedgerTemplate = (data)=>{
                  <STXABATEMENTDETAILS.LIST>      </STXABATEMENTDETAILS.LIST>
            <LEDMULTIADDRESSLIST.LIST>
                   <ADDRESS.LIST TYPE="String">
-                   <ADDRESS>Ins Chandigarh Add1</ADDRESS>
-                   <ADDRESS>ins Chandigarh Add2</ADDRESS>
-                   <ADDRESS>Ins Chandigarh Add3</ADDRESS>
-                   <ADDRESS>ins Chandigarh Add4</ADDRESS>
+                   <ADDRESS></ADDRESS>
+                   <ADDRESS></ADDRESS>
+                   <ADDRESS></ADDRESS>
+                   <ADDRESS></ADDRESS>
                   </ADDRESS.LIST>
                   <EMAIL>${data.email__c}</EMAIL>
                   <PRIORSTATENAME>${data.state__c}</PRIORSTATENAME>
@@ -241,7 +241,7 @@ let getStaticLedgerTemplate = (data)=>{
                   <ADDRESSNAME>${data.street__c}</ADDRESSNAME>
                   <MOBILENUMBER>${data.helpline_number__c}</MOBILENUMBER>
                   <PARTYGSTIN></PARTYGSTIN>
-                  <CONTACTPERSON>Hari</CONTACTPERSON>
+                  <CONTACTPERSON></CONTACTPERSON>
                   <STATE>${data.state__c}</STATE>
                   <ISOTHTERRITORYASSESSEE>No</ISOTHTERRITORYASSESSEE>
                   <ISEXCISEMERCHANTEXPORTER>No</ISEXCISEMERCHANTEXPORTER>
