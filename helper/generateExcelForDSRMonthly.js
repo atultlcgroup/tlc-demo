@@ -1096,30 +1096,30 @@ ws2.cell(row, column, row, column+6, true).string(d.certificatenumber ? d.certif
 // ws2.cell(row, column++).string(``).style(myStyleAlignCenterWithoutBoldAlignLeft)
 
  
-//Annexure – 2    Credit Card Batch Closure  table
-row +=3;
-column = 2;
-ws2.cell(row, column,row, column+4, true).string(`Credit Card Batch Closure`).style(myStyle1);
-row+=1;
-column = 2;
-ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
-ws2.cell(row, column++, row , column+ 3,true).string(`Document Reference Number`).style(myStyleAlignCenter)
-slNo =1;
-if(sfdcFiles)
-for(let d of sfdcFiles){
-  if(slNo % 2 != 0) 
-  {
-    className1=myStyleAlignCenterWithoutBold2
-    className2=myStyleAlignCenterWithoutBoldAlignLeft2
-  }else{
-    className1=myStyleAlignCenterWithoutBold
-    className2=myStyleAlignCenterWithoutBoldAlignLeft   
-  }
-  row+=1;
-  column = 2
-  ws2.cell(row, column++).number(slNo++).style(className1)
-  ws2.cell(row, column++, row , column+ 3,true).string(`${d.sequenceNumber}`).style(className2)  
-}
+// //Annexure – 2    Credit Card Batch Closure  table
+// row +=3;
+// column = 2;
+// ws2.cell(row, column,row, column+4, true).string(`Credit Card Batch Closure`).style(myStyle1);
+// row+=1;
+// column = 2;
+// ws2.cell(row, column++).string(`Sl. No`).style(myStyleAlignCenter)
+// ws2.cell(row, column++, row , column+ 3,true).string(`Document Reference Number`).style(myStyleAlignCenter)
+// slNo =1;
+// if(sfdcFiles)
+// for(let d of sfdcFiles){
+//   if(slNo % 2 != 0) 
+//   {
+//     className1=myStyleAlignCenterWithoutBold2
+//     className2=myStyleAlignCenterWithoutBoldAlignLeft2
+//   }else{
+//     className1=myStyleAlignCenterWithoutBold
+//     className2=myStyleAlignCenterWithoutBoldAlignLeft   
+//   }
+//   row+=1;
+//   column = 2
+//   ws2.cell(row, column++).number(slNo++).style(className1)
+//   ws2.cell(row, column++, row , column+ 3,true).string(`${d.sequenceNumber}`).style(className2)  
+// }
 // row+=1;
 // column = 2
 // ws2.cell(row, column++).number(slNo++).style(myStyleAlignCenterWithoutBold)

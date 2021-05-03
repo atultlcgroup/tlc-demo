@@ -735,27 +735,8 @@ let headerForPageCertificate=`
 
 
 
-<table class="tftable border-none" style="margin-top:50px; ">
-<caption align="left" style="font-size: 11px; margin-top:12px;text-align:left;" ><b>Annexure – 2        Credit card batch closure</b></caption>
-<tr width="200px">
-    <th>S. No.</th>
-    <th  height="50">Document Reference Number</th>
 
-</tr>
-
-    <!--tr>
-    <td>{!summary['mode']}</td>
-    <td>{!summary['modefor']}</td>
-    <td style="text-align: right;">{!summary['recordCount']}</td>
-    <td style="text-align: right;">{!summary['amount']}</td>
-</tr-->
-  ${creditCardBatchClosureStr}
-
-
-</table>
-<br>
-
-<h4 style="width: 15%; font-size: 11px;" >Annexure – 3  Explanation</h4>
+<h4 style="width: 15%; font-size: 11px;" >Annexure – 2  Explanation</h4>
 <div style="font-size: 10px; " >
 This is an auto generated Monthly Sales Report of ${programName}.   Please do not reply to this email and contact the Program management team for any questions.  Explanations and Definitions are given below.   <br><br>
 

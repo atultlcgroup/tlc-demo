@@ -932,8 +932,8 @@ membership__c.membership_number__c is not Null and membershiptype__c.program__c 
 
 let getDynamicValuesMonthly=async(brandId)=>{
     try{
-        let query=await pool.query(`select name dsr_subject_name,brand_name__c,brand_logo__c,tlc_logo__c,page_footer_2_dsr__c,page_footer_1_dsr__c,footer_dsr__c,from_email_id_dsr__c,
-        column_1_dsr__c,column_2_dsr__c,column_3_dsr__c,display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let query=await pool.query(`select Subject_MSR__c dsr_subject_name,brand_name__c,brand_logo__c,tlc_logo__c, Page_Footer_2_MSR__c page_footer_2_dsr__c,Page_Footer_1_MSR__c page_footer_1_dsr__c,Footer_MSR__c footer_dsr__c,From_Email_Id_MSR__c from_email_id_dsr__c,
+        Column_1_MSR__c column_1_dsr__c,Column_2_MSR__c column_2_dsr__c,Column_3_MSR__c column_3_dsr__c,Display_Name_MSR__c display_name_dsr__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
         let result = query ? query.rows : [];
         return result;
     }catch(e){
@@ -980,6 +980,8 @@ let DSRReportMonthly = async()=>{
                       let excelFile = await generateExcelMonthly.generateExcel(DSRRecords,dataObj.propertyArr[ind],DSRCertificateIssued , dynamicValues[0] , sfdcFiles);
                       console.log(`------------------------------------------------------------`)
                     //   emails = ['atul.srivastava@tlcgroup.com','shailendra@tlcgroup.com','suket.gurtu@tlcgroup.com','aditya.singh@tlcgroup.com']
+                      emails = ['atul.srivastava@tlcgroup.com']
+
                       sendMail.sendDSRReportMonthly(`${pdfFile}`,`${excelFile}`,sfdcFiles,'Monthly Sales Report',emails ,dynamicValues, DSRRecords[0].program_name ) 
                         updateLog(insertedId, true ,'Success', '' , pdfFile)
                        }else{
