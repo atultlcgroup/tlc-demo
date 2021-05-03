@@ -440,6 +440,9 @@ let updateLogForNewEnroll = async(insertedId, isEmailSent ,status, errorDescript
 
 //ClubMarriott New Enroll
 
+
+
+
 let sendCMNewEnroll=(file,fileName,emails,program_name , logId)=>{
 
     try{
@@ -480,6 +483,48 @@ let sendCMNewEnroll=(file,fileName,emails,program_name , logId)=>{
 }   
 
 
+
+
+
+//Monthly Sales Report
+let sendDSRReportMonthly=(file,excelFile,sfdcFile,fileName,emails , dynamicValues , program_name)=>{
+    try{
+        readHTMLFile(__dirname + `/DSR_Report_Monthly.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let dateForDSRReport= new Date();
+            dateforEOMReport = `${dateForDSRReport.toLocaleString('default', { month: 'short' })} ${dateForDSRReport.getFullYear()}`
+            let template = handlebars.compile(html);
+            replacements={"programName": program_name , "footer" :  dynamicValues[0].footer_dsr__c , "brandLogo": dynamicValues[0].brand_logo__c};
+           let htmlToSend = template(replacements);
+           let displayName = dynamicValues[0].display_name_dsr__c || '';
+           const fromEmailForDSR = dynamicValues[0].from_email_id_dsr__c || '';
+           const subjectForDSRReport = dynamicValues[0].dsr_subject_name || '';
+
+            console.log(`fromEmailForDSR : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport} File:${file} fileName:${fileName}`)
+             sendmail.smtpAttachmentDSR(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${excelFile}`,sfdcFile,`${fileName}`).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}      
+
+
+
             module.exports={
                 sendMail,
                 sendEODPaymentReport,
@@ -491,7 +536,8 @@ let sendCMNewEnroll=(file,fileName,emails,program_name , logId)=>{
                 sendFReport,
                 sendRReport,
                 sendDRReport,
-                sendCMNewEnroll
+                sendCMNewEnroll,
+                sendDSRReportMonthly
             }
 
         

@@ -15,9 +15,50 @@ const allowedProgramUniqueIdentifiers = process.env.TALLY_ALLOWED_PROGRAM_UNIQUE
 const axios = require('axios');
 
 
+
+let cityOBJ = {"35" : "Andaman and Nicobar Islands",
+"28" : "Andhra Pradesh",
+"37" : "Andhra Pradesh (New)",
+"12" : "Arunachal Pradesh",
+"18" : "Assam",
+"10" : "Bihar",
+"04" : "Chandigarh",
+"22" : "Chattisgarh",
+"26" : "Dadra and Nagar Haveli",
+"25" : "Daman and Diu",
+"07" : "Delhi",
+"30" : "Goa",
+"24" : "Gujarat",
+"06" : "Haryana",
+"02" : "Himachal Pradesh",
+"01" : "Jammu and Kashmir",
+"20" : "Jharkhand",
+"29" : "Karnataka",
+"32" : "Kerala",
+"38" : "Ladakh",
+"31" : "Lakshadweep Islands",
+"23" : "Madhya Pradesh",
+"27" : "Maharashtra",
+"14" : "Manipur",
+"17" : "Meghalaya",
+"15" : "Mizoram",
+"13" : "Nagaland",
+"21" : "Odisha",
+"34" : "Pondicherry",
+"03" : "Punjab",
+"08" : "Rajasthan",
+"11" : "Sikkim",
+"33" : "Tamil Nadu",
+"36" : "Telangana",
+"16" : "Tripura",
+"09" : "Uttar Pradesh",
+"05" : "Uttarakhand",
+"19" : "West Bengal"
+}
+
 let getPinCodeAndStateByMembershipType = async(membership_type_id)=>{
     try{
-      let qry = `select postal_code__c,state__c from tlcsalesforce.property__c left join tlcsalesforce.membershiptype__c on membershiptype__c.property__c = property__c.sfid left join tlcsalesforce.city__c on property__c.city__c = city__c.sfid  where membershiptype__c.sfid = '${membership_type_id}' limit 1`
+      let qry = `select property__c.postal_code__c,state__c,property__c.street__c,city__c.country__c,city__c.name city_name from tlcsalesforce.property__c left join tlcsalesforce.membershiptype__c on membershiptype__c.property__c = property__c.sfid left join tlcsalesforce.city__c on property__c.city__c = city__c.sfid  where membershiptype__c.sfid = '${membership_type_id}' limit 1`
       console.log(qry)
       let data = await pool.query(qry)
       return data.rows.length ? data.rows : []
@@ -271,14 +312,21 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
         if(voucherData.length ){
             if(!voucherData[0].member_state)
             voucherData[0].member_state= voucherData[0].account_billingstate
+            let postalData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
             if(!voucherData[0].billingpostalcode){
-                let postalData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
                 voucherData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
             }
             if(!voucherData[0].member_state){
-                let stateData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
-                voucherData[0].member_state = stateData.length ? stateData[0].state__c : ``;
+                voucherData[0].member_state = postalData.length ? postalData[0].state__c : ``;
             }
+            if(!voucherData[0].billingcity)
+            voucherData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+            if(!voucherData[0].billingstreet)
+            voucherData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+            if(!voucherData[0].billingcountry)
+            voucherData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+            if(!voucherData[0].member_gst_details__c)
+            voucherData[0].member_gst_details__c = ``
             voucherData[0].createddate = (convertDateFormat(voucherData[0].createddate)) 
             voucherData[0].CGST =0;
             voucherData[0].IGST = 0;
@@ -287,6 +335,12 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             voucherData[0].promocodeAmt = voucherData[0].amount__c - voucherData[0].net_amount__c;
             let taxPerc = await findTax( voucherData[0].tax_master__c)
             console.log(taxPerc)
+            if( voucherData[0].member_gst_details__c){
+                let GSTState = cityOBJ[`${voucherData[0].member_gst_details__c}`.substring(0,2)]; 
+                if(GSTState)
+                voucherData[0].member_state = GSTState;
+                // cityOBJ
+            }
             // voucherData[0].member_state = 'Manama' // to check UTGST
              if(voucherData[0].supplier_state && voucherData[0].supplier_state == voucherData[0].member_state || !voucherData[0].member_state)
             {
@@ -316,6 +370,20 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
             // voucherData[0].member_id__c = '3258'
             if(voucherData[0].amount__c )
             voucherData[0].net_amount__c = voucherData[0].amount__c
+            voucherData[0].billingstate = voucherData[0].member_state
+            let consigneeData = await getConsigneeDetails(voucherData[0].membershiptype_id)
+            voucherData[0].cbillingstreet = ``
+            voucherData[0].cbillingstate = ``
+            voucherData[0].cbillingcity = ``
+            
+
+            if(consigneeData.length)
+            {
+                voucherData[0].cbillingstreet = consigneeData[0].street__c
+                voucherData[0].cbillingstate = consigneeData[0].state__c
+                voucherData[0].cbillingcity = consigneeData[0].city_name
+            }
+            console.log(voucherData)
             voucherXML = voucherTemplate.getVoucherTemplate(voucherData[0])
         }
         
@@ -381,6 +449,7 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
          reject({code:e.response.status ,data :e.response.data})
         }
         }catch(e){
+            console.log(e)
             reject(e)
         }
     })
@@ -403,6 +472,18 @@ let getEcash= async(payment_SFID)=>{
         return 0
     }
 }
+
+let getConsigneeDetails = async(sfid)=>{
+    try{
+        let qry = ` select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c,c.name city_name  from tlcsalesforce.membershiptype__c mt left join 
+        tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
+        where mt.sfid = '${sfid}'`
+        let data = await pool.query(qry)
+        return data.rows.length ? data.rows : []
+    }catch(e){
+        return []
+    }
+}
 let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId , ledgerInsertedId)=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -420,16 +501,29 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
         if(certificateData.length ){
             if(!certificateData[0].member_state)
             certificateData[0].member_state= certificateData[0].account_billingstate
+            let postalData = await getPinCodeAndStateByMembershipType(certificateData[0].membershiptype_id) 
             if(!certificateData[0].billingpostalcode){
-                let postalData = await getPinCodeAndStateByMembershipType(certificateData[0].membership_id) 
                 certificateData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
             }
-            if(!certificateData[0].member_statee){
-                let stateData = await getPinCodeAndStateByMembershipType(certificateData[0].membership_id) 
-                certificateData[0].member_state = stateData.length ? stateData[0].state__c : ``;
+            if(!certificateData[0].member_state){
+                certificateData[0].member_state = postalData.length ? postalData[0].state__c : ``;
             }
+            if(!certificateData[0].billingcity)
+            certificateData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+            if(!certificateData[0].billingstreet)
+            certificateData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+            if(!certificateData[0].billingcountry)
+            certificateData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+            if(!certificateData[0].member_gst_details__c)
+            certificateData[0].member_gst_details__c = ``
             let taxPerc = await findTax( certificateData[0].tax_master__c)
             // certificateData[0].member_state = 'Delhi'   to check UTGST
+            if( certificateData[0].member_gst_details__c){
+                let GSTState = cityOBJ[`${certificateData[0].member_gst_details__c}`.substring(0,2)]; 
+                if(GSTState)
+                certificateData[0].member_state = GSTState;
+                // cityOBJ
+            }
             console.log(certificateData[0].supplier_state ,  certificateData[0].member_state )       
             if(certificateData[0].supplier_state && certificateData[0].supplier_state == certificateData[0].member_state || !certificateData[0].member_state)
             {
@@ -469,6 +563,19 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
             certificateData[0].grand_total__c = certificateData[0].IGST  + certificateData[0].CGST + certificateData[0].SGST + certificateData[0].net_amount__c - certificateData[0].e_cash + certificateData[0].UTGST 
             if(certificateData[0].amount__c)
             certificateData[0].net_amount__c  = certificateData[0].amount__c
+            certificateData[0].billingstate = certificateData[0].member_state
+            let consigneeData = await getConsigneeDetails(certificateData[0].membershiptype_id)
+            certificateData[0].cbillingstreet = ``
+            certificateData[0].cbillingstate = ``
+            certificateData[0].cbillingcity = ``
+            
+
+            if(consigneeData.length)
+            {
+                certificateData[0].cbillingstreet = consigneeData[0].street__c
+                certificateData[0].cbillingstate = consigneeData[0].state__c
+                certificateData[0].cbillingcity = consigneeData[0].city_name
+            }
             console.log(certificateData)
             certificateXML = certificateTemplate.getCertificateTemplate(certificateData)
         }
@@ -653,15 +760,22 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
             console.log(ledgerData[0].company_name)
             console.log(`---------------------------------------------------111`)
             console.log(await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id))
+            let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
             if(!ledgerData[0].billingpostalcode){
-                let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
                 ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
             }
             
             if(!ledgerData[0].billingstate){
-                let stateData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
-                ledgerData[0].billingstate = stateData.length ? stateData[0].state__c : ``;
+                ledgerData[0].billingstate = postalData.length ? postalData[0].state__c : ``;
             }
+            if(!ledgerData[0].billingcity)
+            ledgerData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+            if(!ledgerData[0].billingstreet)
+            ledgerData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+            if(!ledgerData[0].billingcountry)
+            ledgerData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+            if(!ledgerData[0].member_gst_details__c)
+            ledgerData[0].member_gst_details__c = ``
             // ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
@@ -679,6 +793,12 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;
             payment_SFID= ledgerData[0].payment_sfid ;
+            if( ledgerData[0].member_gst_details__c){
+                let GSTState = cityOBJ[`${ledgerData[0].member_gst_details__c}`.substring(0,2)]; 
+                if(GSTState)
+                ledgerData[0].billingstate = GSTState;
+                // cityOBJ
+            }
         }
         console.log(ledgerData)
         let requestObj = {
@@ -777,20 +897,33 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
             //for voucher 
             // ledgerData[0].name = 'voucher1';
             // ledgerData[0].member_id__c = '3258'
+            let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
             if(!ledgerData[0].billingpostalcode){
-                let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
                 ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
             }
             
             if(!ledgerData[0].billingstate){
-                let stateData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
-                ledgerData[0].billingstate = stateData.length ? stateData[0].state__c : ``;
+                ledgerData[0].billingstate = postalData.length ? postalData[0].state__c : ``;
             }
-
+            if(!ledgerData[0].billingcity)
+            ledgerData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+            if(!ledgerData[0].billingstreet)
+            ledgerData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+            if(!ledgerData[0].billingcountry)
+            ledgerData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+            if(!ledgerData[0].member_gst_details__c)
+            ledgerData[0].member_gst_details__c = ``
             ledgerData[0].current_name = ledgerData[0].name
             ledgerData[0].new_name = ledgerData[0].name 
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;  
+            if( ledgerData[0].member_gst_details__c){
+                let GSTState = cityOBJ[`${ledgerData[0].member_gst_details__c}`.substring(0,2)]; 
+                if(GSTState)
+                ledgerData[0].billingstate = GSTState;
+                // cityOBJ
+            }
+            
         }
         console.log(ledgerData)
         let requestObj = {
@@ -1109,12 +1242,12 @@ let membershiptypeinfo = async(sfid)=>{
         let qry = ``
         if(sfid){
          qry = `
-         select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+         select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c , c.state__c,p.postal_code__c,c.name city_name  from tlcsalesforce.membershiptype__c mt left join 
          tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
          where mt.sfid = '${sfid}' and  mt.supplier__c is not null`;
         }else{
          qry = `
-         select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c  from tlcsalesforce.membershiptype__c mt left join 
+         select   mt.tax_master__c,p.name as property_name,mt.helpline_number__c, mt.sfid,Supplier_Details__c.name supplier_company,mt.name,mt.createddate,p.street__c , p.email__c,p.currencyisocode,c.country__c,c.state__c,p.postal_code__c,c.name city_name  from tlcsalesforce.membershiptype__c mt left join 
          tlcsalesforce.property__c p on mt.property__c = p.sfid left join tlcsalesforce.city__c c on c.sfid = p.city__c inner join tlcsalesforce.Supplier_Details__c on Supplier_Details__c.sfid = mt.supplier__c
          where mt.supplier__c is not null`;    
         }

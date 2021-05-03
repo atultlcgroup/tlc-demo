@@ -233,3 +233,22 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_DROP_OFF_AFTER_MV == true || process.env
   console.log(`schedule Tasks For DROPOFFAMV.`);
   scheduleTasksForDROPOFFAMV(process.env.SCHEDULER_TIME_FOR_DROP_OFF_AFTER_MV);
 }
+
+
+
+//For DSR Report Monthly
+
+let scheduleTasksForDSRReportMonthly=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR DSR REPORT MONTHLY  ========================`)
+ let data= await DSRReport.DSRReportMonthly('')
+ console.log(data) 
+ console.log(`================= DSR REPORT MONTHLY: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT_MONTHLY == true || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT_MONTHLY == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT_MONTHLY == 'TRUE')
+{
+  console.log(`DSR Report Monthly`);
+  scheduleTasksForDSRReportMonthly(process.env.SCHEDULER_TIME_FOR_DSR_REPORT_MONTHLY);
+}
+
+
