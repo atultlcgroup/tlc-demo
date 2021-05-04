@@ -525,6 +525,53 @@ let sendDSRReportMonthly=(file,excelFile,sfdcFile,fileName,emails , dynamicValue
 
 
 
+//Send mail to account team for tally GST Number And State Mismatch
+
+let sendMailForGSTAndStateMisMatch = async(req,toEmails , logId)=>{
+    try{
+        readHTMLFile(__dirname + `/Mismatch_In_GST_N_State_Tally.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let template = handlebars.compile(html);
+            // replacements={"name":`${req.name}`,"membership_number":`${req.membership_number}`,"membership_type":`${req.membership_type}`,"email":`${req.email}`,"amount":`${req.amount}`,"transaction_code":`${req.transaction_code}`,"date_time":`${req.date_time}`,"payment_mode":`${req.payment_mode}`,"source":`Web`};
+            let dateFormat1 = ( req.createddate? req.createddate:  "")
+            let dateTime1 = ``
+            if(formatDate){
+                // dateTime1 = formatDate(dateFormat1)
+            }
+            let displayName = `Club Marriott` ;
+            let fromEmailForPyament =  `<mis@clubmarriott.in>`;
+            let memberaddress = req.billingstreet ? req.billingstreet : ``;
+            memberaddress += ', ';
+            memberaddress += req.address_line_2__c ? req.address_line_2__c : ``
+           let membershipTypeName =  req.membership_type_name__c ? req.membership_type_name__c : ``;
+           if(!membershipTypeName)
+           membershipTypeName =  req.membership_type_name ? req.membership_type_name: ``;
+            let replacements={transaction_code : req.transcationcode__c ? req.transcationcode__c : ``,certificate : req.certificate_name ? req.certificate_name : ``,date_time : req.createddate ? req.createddate : ``,"membership_type" : membershipTypeName ,"amount" : req.grand_total__c ? req.grand_total__c : 0,gstnumber : req.member_gst_details__c ? req.member_gst_details__c : ``,pincode: req.billingpostalcode ? req.billingpostalcode : ``,state: req.billingstate ? req.billingstate : ``,country : req.billingcountry ? req.billingcountry : ``,address :memberaddress,name: req.name ? req.name : '',"membership_number":(req.membership_number__c ?req.membership_number__c:""),"email":(req.email__c ?req.email__c : "")};
+            let htmlToSend = template(replacements);
+            let emailSubject = `Club Marriott | Mismatch in State and GST State Code`;
+            console.log(`toEmails : ${toEmails}`)
+            sendmail.sendMailForTally(toEmails, `${displayName} ${fromEmailForPyament}` , emailSubject,`${htmlToSend}` , `${htmlToSend}`).then(async(data)=>{
+                pool.query(`UPDATE tlcsalesforce.reports_log
+                SET  "isEmailSent"=true ,status = 'SUCCESS' 
+                WHERE id='${logId}'`)  
+                                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch(async(err)=>{
+        pool.query(`UPDATE tlcsalesforce.reports_log
+        SET  "errorDescription"='${err}' ,status = 'ERROR' 
+        WHERE id='${logId}'`)  
+        console.log(err)
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+    }catch(e)
+   {
+       return   `${e}`
+   } 
+}
+
             module.exports={
                 sendMail,
                 sendEODPaymentReport,
@@ -537,7 +584,8 @@ let sendDSRReportMonthly=(file,excelFile,sfdcFile,fileName,emails , dynamicValue
                 sendRReport,
                 sendDRReport,
                 sendCMNewEnroll,
-                sendDSRReportMonthly
+                sendDSRReportMonthly,
+                sendMailForGSTAndStateMisMatch
             }
 
         

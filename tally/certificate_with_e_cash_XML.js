@@ -16,12 +16,18 @@ let getCertificateTemplate =(data)=> {
            <TALLYMESSAGE xmlns:UDF="TallyUDF">
             <VOUCHER VCHKEY="82b03d3a-bbba-4959-9437-4f7c344d64ff-0000aca4:00000010" SENDERID="3105d5c9-a08f-4500-bde5-5b998bc7e009-00000008" VCHTYPE="Sales" ACTION="Create" OBJVIEW="Invoice Voucher View">
              <ADDRESS.LIST TYPE="String">
+             <ADDRESS>${data[0].gst_company_name__c}</ADDRESS>
               <ADDRESS>${data[0].billingstreet}</ADDRESS>
+              <ADDRESS>${data[0].address_line_2__c}</ADDRESS>
+              <ADDRESS>${data[0].billingcity}</ADDRESS>
               <ADDRESS>${data[0].billingstate}</ADDRESS>
              </ADDRESS.LIST>
              <BASICBUYERADDRESS.LIST TYPE="String">
-              <BASICBUYERADDRESS>Electronic City</BASICBUYERADDRESS>
-              <BASICBUYERADDRESS>Bangalore</BASICBUYERADDRESS>
+              <BASICBUYERADDRESS>${data[0].gst_company_name__c}</BASICBUYERADDRESS>
+              <BASICBUYERADDRESS>${data[0].billingstreet}</BASICBUYERADDRESS>
+              <BASICBUYERADDRESS>${data[0].address_line_2__c}</BASICBUYERADDRESS>
+              <BASICBUYERADDRESS>${data[0].billingcity}</BASICBUYERADDRESS>
+              <BASICBUYERADDRESS>${data[0].billingstate}</BASICBUYERADDRESS>
              </BASICBUYERADDRESS.LIST>
              <OLDAUDITENTRYIDS.LIST TYPE="Number">
               <OLDAUDITENTRYIDS>-1</OLDAUDITENTRYIDS>
@@ -31,6 +37,8 @@ let getCertificateTemplate =(data)=> {
              <GUID>3105d5c9-a08f-4500-bde5-5b998bc7e009-00000008</GUID>
              <VATDEALERTYPE>Regular</VATDEALERTYPE>
              <STATENAME>${data[0].billingstate}</STATENAME>
+             <PARTYPINCODE>${data[0].billingpostalcode}</PARTYPINCODE>
+             <CONSIGNEEPINCODE>${data[0].billingpostalcode}</CONSIGNEEPINCODE>
              <COUNTRYOFRESIDENCE>${data[0].billingcountry}</COUNTRYOFRESIDENCE>
              <PARTYGSTIN>${data[0].member_gst_details__c}</PARTYGSTIN>
              <PLACEOFSUPPLY>${data[0].billingstate}</PLACEOFSUPPLY>
@@ -45,12 +53,14 @@ let getCertificateTemplate =(data)=> {
              <PERSISTEDVIEW>Invoice Voucher View</PERSISTEDVIEW>
              <VATDOCUMENTTYPE>1. Invoice</VATDOCUMENTTYPE>
              <CONSIGNEEGSTIN>${data[0].member_gst_details__c}</CONSIGNEEGSTIN>
-             <BASICBUYERNAME>${d.certificate_name}</BASICBUYERNAME>
+             <BASICBUYERNAME>${data[0].name}-${data[0].member_id__c}</BASICBUYERNAME>
              <BASICDATETIMEOFINVOICE>${data[0].createddate}</BASICDATETIMEOFINVOICE>
              <BASICDATETIMEOFREMOVAL>${data[0].createddate}</BASICDATETIMEOFREMOVAL>
              <VCHGSTCLASS/>
              <CONSIGNEEPINNUMBER>${data[0].member_gst_details__c}</CONSIGNEEPINNUMBER>
              <CONSIGNEESTATENAME>${data[0].billingstate}</CONSIGNEESTATENAME>
+             <PARTYGSTIN>${data[0].member_gst_details__c}</PARTYGSTIN> 
+             <GSTREGISTRATIONTYPE>Regular</GSTREGISTRATIONTYPE> 
              <VOUCHERTYPEORIGNAME>Sales</VOUCHERTYPEORIGNAME>
              <DIFFACTUALQTY>No</DIFFACTUALQTY>
              <ISMSTFROMSYNC>No</ISMSTFROMSYNC>

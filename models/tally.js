@@ -13,7 +13,9 @@ const tallyMaximumRetrialCount = process.env.TALLY_MAXIMUM_RETRIAL_COUNT || 5;
 let staticLedgerTemplate  = require('../tally/static_ledger_XML')
 const allowedProgramUniqueIdentifiers = process.env.TALLY_ALLOWED_PROGRAM_UNIQUE_IDENTIFIER || ''
 const axios = require('axios');
-
+const stateByPostalcode = require('../tally/stateAndPincode').data
+const  emailsForStateNGSTMismatchTally = process.env.EMAILS_FOR_STATE_N_GST_MISMATCH_TALLY || ``;
+let sendMailForTally= require("../helper/mailModel");
 
 
 let cityOBJ = {"35" : "Andaman and Nicobar Islands",
@@ -302,6 +304,59 @@ let tallyNotify = (client_id, client_secret , paymentId)=>{
 }
 
 
+let getDetailsFromAccountTable= async(account_sfid)=>{
+    try {
+        let qry = await pool.query(`select distinct account.member_id__c, account.sfid account_sfid,account.billingpostalcode,
+        account.billingcountry, account.billingstreet,account.billingstate,account.billingcity,
+        account.billingcountry,address_line_2__c
+              from tlcsalesforce.account where sfid = '${account_sfid}'`)
+            return qry.rows.length ? qry.rows : []
+    } catch (error) {
+        return []
+    }
+}
+
+// console.log(`from here 7`)
+// sendMailForTally.sendMailForGSTAndStateMisMatch(`data`,emailsForStateNGSTMismatchTally)
+
+let insertDataToReportsLog = async(data)=>{
+    try {
+        let type = `GSTNSTATEMMT-${data.transcationcode__c}`
+        console.log(`insert into tlcsalesforce.reports_log("isEmailSent",status,"typeBifurcation" , emails , created_at)
+        values(false,'In-Progress', '${type}','${emailsForStateNGSTMismatchTally}' , now())`);
+        let insertData = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent",status,"typeBifurcation" , emails , created_at)
+        values(false,'In-Progress', '${type}','${emailsForStateNGSTMismatchTally}' , now()) returning id`);
+        return insertData.rows ? insertData.rows[0].id : 0;
+    } catch (error) {
+        console.log(error)
+        return 0
+    }
+}
+
+let sendMail =async(memberData)=>{
+    try {
+        //emailsForStateNGSTMismatchTally
+        //create log
+        let typeName = `GSTNSTATEMMT-${memberData[0].transcationcode__c}`;
+        console.log(`select id from tlcsalesforce.reports_log where "typeBifurcation" = '${typeName}' and "isEmailSent" = true`)
+        let logData = await pool.query(`select id from tlcsalesforce.reports_log where "typeBifurcation" = '${typeName}' and "isEmailSent" = true`)
+        if(logData.rows.length)
+        return
+        console.log(`---------------------------------------Member Data -----------------------------`)
+        console.log(memberData)
+        console.log(`---------------------------------------Member Data: END -----------------------------`)
+       let logId = await insertDataToReportsLog(memberData[0])
+       console.log(`-----------------------------${logId}-------------------`)
+         sendMailForTally.sendMailForGSTAndStateMisMatch(memberData[0],emailsForStateNGSTMismatchTally,logId)
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+
+
 let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , ledgerInsertedId)=>{
     console.log(`--------------------------------------------------------------------------------------`)
     return new Promise(async(resolve,reject)=>{
@@ -310,21 +365,67 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
         let voucherXML = ``
         let accountSfid = ``
         if(voucherData.length ){
+
+
+
+              //GST and STate Valiation will be one here
+              if(voucherData[0].member_gst_details__c){
+                let MemberGSTState = cityOBJ[`${voucherData[0].member_gst_details__c}`.substring(0,2)]; 
+                let memberState = voucherData[0].member_state
+                if(!MemberGSTState)
+                    MemberGSTState=``;
+                if(!memberState)
+                    memberState = ``;
+                    if(memberState.toLocaleLowerCase() != MemberGSTState.toLocaleLowerCase())
+                    {
+                        //send mail and return 
+                        sendMail(voucherData)
+                        resolve(``);
+                        return
+                    }
+            }
+
+
+
+
+          let accountDetails =   await getDetailsFromAccountTable(voucherData[0].account_sfid)
+          if(accountDetails.length){
+                            if(!voucherData[0].billingpostalcode){
+                                voucherData[0].billingpostalcode = accountDetails[0].billingpostalcode;
+                            }
+                            if(!voucherData[0].member_state){
+                                voucherData[0].member_state = accountDetails[0].billingstate ;
+                            }
+                            if(!voucherData[0].billingcity)
+                            voucherData[0].billingcity =  accountDetails[0].billingcity ;
+                            if(!voucherData[0].billingstreet)
+                            voucherData[0].billingstreet =  accountDetails[0].billingstreet;
+                            if(!voucherData[0].billingcountry)
+                            voucherData[0].billingcountry =  accountDetails[0].billingcountry ;
+                            if(!voucherData[0].address_line_2__c )
+                            voucherData[0].address_line_2__c  = accountDetails[0].address_line_2__c ;
+                    
+
+          }
+
+              
+        
+
+          if(voucherData[0].billingpostalcode && !voucherData[0].member_state){
+            voucherData[0].member_state = stateByPostalcode[voucherData[0].billingpostalcode]
+        }
+
             if(!voucherData[0].member_state)
             voucherData[0].member_state= voucherData[0].account_billingstate
             let postalData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
-            if(!voucherData[0].billingpostalcode){
-                voucherData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
-            }
             if(!voucherData[0].member_state){
-                voucherData[0].member_state = postalData.length ? postalData[0].state__c : ``;
+                    voucherData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+                    voucherData[0].member_state = postalData.length ? postalData[0].state__c : ``;
+                    voucherData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+                    voucherData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+                    voucherData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+                    voucherData[0].address_line_2__c  = ``
             }
-            if(!voucherData[0].billingcity)
-            voucherData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
-            if(!voucherData[0].billingstreet)
-            voucherData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
-            if(!voucherData[0].billingcountry)
-            voucherData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
             if(!voucherData[0].member_gst_details__c)
             voucherData[0].member_gst_details__c = ``
             voucherData[0].createddate = (convertDateFormat(voucherData[0].createddate)) 
@@ -383,6 +484,8 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
                 voucherData[0].cbillingstate = consigneeData[0].state__c
                 voucherData[0].cbillingcity = consigneeData[0].city_name
             }
+            voucherData[0].address_line_2__c  = voucherData[0].address_line_2__c ? voucherData[0].address_line_2__c  : ``
+            voucherData[0].gst_company_name__c = voucherData[0].gst_company_name__c ? voucherData[0].gst_company_name__c : ``
             console.log(voucherData)
             voucherXML = voucherTemplate.getVoucherTemplate(voucherData[0])
         }
@@ -499,21 +602,66 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
         let UTGST = 0;
         let ecash_value =0
         if(certificateData.length ){
+
+
+              //GST and STate Valiation will be one here
+              if(certificateData[0].member_gst_details__c){
+                let MemberGSTState = cityOBJ[`${certificateData[0].member_gst_details__c}`.substring(0,2)]; 
+                let memberState = certificateData[0].member_state
+                if(!MemberGSTState)
+                    MemberGSTState=``;
+                if(!memberState)
+                    memberState = ``;
+                    if(memberState.toLocaleLowerCase() != MemberGSTState.toLocaleLowerCase())
+                    {
+                        //send mail and return 
+                        sendMail(certificateData)
+                        resolve(``);
+                        return;
+                    }
+            }
+
+            
+
+            let accountDetails =   await getDetailsFromAccountTable(certificateData[0].account_sfid)
+            if(accountDetails.length){
+                              if(!certificateData[0].billingpostalcode){
+                                  certificateData[0].billingpostalcode = accountDetails[0].billingpostalcode;
+                              }
+                              if(!certificateData[0].member_state){
+                                  certificateData[0].member_state = accountDetails[0].billingstate ;
+                              }
+                              if(!certificateData[0].billingcity)
+                              certificateData[0].billingcity =  accountDetails[0].billingcity ;
+                              if(!certificateData[0].billingstreet)
+                              certificateData[0].billingstreet =  accountDetails[0].billingstreet;
+                              if(!certificateData[0].billingcountry)
+                              certificateData[0].billingcountry =  accountDetails[0].billingcountry ;
+                              if(!certificateData[0].address_line_2__c )
+                              certificateData[0].address_line_2__c  = accountDetails[0].address_line_2__c ;
+                      
+  
+            }
+       
+      
+           
+
+            if(certificateData[0].billingpostalcode && !certificateData[0].member_state){
+                certificateData[0].member_state = stateByPostalcode[certificateData[0].billingpostalcode]
+            }
+    
+
             if(!certificateData[0].member_state)
             certificateData[0].member_state= certificateData[0].account_billingstate
             let postalData = await getPinCodeAndStateByMembershipType(certificateData[0].membershiptype_id) 
-            if(!certificateData[0].billingpostalcode){
-                certificateData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
-            }
             if(!certificateData[0].member_state){
+                certificateData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
                 certificateData[0].member_state = postalData.length ? postalData[0].state__c : ``;
+                certificateData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+                certificateData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+                certificateData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+                certificateData[0].address_line_2__c  = ``
             }
-            if(!certificateData[0].billingcity)
-            certificateData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
-            if(!certificateData[0].billingstreet)
-            certificateData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
-            if(!certificateData[0].billingcountry)
-            certificateData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
             if(!certificateData[0].member_gst_details__c)
             certificateData[0].member_gst_details__c = ``
             let taxPerc = await findTax( certificateData[0].tax_master__c)
@@ -576,6 +724,9 @@ let MuleApiCallCreateCertificate = async(client_id, client_secret  , paymentId ,
                 certificateData[0].cbillingstate = consigneeData[0].state__c
                 certificateData[0].cbillingcity = consigneeData[0].city_name
             }
+            certificateData[0].address_line_2__c  = certificateData[0].address_line_2__c ? certificateData[0].address_line_2__c  : ``
+            certificateData[0].gst_company_name__c = certificateData[0].gst_company_name__c ? certificateData[0].gst_company_name__c : ``
+            
             console.log(certificateData)
             certificateXML = certificateTemplate.getCertificateTemplate(certificateData)
         }
@@ -761,21 +912,22 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
             console.log(`---------------------------------------------------111`)
             console.log(await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id))
             let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
-            if(!ledgerData[0].billingpostalcode){
-                ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+            if(ledgerData[0].billingpostalcode && !ledgerData[0].billingstate){
+                ledgerData[0].billingstate = stateByPostalcode[ledgerData[0].billingpostalcode] 
             }
-            
+            if(!ledgerData[0].address_line_2__c)
+            ledgerData[0].address_line_2__c = ``
             if(!ledgerData[0].billingstate){
+                ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
                 ledgerData[0].billingstate = postalData.length ? postalData[0].state__c : ``;
+                ledgerData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+                ledgerData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+                ledgerData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+                ledgerData[0].address_line_2__c = ``;
             }
-            if(!ledgerData[0].billingcity)
-            ledgerData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
-            if(!ledgerData[0].billingstreet)
-            ledgerData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
-            if(!ledgerData[0].billingcountry)
-            ledgerData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
             if(!ledgerData[0].member_gst_details__c)
             ledgerData[0].member_gst_details__c = ``
+        
             // ledgerData[0].company_name ='TLC Testing'
             //for certificate
             // ledgerData[0].name = 'tally1';
@@ -790,6 +942,8 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
                 ledgerData[0].current_name = current_name
                 ledgerData[0].new_name = new_name         
             }
+
+            
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;
             payment_SFID= ledgerData[0].payment_sfid ;
@@ -872,6 +1026,19 @@ let MuleApiCallCreateLedgerUpdate = async(client_id, client_secret  , member_id 
 }
 
 
+let getDetailsFromPaymentTable = async(payment_sfid)=>{
+    try {
+        let qry = await pool.query(`select  distinct payment__c.pin_code__c,payment__c.address_line_2__c,gst_company_name__c,payment__c.state__c member_state,payment__c.gst_details__c member_gst_details__c 
+        , payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity
+        ,payment__c.country__c billingcountry
+        from tlcsalesforce.payment__c
+        where payment__c.sfid = '${payment_sfid}' `)
+        return qry.rows.length ? qry.rows : []
+    } catch (error) {
+        return []
+    }
+}
+
 let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type)=>{
     return new Promise(async(resolve,reject)=>{
         try{
@@ -897,24 +1064,47 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
             //for voucher 
             // ledgerData[0].name = 'voucher1';
             // ledgerData[0].member_id__c = '3258'
+            let paymentDetails = await getDetailsFromPaymentTable(paymentId)
+                if(paymentDetails.length){
+                            if(paymentDetails[0].member_gst_details__c){
+                                ledgerData[0].billingpostalcode = paymentDetails[0].pin_code__c;
+                            }
+                            
+                            if(paymentDetails[0].member_gst_details__c){
+                                ledgerData[0].billingstate = cityOBJ[`${paymentDetails[0].member_gst_details__c}`.substring(0,2)];
+                            }
+                            if(paymentDetails[0].member_gst_details__c)
+                            ledgerData[0].billingcity = paymentDetails[0].billingcity;
+                            if(paymentDetails[0].member_gst_details__c)
+                            ledgerData[0].billingstreet = paymentDetails[0].billingstreet;
+                            if(paymentDetails[0].member_gst_details__c)
+                            ledgerData[0].billingcountry = paymentDetails[0].billingcountry;
+                            if(paymentDetails[0].member_gst_details__c)
+                            ledgerData[0].member_gst_details__c = paymentDetails[0].member_gst_details__c
+                            if(paymentDetails[0].member_gst_details__c)
+                            ledgerData[0].address_line_2__c = paymentDetails[0].address_line_2__c
+                    }
+
+                    if(ledgerData[0].billingpostalcode && !ledgerData[0].billingstate){
+                        ledgerData[0].billingstate = stateByPostalcode[ledgerData[0].billingpostalcode]
+                    }
+
             let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
-            if(!ledgerData[0].billingpostalcode){
-                ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
-            }
-            
+            if(!ledgerData[0].address_line_2__c)
+            ledgerData[0].address_line_2__c = ``
             if(!ledgerData[0].billingstate){
-                ledgerData[0].billingstate = postalData.length ? postalData[0].state__c : ``;
-            }
-            if(!ledgerData[0].billingcity)
-            ledgerData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
-            if(!ledgerData[0].billingstreet)
-            ledgerData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
-            if(!ledgerData[0].billingcountry)
-            ledgerData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+                    ledgerData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
+                    ledgerData[0].billingstate = postalData.length ? postalData[0].state__c : ``;
+                    ledgerData[0].billingcity = postalData.length ? postalData[0].city_name : ``;
+                    ledgerData[0].billingstreet = postalData.length ? postalData[0].street__c : ``;
+                    ledgerData[0].billingcountry = postalData.length ? postalData[0].country__c : ``;
+                    ledgerData[0].address_line_2__c = ``
+              }
             if(!ledgerData[0].member_gst_details__c)
             ledgerData[0].member_gst_details__c = ``
             ledgerData[0].current_name = ledgerData[0].name
             ledgerData[0].new_name = ledgerData[0].name 
+         
             ledgerXML = ledgerTemplate.getLedgerTemplate(ledgerData[0]) 
             accountSfid = ledgerData[0].account_sfid ;  
             if( ledgerData[0].member_gst_details__c){
@@ -1024,7 +1214,7 @@ let findTax= async(tax_master_sfid)=>{
 }
 let gerReuiredDetailsForLedger = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select distinct payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select distinct account.address_line_2__c,payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
      ,membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
@@ -1045,7 +1235,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
 
  let gerReuiredDetailsForLedgerC = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select distinct payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select distinct account.address_line_2__c,payment__c.sfid payment_sfid,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
      , membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
     
@@ -1070,7 +1260,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
  let gerReuiredDetailsForLedgerUpdate = async(member_id , company_name)=>{
     try{
 
-      let qry = await pool.query(`select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select account.address_line_2__c,payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
      , membershiptype__c.sfid membershiptype_id
       from  tlcsalesforce.account
       left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
@@ -1080,7 +1270,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
       left join tlcsalesforce.city__c on Supplier_Details__c.city_master__c = city__c.sfid
       where  account.member_id__c = '${member_id}' and Supplier_Details__c.name = '${company_name}'
        and UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') union 
-       select payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
+       select account.address_line_2__c,payment__c.sfid payment_SFID,Supplier_Details__c.name supplier_company,account.member_id__c, account.sfid account_sfid,account.createddate,account.billingpostalcode,payment__c.mobile__c,account.billingcountry,payment__c.gst_details__c member_gst_details__c,account.name, payment__c.email__c, account.billingstreet,account.billingstate,account.billingcity,account.billingcountry, payment__c.currencyisocode
       , membershiptype__c.sfid membershiptype_id
        from  tlcsalesforce.account
       left join tlcsalesforce.payment__c on account.sfid=payment__c.Account__c
@@ -1108,7 +1298,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
         // where payment__c.sfid = '${payment_SFID}' 
         //  and UPPER(payment__c.payment_status__c) in('CONSUMED', 'SUCCESS') and payment__c.transaction_type__c in ('SpouseMembership-Buy' , 'SpouseMembership-Renew' , 'Membership-Buy' , 'Membership-Renew')
         //  `)
-      let qry = await pool.query(`select  distinct program__c.unique_identifier__c, membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select  distinct payment__c.transcationcode__c,payment__c.address_line_2__c,gst_company_name__c,program__c.unique_identifier__c, membershiptype__c.sfid membershiptype__sfid,membershiptype__c.tax_master__c ,supplier_details__c.is_union_territory__c ,account.billingstate account_billingstate,Supplier_Details__c.name supplier_company, payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid,account.member_id__c,payment__c.grand_total__c, payment__c.amount__c,membershiptype__c.name membership_type_name__c,membership__c.expiry_date__c,payment__c.sfid, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode, payment__c.pin_code__c billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,membership__c.membership_number__c, payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
       ,membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.account on account.sfid=payment__c.Account__c
@@ -1129,7 +1319,7 @@ let gerReuiredDetailsForLedger = async(payment_SFID)=>{
 
  let gerReuiredDetailsForCertificate = async(payment_SFID)=>{
     try{
-      let qry = await pool.query(`select  distinct  program__c.unique_identifier__c,payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,payment__c.membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
+      let qry = await pool.query(`select  distinct  payment__c.transcationcode__c,payment__c.address_line_2__c,gst_company_name__c,program__c.unique_identifier__c,payment_line_item__c.gross_amount__c certificate_gross_amount__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c,supplier_details__c.is_union_territory__c ,membershiptypeoffer__c.tax_master__c, account.billingstate account_billingstate,Supplier_Details__c.name supplier_company,payment__c.state__c member_state,city__c.state__c supplier_state,membershiptype__c.supplier__c,account.sfid account_sfid, account.member_id__c,membershiptype__c.name membership_type_name, membershiptypeoffer__c.name certificate_name,payment_line_item__c.membership_type_offer__c,payment_line_item__c.net_amount__c certificate_net_amount, payment__c.amount__c, payment_line_item__c.gross_amount__c cretificate_gross_amount, payment__c.grand_total__c, payment__c.gst_amount__c ,payment__c.name receipt_no__c,payment__c.transaction_type__c payment_for__c,payment__c.membership__r__membership_number__c, payment__c.payment_mode__c, payment__c.net_amount__c,payment__c.createddate,account.billingpostalcode, payment__c.pin_code__c billingpostalcode,account.billingcountry, payment__c.gst_details__c member_gst_details__c , payment__c.mobile__c ,account.name,payment__c.email__c, payment__c.address_line_1__c billingstreet,payment__c.state__c billingstate,payment__c.city__c billingcity,payment__c.country__c billingcountry, payment__c.currencyisocode
       ,membershiptype__c.sfid membershiptype_id
       from tlcsalesforce.payment__c
       inner join tlcsalesforce.payment_line_item__c on payment__c.sfid = payment_line_item__c.payment__c  
