@@ -340,7 +340,7 @@ let sendMail =async(memberData)=>{
         let typeName = `GSTNSTATEMMT-${memberData[0].transcationcode__c}`;
         console.log(`select id from tlcsalesforce.reports_log where "typeBifurcation" = '${typeName}' and "isEmailSent" = true`)
         let logData = await pool.query(`select id from tlcsalesforce.reports_log where "typeBifurcation" = '${typeName}' and "isEmailSent" = true`)
-        if(logData.rows.length)
+        if(!logData.rows.length)
         return
         console.log(`---------------------------------------Member Data -----------------------------`)
         console.log(memberData)
