@@ -355,6 +355,121 @@ let sendMail =async(memberData)=>{
 }
 
 
+let getPrimaryPaymentId = async(payment_id)=>{
+    try {
+        let qry = await pool.query(`select p1.sfid as primary_payment_id,primary_membership__c,payment__c.sfid,payment__c.transaction_type__c,payment__c.membership__c from 
+        tlcsalesforce.payment__c left join tlcsalesforce.membership__c on membership__c.sfid = 
+        payment__c.membership__c left join tlcsalesforce.payment__c p1 on membership__c.primary_membership__c = p1.membership__c where payment__c.sfid = '${payment_id}'
+        `)
+        return qry.rows.length ? qry.rows[0].primary_payment_id : payment_id
+    } catch (error) {
+       return payment_id 
+    }
+}
+
+
+
+let getSpouseAddressForLedger = async(voucherData)=>{
+    try{
+        console.log(`-------------------------------from getSpouseAddress ------------------------`)
+      let getTransactionType = await getPaymentDetails(voucherData[0].payment_sfid)
+      console.log(`-------------------------${getTransactionType}-----------------------`)
+      if(['SpouseMembership-Buy' , 'SpouseMembership-Renew'].includes(getTransactionType)){
+            let primaryPaymentId  = await getPrimaryPaymentId(voucherData[0].payment_sfid)
+            if(!voucherData[0].member_gst_details__c){
+              console.log(`-------------------------------from GST DETAILS ------------------------`)
+              let primaryVoucherData = await  gerReuiredDetailsForVoucher(`${primaryPaymentId}`);
+              console.log(`-------------------------------from primaryVoucherData  ------------------------`)
+              console.log(primaryVoucherData)
+              voucherData[0].billingstate = primaryVoucherData[0].member_state ? primaryVoucherData[0].member_state : ``;
+              voucherData[0].billingpostalcode = primaryVoucherData[0].billingpostalcode ? primaryVoucherData[0].billingpostalcode : ``;
+              voucherData[0].billingcountry = primaryVoucherData[0].billingcountry ?  primaryVoucherData[0].billingcountry : ``;
+              voucherData[0].member_gst_details__c =  primaryVoucherData[0].member_gst_details__c ?  primaryVoucherData[0].member_gst_details__c : ``;
+              voucherData[0].billingstreet = primaryVoucherData[0].billingstreet ? primaryVoucherData[0].billingstreet  : ``;
+              voucherData[0].billingstate = primaryVoucherData[0].billingstate ? primaryVoucherData[0].billingstate : ``;
+              voucherData[0].billingcity = primaryVoucherData[0].billingcity ? primaryVoucherData[0].billingcity : ``;
+              voucherData[0].address_line_2__c = primaryVoucherData[0].address_line_2__c ? primaryVoucherData[0].address_line_2__c : ``;
+          }
+          else if(!voucherData[0].member_state && !voucherData[0].member_gst_details__c){
+              console.log(`-------------------------------from primaryLedgerrData  ------------------------`)
+             let primaryLedgerData =await  gerReuiredDetailsForLedger(paymentId);
+             console.log(primaryLedgerData)
+              voucherData[0].billingstate = primaryLedgerData[0].billingstate ? primaryLedgerData[0].billingstate : ``;
+              voucherData[0].billingpostalcode = primaryLedgerData[0].billingpostalcode ? primaryLedgerData[0].billingpostalcode : ``;
+              voucherData[0].billingcountry = primaryLedgerData[0].billingcountry ?  primaryLedgerData[0].billingcountry : ``;
+              voucherData[0].billingstreet = primaryLedgerData[0].billingstreet ? primaryLedgerData[0].billingstreet  : ``;
+              voucherData[0].billingstate = primaryLedgerData[0].billingstate ? primaryLedgerData[0].billingstate : ``;
+              voucherData[0].billingcity = primaryLedgerData[0].billingcity ? primaryLedgerData[0].billingcity : ``;
+              voucherData[0].address_line_2__c = primaryLedgerData[0].address_line_2__c ? primaryLedgerData[0].address_line_2__c : ``;
+          }
+
+      }
+      console.log(`-------------------------------Final Voucher Data ------------------------`)
+      console.log(voucherData)
+       return voucherData ;     
+    }catch(e){
+        return voucherData ;
+    }
+}
+
+
+
+let getSpouseAddress = async(voucherData)=>{
+      try{
+          console.log(`-------------------------------from getSpouseAddress ------------------------`)
+        let getTransactionType = await getPaymentDetails(voucherData[0].sfid)
+        console.log(`-------------------------${getTransactionType}-----------------------`)
+        if(['SpouseMembership-Buy' , 'SpouseMembership-Renew'].includes(getTransactionType)){
+              let primaryPaymentId  = await getPrimaryPaymentId(voucherData[0].sfid)
+              if(!voucherData[0].member_gst_details__c){
+                console.log(`-------------------------------from GST DETAILS ------------------------`)
+                let primaryVoucherData = await  gerReuiredDetailsForVoucher(`${primaryPaymentId}`);
+                console.log(`-------------------------------from primaryVoucherData  ------------------------`)
+                console.log(primaryVoucherData)
+                voucherData[0].member_state = primaryVoucherData[0].member_state ? primaryVoucherData[0].member_state : ``;
+                voucherData[0].billingpostalcode = primaryVoucherData[0].billingpostalcode ? primaryVoucherData[0].billingpostalcode : ``;
+                voucherData[0].billingcountry = primaryVoucherData[0].billingcountry ?  primaryVoucherData[0].billingcountry : ``;
+                voucherData[0].member_gst_details__c =  primaryVoucherData[0].member_gst_details__c ?  primaryVoucherData[0].member_gst_details__c : ``;
+                voucherData[0].billingstreet = primaryVoucherData[0].billingstreet ? primaryVoucherData[0].billingstreet  : ``;
+                voucherData[0].billingstate = primaryVoucherData[0].billingstate ? primaryVoucherData[0].billingstate : ``;
+                voucherData[0].billingcity = primaryVoucherData[0].billingcity ? primaryVoucherData[0].billingcity : ``;
+                voucherData[0].address_line_2__c = primaryVoucherData[0].address_line_2__c ? primaryVoucherData[0].address_line_2__c : ``;
+                if(voucherData[0].member_gst_details__c){
+                    let MemberGSTState = cityOBJ[`${voucherData[0].member_gst_details__c}`.substring(0,2)]; 
+                    let memberState = voucherData[0].member_state
+                    if(!MemberGSTState)
+                        MemberGSTState=``;
+                    if(!memberState)
+                        memberState = ``;
+                        if(memberState.toLocaleLowerCase() != MemberGSTState.toLocaleLowerCase())
+                        {
+                            //send mail and return 
+                            sendMail(voucherData)
+                            return [];
+                        }
+                }  
+            }
+            else if(!voucherData[0].member_state && !voucherData[0].member_gst_details__c){
+                console.log(`-------------------------------from primaryLedgerrData  ------------------------`)
+               let primaryLedgerData =await  gerReuiredDetailsForLedger(paymentId);
+               console.log(primaryLedgerData)
+                voucherData[0].member_state = primaryLedgerData[0].billingstate ? primaryLedgerData[0].billingstate : ``;
+                voucherData[0].billingpostalcode = primaryLedgerData[0].billingpostalcode ? primaryLedgerData[0].billingpostalcode : ``;
+                voucherData[0].billingcountry = primaryLedgerData[0].billingcountry ?  primaryLedgerData[0].billingcountry : ``;
+                voucherData[0].billingstreet = primaryLedgerData[0].billingstreet ? primaryLedgerData[0].billingstreet  : ``;
+                voucherData[0].billingstate = primaryLedgerData[0].billingstate ? primaryLedgerData[0].billingstate : ``;
+                voucherData[0].billingcity = primaryLedgerData[0].billingcity ? primaryLedgerData[0].billingcity : ``;
+                voucherData[0].address_line_2__c = primaryLedgerData[0].address_line_2__c ? primaryLedgerData[0].address_line_2__c : ``;
+            }
+
+        }
+        console.log(`-------------------------------Final Voucher Data ------------------------`)
+        console.log(voucherData)
+         return voucherData ;     
+      }catch(e){
+          return voucherData ;
+      }
+}
 
 
 let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , ledgerInsertedId)=>{
@@ -416,7 +531,9 @@ let MuleApiCallCreateVoucher = async(client_id, client_secret  , paymentId , led
         }
 
             if(!voucherData[0].member_state)
-            voucherData[0].member_state= voucherData[0].account_billingstate
+            voucherData[0].member_state= voucherData[0].account_billingstate;
+
+            voucherData = await getSpouseAddress(voucherData);
             let postalData = await getPinCodeAndStateByMembershipType(voucherData[0].membershiptype_id) 
             if(!voucherData[0].member_state){
                     voucherData[0].billingpostalcode = postalData.length ? postalData[0].postal_code__c : ``;
@@ -1089,6 +1206,7 @@ let MuleApiCallCreateLedger = async(client_id, client_secret  , paymentId , type
                         ledgerData[0].billingstate = stateByPostalcode[ledgerData[0].billingpostalcode]
                     }
 
+                   ledgerData = await getSpouseAddressForLedger(ledgerData);
             let postalData = await getPinCodeAndStateByMembershipType(ledgerData[0].membershiptype_id) 
             if(!ledgerData[0].address_line_2__c)
             ledgerData[0].address_line_2__c = ``
