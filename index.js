@@ -22,6 +22,7 @@ const helmet = require('helmet')
 
 const reservationRouters= require("./routers/reservation");
 const paymentRouters= require("./routers/paymentLink");
+const DBToDBMigration= require("./routers/DBToDBMigration");
 
 const excelRouters = require("./routers/pos");
 const body_parser = require("body-parser");
@@ -52,6 +53,8 @@ app.use("/api/UTR",UTRReport)
 app.use("/api/DRR",DRReport)
 app.use("/api/FR",FReport)
 app.use("/api/RR",RReport)
+app.use("/api/migration",DBToDBMigration)
+
 app.use("/api/MemberSpend",memberSpentPOS)
 app.use("/api/tally" , tallyrouters)
 app.use("/api/CMNewEnroll" , CMReport)
