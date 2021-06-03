@@ -393,7 +393,54 @@ const sendMailForTally = (to, from, subject, text, html) => {
 }
 
 
-
+/**
+ * Send emails for Export String Report 
+ */
+ const smtpAttachmentExportString = (to, from, subject, text, html , files) => {
+    console.log(`----------------------------`)
+    console.log(`MAILER_HOST= ${config.MAILER_HOST},MAILER_PORT=${config.MAILER_PORT},MAILER_USER=${config.MAILER_USER},MAILER_PASSWORD = ${config.MAILER_PASSWORD},MAILER_SECURE=${config.MAILER_SECURE}`)
+    console.log(`----------------------------`)    // if(!config.MAILER_FROM_EMAIL) console.log(`MAILER_FROM_EMAIL not specified. Using provided in argument: ${from}`);
+    console.log('Yes from here')
+    const newMail = {
+        to,
+        from: from ,
+        subject,
+        text,
+        html,
+        attachments:[
+            {
+                filename: `${files[0].fileName}.xlsx`,
+                path: `${files[0].filePath}`
+            },
+            {
+                filename: `${files[1].fileName}.xlsx`,
+                path: `${files[1].filePath}`
+            },
+            {
+                filename: `${files[2].fileName}.xlsx`,
+                path: `${files[2].filePath}`
+            },
+            {
+                filename: `${files[3].fileName}.xlsx`,
+                path: `${files[3].filePath}`
+            }
+        ]
+    };
+    return new Promise((resolve, reject) => {
+         SMTPConfiguration(newMail).then((res) => {
+            //  console.log(`mail sent successfully!`)
+            for(let d of files)
+            unlinkFiles(d.filePath);
+            resolve(res);
+            
+        }).catch((err) => {
+            for(let d of files)
+            unlinkFiles(d.filePath);
+            reject(err);
+        });    
+    })
+      
+}
 
 exports.smtp = (to, from, subject, text, html) => sendMail(to, from, subject, text, html, {}, 'smtp');
 exports.smtpAttachment = (to, from, subject, text, html,file,pdf,fileName) => sendMailAttachment(to, from, subject, text, html, file,pdf,fileName);
@@ -409,4 +456,7 @@ exports.smtpAttachmentDRR = (to, from, subject, text, html,file,fileName) => sen
 exports.smtpAttachmentNewEnroll = (to, from, subject, text, html,file,fileName) => sendMailAttachmentNewEnroll(to, from, subject, text, html, file,fileName);
 
 exports.sendMailForTally = (to, from, subject, text, html) => sendMailForTally(to, from, subject, text, html, {}, 'smtp');
+
+exports.smtpAttachmentExportString = (to, from, subject, text, html , files) => smtpAttachmentExportString(to, from, subject, text, html, files , {}, 'smtp');
+
 

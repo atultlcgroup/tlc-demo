@@ -572,6 +572,57 @@ let sendMailForGSTAndStateMisMatch = async(req,toEmails , logId)=>{
    } 
 }
 
+
+
+
+//send mail for ExportString
+
+let sendExportSrtingReport=(files, emails , dynamicValues , program_name , logId)=>{
+    try{
+        // console.log(`dynamic values --------------------------------`);
+        console.log(dynamicValues);
+        readHTMLFile(__dirname + `/Export_String.html`, function(err, html) {
+            console.log('hi')
+            if(err)
+            console.log(err)
+            let template = handlebars.compile(html);
+            replacements={"brandLogo":dynamicValues[0].brand_logo__c,"programName":program_name ,"footer":dynamicValues[0].footer_es__c};
+           let htmlToSend = template(replacements);
+           let displayName = dynamicValues[0].display_name_es__c || '';
+           const fromEmailForDSR = dynamicValues[0].from_email_id_es__c || '';
+           const subjectForDSRReport = dynamicValues[0].es_subject_name || '';
+           
+            console.log(`fromEmailForEXPORTSTING : ${fromEmailForDSR} to ${emails} subject ${subjectForDSRReport}`);
+            // console.log(files)
+             sendmail.smtpAttachmentExportString(emails, `${displayName} <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,files).then((data)=>{
+                // sendmail.smtpAttachmentDSR(['atul.srivastava@tlcgroup.com','shubham.thute@tlcgroup.com','shailendra@tlcgroup.com'], `Club Marriott <${fromEmailForDSR}>` , subjectForDSRReport,`${htmlToSend}` , `${htmlToSend}`,`${file}`,`${fileName}`).then((data)=>{
+
+                // updatePayentLog(transactionIdsArr,'SUCCESS')
+                pool.query(`UPDATE tlcsalesforce.reports_log
+                SET  "isEmailSent"=true ,status = 'SUCCESS' 
+                WHERE id='${logId}'`)  
+                console.log(`Email Sent Successfully`)
+        // res.status(200).send(`email sent from: ${from} to: ${to}`)
+    }).catch((err)=>{
+        // res.status(500).send(`${JSON.stringify(err)}`)
+        // updatePayentLog(transactionIdsArr,'FAILED')
+        console.log(err)
+        pool.query(`UPDATE tlcsalesforce.reports_log
+        SET status = 'FAILED' 
+        WHERE id='${logId}'`)  
+        console.log(`Email snet has err :${JSON.stringify(err)}`)
+    })
+    })
+  
+
+    }catch(e){
+        console.log(`Email snet has err :${JSON.stringify(e)}`)
+    }
+}      
+
+
+
+
             module.exports={
                 sendMail,
                 sendEODPaymentReport,
@@ -585,7 +636,8 @@ let sendMailForGSTAndStateMisMatch = async(req,toEmails , logId)=>{
                 sendDRReport,
                 sendCMNewEnroll,
                 sendDSRReportMonthly,
-                sendMailForGSTAndStateMisMatch
+                sendMailForGSTAndStateMisMatch,
+                sendExportSrtingReport
             }
 
         

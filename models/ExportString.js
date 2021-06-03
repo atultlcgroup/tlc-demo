@@ -1,0 +1,262 @@
+const pool = require("../databases/db").pool;
+let sendMail= require("../helper/mailModel");
+let generateExcels = require("../helper/generateExportStingExcels");
+
+/**
+ * Get emails
+ */
+
+
+
+ let findPaymentRule= async(req )=>{
+    try{
+        console.log(`program id from findpayment rule = ${req.program__c}`)
+        let qry = ``;
+        if(req.program__c)
+        qry = `select distinct hotel_email_send_es__c,hotel_email_id_es__c,tlc_email_id_es__c,tlc_send_email_es__c from tlcsalesforce.Payment_Email_Rule__c where program__c = '${req.program__c}'`;
+        // else if(req.property_sfid && req.customer_set_sfid)
+        // qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_id}'`;
+        // else if(req.property_sfid)
+        // qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where property__c = '${req.property_sfid}' and program__c = '${req.program_id}'`;
+        // else if(req.customer_set_sfid)
+        // qry = `select distinct hotel_email_send_utr__c,hotel_email_id_utr__c,tlc_email_id_utr__c,tlc_send_email_utr__c from tlcsalesforce.Payment_Email_Rule__c where customer_set__c = '${req.customer_set_sfid}' and program__c = '${req.program_id}'`;
+        let emailData = await pool.query(`${qry}`)
+        let result = emailData ? emailData.rows : []
+        let resultArray=[];
+        if(result){
+            for(let d of result){
+            if(d.hotel_email_send_es__c == true)
+            resultArray= resultArray.concat(d.hotel_email_id_es__c.split(','));
+            if(d.tlc_send_email_es__c == true)
+            resultArray=resultArray.concat(d.tlc_email_id_es__c.split(','));
+           }
+        }
+        return resultArray
+    }catch(e){
+        // await createLogForUTRReport(fileName,'ERROR',false,`${e}`)
+        console.log(e)
+        return [];
+    }
+}
+
+
+
+let getEPRSfid = async()=>{
+    try{
+      let qry = `select distinct payment_email_rule__c.program__c,(select name from tlcsalesforce.program__c where sfid = payment_email_rule__c.program__c limit 1)  as program_name from tlcsalesforce.payment_email_rule__c where
+      (hotel_email_send_es__c = true or tlc_send_email_es__c = true) and  (program__c is not NULL or program__c !='')`
+      let data = await pool.query(`${qry}`)
+      let result = data ? data.rows : []
+      let finalArr = []
+      let programNameArr = [];
+      let programArr = [];
+      for(let r of result){
+          let emails = await findPaymentRule(r)
+          finalArr.push(emails)
+          programNameArr.push(r.program_name)
+          programArr.push(r.program__c)
+      }
+      let resultObj = {emailArr: finalArr, programArr : programArr , programNameArr : programNameArr}
+      return resultObj;
+    }catch(e){
+        console.log(e)
+      return [];
+    }
+}
+
+/**
+ * Get Data 
+ */
+let getDSRData = async(programSFID)=>{
+    try {
+        let qry = `select
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.Address_Line_1__c
+        END as Officeadd1,
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.Address_Line_2__c
+        END as Officeadd2,
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.Address_Line_3__c
+        END as Officeadd3,
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.Country__c
+        END as OfficeCountry,
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.State__c
+        END as OfficeState,
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.City__c
+        END as OfficeCity,
+        case
+        when Member_Address_information__c.address_type__c='Loyalty - Business'
+        or Member_Address_information__c.address_type__c='Business'
+        then
+        Member_Address_information__c.Pin_code__c
+        END as OfficePin,
+        Account.Marital_Status__c as Marital,
+        A2.Gender_c__c as Spoussex,A2.salutation as Spous_Sal,A2.firstname as Spous_Firstname,
+        A2.lastname As Spous_Lastname,A2.Birth_date__c as Spousdob,
+        Taj_Bank_Detail__c.Bank_Code__c as orion_cheque_bank,City__c.taj_state_code__c as State_code,
+        city__c.taj_city_code__c as city_code,Account.Enrolled_in_Taj_loyalty_program__c,
+        Account.Email_Communication_Preferences__c,Account.SMS_Communication_Preferences__c,
+        Case
+        when Account.PersonDoNotCall=true then False
+        when Account.PersonDoNotCall=false then true
+        END as Call_Communication_Preference__c,Account.Terms_and_condition_Flag__c
+        from tlcsalesforce.Payment__c
+        inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+        inner join tlcsalesforce.Account on membership__c.member__c=account.sfid
+        Left join tlcsalesforce.Account A2 on Account.Spouse_account__c=A2.sfid
+        Left join tlcsalesforce.City__c on Account.City__c=City__c.sfid
+        Left join tlcsalesforce.Member_Address_information__c on Member_Address_information__c.member__c=Account.sfid
+        inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+        Inner Join tlcsalesforce.program__c On membershiptype__c.program__c = program__c.sfid
+        Left Join tlcsalesforce.Taj_Bank_Detail__c on payment__c.Taj_Bank_Detail__c=Taj_Bank_Detail__c.sfid
+        Left join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
+        where (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
+        
+              or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
+               and
+        Membership__c is not Null and Membership_Offer__c is null
+        and
+        --(Property__c.sfid='')
+        --and
+        program__c.sfid  = '${programSFID}'
+        AND membershiptype__c.sfid != program__c.default_membership_type__c
+        --AND(Member_Address_information__c.address_type__c='Loyalty - Business' or Member_Address_information__c.address_type__c='Business' )`;
+        let data = await pool.query(qry);
+        return data.rows.length ? data.rows  : [];
+        } catch (error) {
+        console.log(error)
+        return []; 
+    }
+}
+
+
+
+
+/**
+ * Get brand id by program id
+ * 
+ */
+
+
+ let getBrandId = async(program__c)=>{
+    try{
+        let  qry=`select brand__c  from tlcsalesforce.payment_email_rule__c where program__c = '${program__c}' limit 1`
+        let data =await pool.query(qry)
+        return data.rows ? data.rows[0].brand__c : ``
+    }catch(e){
+        return ``;
+    }
+}
+
+
+ /**
+  * Get dynamic value by brand id 
+  */
+
+
+  let getDynamicValues=async(brandId)=>{
+    try{
+        let query=await pool.query(`select subject_es__c es_subject_name,brand_name__c,brand_logo__c,tlc_logo__c,page_footer_2_es__c,page_footer_1_es__c,footer_es__c,from_email_id_es__c,
+        column_1_es__c,column_2_es__c,column_3_es__c,display_name_es__c  from tlcsalesforce.dynamic_report__c where brand_name__c='${brandId}'`)
+        let result = query ? query.rows : [];
+        return result;
+    }catch(e){
+        return [];
+    } 
+}
+
+
+/**
+ * Create log
+ * Pass program instead of property
+ */
+ let insertLog = async(program_id, emails)=>
+ {
+     try{
+         emails =emails.length ? emails.join(","):''
+         let isEmailSent= false
+         let data = await pool.query(`insert into tlcsalesforce.reports_log("isEmailSent","propertyId",status,"typeBifurcation","customerSetId",emails) values(${isEmailSent},'${program_id}', 'New' , 'Export Sting' ,'' , '${emails}') RETURNING  id`)
+         return data.rows ? data.rows[0].id : 0;
+     }catch(e){
+         console.log(e)
+     }
+ }
+ 
+
+
+/**
+ * main calling function
+ */
+let exportString = async()=>{
+     /**
+      * Get emails for export string
+      */
+     try {
+     let paymentEmailRuleObject = await getEPRSfid();
+     for(let i =0 ; i< paymentEmailRuleObject.emailArr.length;i++){
+        let brandId = await getBrandId(paymentEmailRuleObject.programArr[i])
+        console.log(`brand id = ${brandId}`)
+        let dynamicValues=await getDynamicValues(brandId);
+        if(dynamicValues.length){
+            let logId = await insertLog(paymentEmailRuleObject.programArr[i] , paymentEmailRuleObject.emailArr[i]);
+        // console.log(dynamicValues)
+        //  console.log(paymentEmailRuleObject.emailArr[i]);
+        //  console.log(paymentEmailRuleObject.programArr[i]);
+        //  console.log(paymentEmailRuleObject.programNameArr[i]);
+
+         //get data and send to generate excel function
+         let data = await getDSRData(paymentEmailRuleObject.programArr[i]);
+         /**
+         * Generate Excels
+         */
+         let DSRChequeExcel = await generateExcels.DSRCheque(data);
+         let DSRPriviledgeExcel = await generateExcels.DSRPrivilege(data);
+         let DSRPreferredExcel = await generateExcels.DSRPreferred(data);
+         let OrionStringExcel = await generateExcels.OrionString();
+         
+         let filesArr = [{fileName: `DSR Cheque` , filePath : `${DSRChequeExcel}`},{fileName: `DSR Privileged` , filePath : `${DSRPriviledgeExcel}`},{fileName: `DSR Preferred` , filePath : `${DSRPreferredExcel}`},{fileName: `Orion String` , filePath : `${OrionStringExcel}`}];
+    //    console.log(filesArr)
+         //  console.log(OrionStringcel , DSRChequeExcel , DSRPriviledgeExcel , DSRPreferredExcel )
+
+        /**
+         * SendMail 
+         */        
+         let sendMailData = await sendMail.sendExportSrtingReport(filesArr, `atul.srivastava@tlcgroup.com` , dynamicValues , paymentEmailRuleObject.programNameArr[i] , logId);
+         }
+        }
+    } catch (error) {
+         return error;
+    }
+    //  console.log(paymentEmailRuleObject);
+}
+
+exportString()
+/**
+ * Exporting functions
+ */
+module.exports={
+    exportString
+}
+
