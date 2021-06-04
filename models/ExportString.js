@@ -252,7 +252,7 @@ let exportString = async()=>{
     //  console.log(paymentEmailRuleObject);
 }
 
-exportString()
+// exportString()
 /**
  * Exporting functions
  */

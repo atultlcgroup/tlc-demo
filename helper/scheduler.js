@@ -13,7 +13,7 @@ const tally=require('../models/tally');
 const CMNewEnroll=require('../models/CMNewEnroll');
 
 const DROPOFFAMV = require('../models/mobileVerificationCase')
-
+const ExportString = require('../models/ExportString')
 
 
 let scheduleTasksForPOS =(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
@@ -260,7 +260,7 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT_MONTHLY == true || process.en
 
 let scheduleTasksForExportString=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
   console.log(`=================   SCHEDULER START FOR Export String Report ========================`)
- let data= await DSRReport.DSRReportMonthly('')
+ let data= await ExportString.exportString();
  console.log(data) 
  console.log(`================= Export String Report: Success=============`)
 });
