@@ -252,3 +252,22 @@ if(process.env.IS_SCHEDULER_ALLOWED_FOR_DSR_REPORT_MONTHLY == true || process.en
 }
 
 
+
+/**
+ * For String Export Report 
+ */
+
+
+let scheduleTasksForExportString=(scheduledTime)=> schedule.scheduleJob(scheduledTime, async()=>{
+  console.log(`=================   SCHEDULER START FOR Export String Report ========================`)
+ let data= await DSRReport.DSRReportMonthly('')
+ console.log(data) 
+ console.log(`================= Export String Report: Success=============`)
+});
+
+if(process.env.IS_SCHEDULER_ALLOWED_FOR_EXPORT_STRING_REPORT == true || process.env.IS_SCHEDULER_ALLOWED_FOR_EXPORT_STRING_REPORT == 'true' || process.env.IS_SCHEDULER_ALLOWED_FOR_EXPORT_STRING_REPORT == 'TRUE')
+{
+  console.log(`Export String Report`);
+  scheduleTasksForExportString(process.env.SCHEDULER_TIME_FOR_EXPORT_STRING_REPORT);
+}
+
