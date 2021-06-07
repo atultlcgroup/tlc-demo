@@ -147,9 +147,49 @@ let OrionString=async(data)=>{
   /**
        * Looping header
        */
-   for(let h =0 ; h <sheetHeaderArr.length ;h++){
-    ws2.cell(1, h +1).string(`${sheetHeaderArr[h]}`).style(style);
-  }
+      for(let h =0 ; h <sheetHeaderArr.length ;h++){
+        ws2.cell(1, h +1).string(`${sheetHeaderArr[h]}`).style(style);
+      }
+      let row =2;
+      for(let d of data){
+        // console.log(data)
+        let column = 1;
+        ws2.cell(row , column++).number((d.membership_number__c ? d.membership_number__c : 0 )).style(style);
+        ws2.cell(row , column++).string(`` + (d.name ? d.name : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.add1 ? d.add1 : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.add2 ? d.add2 : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.add3 ? d.add3 : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.city ? d.city : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.billingpostalcode ? d.billingpostalcode : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.telephone_number ? d.telephone_number : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.mobile_number ? d.mobile_number : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.fax_number ? d.fax_number : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.email_for_notification__c ? d.email_for_notification__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.salutation ? d.salutation : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.firstname ? d.firstname : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.lastname ? d.lastname : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.recommended_by ? d.recommended_by : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.membership_enrollment_date__c ? d.membership_enrollment_date__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.expiry_date__c ? d.expiry_date__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.state_code ? d.state_code : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.city_code ? d.city_code : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.membership_enrollment_date__c ? d.membership_enrollment_date__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.net_amount__c ? d.net_amount__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.payment_mode__c ? d.payment_mode__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.payment_mode__c ? d.payment_mode__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.cheque_number__c ? d.cheque_number__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.orion_cheque_bank ? d.orion_cheque_bank : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.check_city ? d.check_city : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.check_branch ? d.check_branch : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.bank_deposit_date__c ? d.bank_deposit_date__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.payment_mode__c = 'CHEQUE'? 'Other Local' : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.credit_card__c ? d.credit_card__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.paid_by ? d.paid_by : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.gst_details__c ? d.gst_details__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.customer_set_program_level__c ? d.customer_set_program_level__c : ``)).style(style);
+        row++;
+
+      }
 
   let fileName = `./reports/ExportString/OrionString_${Date.now()}.xlsx`
   const buffer = await wb.writeToBuffer();

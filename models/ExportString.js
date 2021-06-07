@@ -204,7 +204,95 @@ let getDSRData = async(programSFID)=>{
      }
  }
  
-
+/**
+ * Get Orion String DATA
+ */
+let getOrionStringData =async(program_id)=>
+{
+    try {
+        let qry = `select
+        membership__c.membership_number__c,account.name,account.address_line_2__c,City__c.name,city__c.taj_state_code__c,
+        city__c.taj_state_code__c,
+        account.billingpostalcode,account.Email_for_notification__c,account.salutation,account.firstname,
+        account.lastname,membership__c.membership_enrollment_date__c,membership__c.expiry_date__c,
+        payment__c.net_amount__c,payment__c.payment_mode__c,payment__c.Cheque_Number__c,
+        payment__c.bank_deposit_date__c,payment__c.Credit_Number__c,payment__c.Credit_Card__c,
+        payment__c.gst_details__c,membershiptype__c.customer_Set_program_level__c,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.Address_Line_1__c
+        END as add1,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.Address_Line_2__c
+        END as add2,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.Address_Line_3__c
+        END as add3,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.Country__c
+        END as Country,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.State__c
+        END as State,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.City__c
+        END as City,
+        case
+        when Member_Address_information__c.address_type__c='Personal'
+        then
+        Member_Address_information__c.Pin_code__c
+        END as Pin,
+        Account.Marital_Status__c as Marital,
+        A2.Gender_c__c as Spoussex,A2.salutation as Spous_Sal,A2.firstname as Spous_Firstname,
+        A2.lastname As Spous_Lastname,A2.Birth_date__c as Spousdob,
+        Taj_Bank_Detail__c.Bank_Code__c as orion_cheque_bank,City__c.taj_state_code__c as State_code,
+        city__c.taj_city_code__c as city_code,Account.Enrolled_in_Taj_loyalty_program__c,
+        Account.Email_Communication_Preferences__c,Account.SMS_Communication_Preferences__c,
+        Case
+        when Account.PersonDoNotCall=true then False
+        when Account.PersonDoNotCall=false then true
+        END as Call_Communication_Preference__c,Account.Terms_and_condition_Flag__c
+        from tlcsalesforce.Payment__c
+        inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
+        inner join tlcsalesforce.Account on membership__c.member__c=account.sfid
+        Left join tlcsalesforce.Account A2 on Account.Spouse_account__c=A2.sfid
+        Left join tlcsalesforce.City__c on Account.City__c=City__c.sfid
+        Left join tlcsalesforce.Member_Address_information__c on Member_Address_information__c.member__c=Account.sfid
+        inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
+        Inner Join tlcsalesforce.program__c On membershiptype__c.program__c = program__c.sfid
+        Left Join tlcsalesforce.Taj_Bank_Detail__c on payment__c.Taj_Bank_Detail__c=Taj_Bank_Detail__c.sfid
+        Left join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid limit 19
+        --where (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 days'
+        
+              --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 days'))
+               --and
+        --Membership__c is not Null and Membership_Offer__c is null
+        --and
+        --((Property__c.sfid='')
+        --Or
+        --program__c.sfid  = '${program_id}')
+        --AND membershiptype__c.sfid != program__c.default_membership_type__c
+        
+        `;
+        // console.log(qry);
+        let data =await pool.query(qry);
+        return data.rows.length ? data.rows : [];
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
 
 /**
  * main calling function
@@ -227,32 +315,35 @@ let exportString = async()=>{
         //  console.log(paymentEmailRuleObject.programNameArr[i]);
 
          //get data and send to generate excel function
-         let data = await getDSRData(paymentEmailRuleObject.programArr[i]);
+         let DSRdata = await getDSRData(paymentEmailRuleObject.programArr[i]);
+         let OrionStringData =await getOrionStringData(paymentEmailRuleObject.programArr[i]);
+        // console.log(OrionStringData);
          /**
          * Generate Excels
          */
-         let DSRChequeExcel = await generateExcels.DSRCheque(data);
-         let DSRPriviledgeExcel = await generateExcels.DSRPrivilege(data);
-         let DSRPreferredExcel = await generateExcels.DSRPreferred(data);
-         let OrionStringExcel = await generateExcels.OrionString();
+        //  let DSRChequeExcel = await generateExcels.DSRCheque(DSRdata);
+        //  let DSRPriviledgeExcel = await generateExcels.DSRPrivilege(DSRdata);
+        //  let DSRPreferredExcel = await generateExcels.DSRPreferred(DSRdata);
+         let OrionStringExcel = await generateExcels.OrionString(OrionStringData);
          
-         let filesArr = [{fileName: `DSR Cheque` , filePath : `${DSRChequeExcel}`},{fileName: `DSR Privileged` , filePath : `${DSRPriviledgeExcel}`},{fileName: `DSR Preferred` , filePath : `${DSRPreferredExcel}`},{fileName: `Orion String` , filePath : `${OrionStringExcel}`}];
+        //  let filesArr = [{fileName: `DSR Cheque` , filePath : `${DSRChequeExcel}`},{fileName: `DSR Privileged` , filePath : `${DSRPriviledgeExcel}`},{fileName: `DSR Preferred` , filePath : `${DSRPreferredExcel}`},{fileName: `Orion String` , filePath : `${OrionStringExcel}`}];
     //    console.log(filesArr)
          //  console.log(OrionStringcel , DSRChequeExcel , DSRPriviledgeExcel , DSRPreferredExcel )
 
         /**
          * SendMail 
          */        
-         let sendMailData = await sendMail.sendExportSrtingReport(filesArr, `atul.srivastava@tlcgroup.com` , dynamicValues , paymentEmailRuleObject.programNameArr[i] , logId);
+        //  let sendMailData = await sendMail.sendExportSrtingReport(filesArr, `atul.srivastava@tlcgroup.com` , dynamicValues , paymentEmailRuleObject.programNameArr[i] , logId);
          }
         }
     } catch (error) {
+        console.log(error)
          return error;
     }
     //  console.log(paymentEmailRuleObject);
 }
 
-// exportString()
+exportString()
 /**
  * Exporting functions
  */
