@@ -6,7 +6,7 @@ let xl = require('excel4node');
 * This function takes all required values for DSR Cheque and generates an excel for the same
 */ 
 
-let DSRCheque=async(data)=>{
+let DSRCheque=async(dataArr)=>{
       // Create a new instance of a Workbook class
     let wb = new xl.Workbook();
     // Add Worksheets to the workbook
@@ -26,6 +26,185 @@ let DSRCheque=async(data)=>{
    for(let h =0 ; h <sheetHeaderArr.length ;h++){
     ws2.cell(1, h +1).string(`${sheetHeaderArr[h]}`).style(style);
   }
+ //Insert data in EXCEL
+ let row = 2 ;
+  
+ for(let data of dataArr){
+   let column = 1 ; 
+   ws2.cell(row , column++).number(row -1).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.type_of_enrollement ? (data.type_of_enrollement =='New Membership' ? 'New TIC Epicure' : 'TIC Epicure'): ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`Update`).style(style);
+   ws2.cell(row , column++).string(`` + (data.membership_enrollment_date__c ? convertDateFormatForExcel(data.membership_enrollment_date__c): ``)).style(style);
+   ws2.cell(row , column++).number(data.net_amount__c ? data.net_amount__c : 0).style(style);
+   ws2.cell(row , column++).number(data.sales_tax ? data.sales_tax : 0).style(style);
+   let Total_Fees = data.net_amount__c  + data.sales_tax;
+   ws2.cell(row , column++).number(Total_Fees ? Total_Fees : 0).style(style);
+   ws2.cell(row , column++).string((data.mbr_rct_no == 'Cheque' || data.mbr_rct_no == 'Credit Card' || data.mbr_rct_no == 'CHEQUE' || data.mbr_rct_no == 'CREDIT CARD') ? data.mbr_rct_no :`` ).style(style);//Doubt
+   let payment_method = ``;
+   if(data.payment_method == 'Cheque' || data.payment_method == 'CHEQUE')
+   payment_method = `Cheque`;
+   else if(data.payment_method == 'Online' || data.payment_method == 'ONLINE' )
+   payment_method = `Net Banking`;
+
+   ws2.cell(row , column++).string(payment_method).style(style);
+   let payment_type  = ``;
+   if(data.payment_type == 'Cheque' || data.payment_type == 'CHEQUE' || data.payment_type == 'Online' || data.payment_type == 'Online')
+   payment_type = `Payment`;
+   else if(data.payment_type == 'Credit Card' || data.payment_type == 'CREDIT CARD')
+   payment_type = data.payment_type;//Doubt
+   ws2.cell(row , column++).string(payment_type).style(style);
+   ws2.cell(row , column++).string(`` + (data.cheque_number ? data.cheque_number : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.bank_name ? data.bank_name : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.cheque_date ? convertDateFormatForExcel(data.cheque_date) : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.bank_cheque_deposit_number ? data.bank_cheque_deposit_number : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.bank_deposit_date ? convertDateFormatForExcel(data.bank_deposit_date) : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.cc_details ? data.cc_details : ``)).style(style);
+   let consultant_name = data.salutation ? data.salutation : `` + ` `;
+   consultant_name += data.firstname ? data.firstname : `` + ` `;
+   consultant_name += data.lastname ? data.lastname : ``;
+   ws2.cell(row , column++).string(`` + (consultant_name ? consultant_name : ``)).style(style);
+   ws2.cell(row , column++).string(`Taj`).style(style);
+   ws2.cell(row , column++).string(`` + (data.add_on_plan_code ? data.add_on_plan_code : ``)).style(style);
+   let enrollment_type = ``;
+   if(data.enrollment_type == `New Membership`)
+   enrollment_type = `New`;
+   else if(data.enrollment_type == `Renewal` || data.enrollment_type == `Renew`)
+   enrollment_type = `Renewal`;
+   ws2.cell(row , column++).string(enrollment_type).style(style);
+   ws2.cell(row , column++).string(`` + (data.new_renewal_date ? convertDateFormatForExcel(data.new_renewal_date): ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.next_renewal_expiry_date ? convertDateFormatForExcel(data.next_renewal_expiry_date): ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.first_enrolledat == 'New Membership' ? `Taj TeleSales Centre` : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.first_enroll_source == 'New Membership' ? `Taj TeleSales Centre` : ``)).style(style);
+   ws2.cell(row , column++).string(`Taj TeleSales Centre`).style(style);
+   let lastUpdateSource = ``;
+   if(data.officecity == 'Delhi')
+   lastUpdateSource = `Telesales - Delhi`;
+   else if(data.officecity == 'Mumbai')
+   lastUpdateSource = `Telesales - Mumbai`;
+   ws2.cell(row , column++).string(lastUpdateSource).style(style);
+   ws2.cell(row , column++).string(`` +(data.membershipno ? data.membershipno : ``)).style(style);
+   ws2.cell(row , column++).string(`` +(data.tier ? data.tier : ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.statusdesc ? data.statusdesc : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.dt_of_birth ? data.dt_of_birth : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.gender ? data.gender : ``)).style(style);
+   ws2.cell(row , column++).string(`IN`).style(style);
+   ws2.cell(row , column++).string(`` + (data.title ? data.title : ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.first_name ? data.first_name : ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.last_name ? data.last_name : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officeadd1 ? data.officeadd1 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officeadd2 ? data.officeadd2 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officeadd3 ? data.officeadd3 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officecountry ? data.officecountry : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officestate ? data.officestate : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officecity ? data.officecity : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officepin ? data.officepin : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officetel ? data.officetel : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officetel2 ? data.officetel2 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officemobile ? data.officemobile : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.officefax ? data.officefax : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.office_email ? data.office_email : ``)).style(style);
+   ws2.cell(row , column++).string(`"B"`).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.homeadd1 ? data.homeadd1 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homeadd2 ? data.homeadd2 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homeadd3 ? data.homeadd3 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homecountry ? data.homecountry : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homestate ? data.homestate : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homecity ? data.homecity : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homepin ? data.homepin : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.hometel ? data.hometel : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.hometel2 ? data.hometel2 : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.mobile ? data.mobile : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homefax ? data.homefax : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.homeemail ? data.homeemail : ``)).style(style);
+   ws2.cell(row , column++).string(`"R"`).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.Preferred_Postal_Communication ? data.Preferred_Postal_Communication : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.Preferred_Email_Communication ? data.Preferred_Email_Communication : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.Preferred_Mobile_Communication ? data.Preferred_Mobile_Communication : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.designation ? data.designation : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.company ? data.company : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.job_description ? data.job_description : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.profession ? data.profession : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.til_form_no ? data.til_form_no : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.profession ? data.profession : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.created_at_source == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.created_at_channel == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.createdby == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.createddt ? convertDateFormatForExcel(data.createddt): ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.modified_by ? data.modified_by: ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.modifieddt ? convertDateFormatForExcel(data.modifieddt): ``)).style(style);
+   ws2.cell(row , column++).string(`"Spouse"`).style(style); 
+   ws2.cell(row , column++).string(`` + (data.marital ? data.marital : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.spoussex ? data.spoussex : ``)).style(style); 
+   let spouseFullName =(data.spous_sal ? data.spous_sal : ``) + ` `+ (data.spous_firstname ? data.spous_firstname : ``) + ` `+ (data.spous_lastname ? data.spous_lastname : ``);
+   ws2.cell(row , column++).string(`` + (spouseFullName)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.spous_sal ? data.spous_sal : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.spous_firstname ? data.spous_firstname : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.spous_lastname ? data.spous_lastname : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.spousdob ? data.spousdob : ``)).style(style); 
+   ws2.cell(row , column++).string(`` + (data.anniversary ? data.anniversary : ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.orion_cheque_bank ? data.orion_cheque_bank : ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + ((data.payment_mode__c == 'CHEQUE' || data.payment_mode__c == 'Cheque') ? 'Other Local' : ``)).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(``).style(style);
+   ws2.cell(row , column++).string(`` + (data.membership_enrollment_date__c ? convertDateFormatForExcel(data.membership_enrollment_date__c): ``)).style(style);
+   ws2.cell(row , column++).string(`"Y"`).style(style);
+   ws2.cell(row , column++).string(`` + (data.state_code ? data.state_code : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.city_code ? data.city_code : ``)).style(style);
+   ws2.cell(row , column++).string(`` + (data.enrolled_in_taj_loyalty_program__c ? data.enrolled_in_taj_loyalty_program__c : `false`)).style(style);
+   ws2.cell(row , column++).string(`` + (data.sms_communication_preferences__c ? data.sms_communication_preferences__c : `false`)).style(style);
+   ws2.cell(row , column++).string(`` + (data.terms_and_condition_flag__c ? data.terms_and_condition_flag__c : `false`)).style(style);
+  row++;
+ }
+
 
   let fileName = `./reports/ExportString/DSRCheque_${Date.now()}.xlsx`
   const buffer = await wb.writeToBuffer();
@@ -46,7 +225,7 @@ let DSRCheque=async(data)=>{
  * This function takes all required values for DSR Privilege and generates an excel for the same
  */
 
-let DSRPrivilege=async(data)=>{
+let DSRPrivilege=async(dataArr)=>{
         // Create a new instance of a Workbook class
         let wb = new xl.Workbook();
         // Add Worksheets to the workbook
@@ -67,6 +246,187 @@ let DSRPrivilege=async(data)=>{
         ws2.cell(1, h +1).string(`${sheetHeaderArr[h]}`).style(style);
       }
 
+   //Insert data in EXCEL
+   let row = 2 ;
+  
+   for(let data of dataArr){
+     let column = 1 ; 
+     ws2.cell(row , column++).number(row -1).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.type_of_enrollement ? (data.type_of_enrollement =='New Membership' ? 'New Privileged Epicure' : 'Privileged Epicure'): ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`Update`).style(style);
+     ws2.cell(row , column++).string(`` + (data.membership_enrollment_date__c ? convertDateFormatForExcel(data.membership_enrollment_date__c): ``)).style(style);
+     ws2.cell(row , column++).number(data.net_amount__c ? data.net_amount__c : 0).style(style);
+     ws2.cell(row , column++).number(data.sales_tax ? data.sales_tax : 0).style(style);
+     let Total_Fees = data.net_amount__c  + data.sales_tax;
+     ws2.cell(row , column++).number(Total_Fees ? Total_Fees : 0).style(style);
+     ws2.cell(row , column++).string((data.mbr_rct_no == 'Cheque' || data.mbr_rct_no == 'Credit Card' || data.mbr_rct_no == 'CHEQUE' || data.mbr_rct_no == 'CREDIT CARD') ? data.mbr_rct_no :`` ).style(style);//Doubt
+     let payment_method = ``;
+     if(data.payment_method == 'Cheque' || data.payment_method == 'CHEQUE')
+     payment_method = `Cheque`;
+     else if(data.payment_method == 'Online' || data.payment_method == 'ONLINE' )
+     payment_method = `Net Banking`;
+ 
+     ws2.cell(row , column++).string(payment_method).style(style);
+     let payment_type  = ``;
+     if(data.payment_type == 'Cheque' || data.payment_type == 'CHEQUE' || data.payment_type == 'Online' || data.payment_type == 'Online')
+     payment_type = `Payment`;
+     else if(data.payment_type == 'Credit Card' || data.payment_type == 'CREDIT CARD')
+     payment_type = data.payment_type;//Doubt
+     ws2.cell(row , column++).string(payment_type).style(style);
+     ws2.cell(row , column++).string(`` + (data.cheque_number ? data.cheque_number : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.bank_name ? data.bank_name : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.cheque_date ? convertDateFormatForExcel(data.cheque_date) : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.bank_cheque_deposit_number ? data.bank_cheque_deposit_number : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.bank_deposit_date ? convertDateFormatForExcel(data.bank_deposit_date) : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.cc_details ? data.cc_details : ``)).style(style);
+     let consultant_name = data.salutation ? data.salutation : `` + ` `;
+     consultant_name += data.firstname ? data.firstname : `` + ` `;
+     consultant_name += data.lastname ? data.lastname : ``;
+     ws2.cell(row , column++).string(`` + (consultant_name ? consultant_name : ``)).style(style);
+     ws2.cell(row , column++).string(`Taj`).style(style);
+     ws2.cell(row , column++).string(`` + (data.add_on_plan_code ? data.add_on_plan_code : ``)).style(style);
+     let enrollment_type = ``;
+     if(data.enrollment_type == `New Membership`)
+     enrollment_type = `New`;
+     else if(data.enrollment_type == `Renewal` || data.enrollment_type == `Renew`)
+     enrollment_type = `Renewal`;
+     ws2.cell(row , column++).string(enrollment_type).style(style);
+     ws2.cell(row , column++).string(`` + (data.new_renewal_date ? convertDateFormatForExcel(data.new_renewal_date): ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.next_renewal_expiry_date ? convertDateFormatForExcel(data.next_renewal_expiry_date): ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.first_enrolledat == 'New Membership' ? `Taj TeleSales Centre` : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.first_enroll_source == 'New Membership' ? `Taj TeleSales Centre` : ``)).style(style);
+     ws2.cell(row , column++).string(`Taj TeleSales Centre`).style(style);
+     let lastUpdateSource = ``;
+     if(data.officecity == 'Delhi')
+     lastUpdateSource = `Telesales - Delhi`;
+     else if(data.officecity == 'Mumbai')
+     lastUpdateSource = `Telesales - Mumbai`;
+     ws2.cell(row , column++).string(lastUpdateSource).style(style);
+     ws2.cell(row , column++).string(`` +(data.membershipno ? data.membershipno : ``)).style(style);
+     ws2.cell(row , column++).string(`` +(data.tier ? `PRIVILEGED` : `PRIVILEGED`)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.statusdesc ? data.statusdesc : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.dt_of_birth ? data.dt_of_birth : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.gender ? data.gender : ``)).style(style);
+     ws2.cell(row , column++).string(`IN`).style(style);
+     ws2.cell(row , column++).string(`` + (data.title ? data.title : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.first_name ? data.first_name : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.last_name ? data.last_name : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officeadd1 ? data.officeadd1 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officeadd2 ? data.officeadd2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officeadd3 ? data.officeadd3 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officecountry ? data.officecountry : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officestate ? data.officestate : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officecity ? data.officecity : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officepin ? data.officepin : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officetel ? data.officetel : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officetel2 ? data.officetel2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officemobile ? data.officemobile : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officefax ? data.officefax : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.office_email ? data.office_email : ``)).style(style);
+     ws2.cell(row , column++).string(`"B"`).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeadd1 ? data.homeadd1 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeadd2 ? data.homeadd2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeadd3 ? data.homeadd3 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homecountry ? data.homecountry : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homestate ? data.homestate : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homecity ? data.homecity : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homepin ? data.homepin : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.hometel ? data.hometel : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.hometel2 ? data.hometel2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.mobile ? data.mobile : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homefax ? data.homefax : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeemail ? data.homeemail : ``)).style(style);
+     ws2.cell(row , column++).string(`"R"`).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.Preferred_Postal_Communication ? data.Preferred_Postal_Communication : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.Preferred_Email_Communication ? data.Preferred_Email_Communication : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.Preferred_Mobile_Communication ? data.Preferred_Mobile_Communication : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.designation ? data.designation : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.company ? data.company : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.job_description ? data.job_description : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.profession ? data.profession : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.til_form_no ? data.til_form_no : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.profession ? data.profession : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.created_at_source == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.created_at_channel == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.createdby == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.createddt ? convertDateFormatForExcel(data.createddt): ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.modified_by ? data.modified_by: ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.modifieddt ? convertDateFormatForExcel(data.modifieddt): ``)).style(style);
+     ws2.cell(row , column++).string(`"Spouse"`).style(style); 
+     ws2.cell(row , column++).string(`` + (data.marital ? data.marital : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spoussex ? data.spoussex : ``)).style(style); 
+     let spouseFullName =(data.spous_sal ? data.spous_sal : ``) + ` `+ (data.spous_firstname ? data.spous_firstname : ``) + ` `+ (data.spous_lastname ? data.spous_lastname : ``);
+     ws2.cell(row , column++).string(`` + (spouseFullName)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spous_sal ? data.spous_sal : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spous_firstname ? data.spous_firstname : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spous_lastname ? data.spous_lastname : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spousdob ? data.spousdob : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.anniversary ? data.anniversary : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.orion_cheque_bank ? data.orion_cheque_bank : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + ((data.payment_mode__c == 'CHEQUE' || data.payment_mode__c == 'Cheque') ? 'Other Local' : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.membership_enrollment_date__c ? convertDateFormatForExcel(data.membership_enrollment_date__c): ``)).style(style);
+     ws2.cell(row , column++).string(`"Y"`).style(style);
+     ws2.cell(row , column++).string(`` + (data.state_code ? data.state_code : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.city_code ? data.city_code : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.enrolled_in_taj_loyalty_program__c ? data.enrolled_in_taj_loyalty_program__c : `false`)).style(style);
+     ws2.cell(row , column++).string(`` + (data.sms_communication_preferences__c ? data.sms_communication_preferences__c : `false`)).style(style);
+     ws2.cell(row , column++).string(`` + (data.terms_and_condition_flag__c ? data.terms_and_condition_flag__c : `false`)).style(style);
+    row++;
+   }
+ 
+
+ 
       let fileName = `./reports/ExportString/DSRPrivilege_${Date.now()}.xlsx`
       const buffer = await wb.writeToBuffer();
        
@@ -88,7 +448,7 @@ let DSRPrivilege=async(data)=>{
 /**
  * This function takes all required values for DSR Preferred and generates an excel for the same
  */
-let DSRPreferred=async(data)=>{
+let DSRPreferred=async(dataArr)=>{
         // Create a new instance of a Workbook class
         let wb = new xl.Workbook();
         // Add Worksheets to the workbook
@@ -108,6 +468,186 @@ let DSRPreferred=async(data)=>{
    for(let h =0 ; h <sheetHeaderArr.length ;h++){
     ws2.cell(1, h +1).string(`${sheetHeaderArr[h]}`).style(style);
   }
+   //Insert data in EXCEL
+   let row = 2 ;
+  
+   for(let data of dataArr){
+     let column = 1 ; 
+     ws2.cell(row , column++).number(row -1).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.type_of_enrollement ? (data.type_of_enrollement =='New Membership' ? 'New Preferred Epicure' : 'Preferred Epicure'): ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`Update`).style(style);
+     ws2.cell(row , column++).string(`` + (data.membership_enrollment_date__c ? convertDateFormatForExcel(data.membership_enrollment_date__c): ``)).style(style);
+     ws2.cell(row , column++).number(data.net_amount__c ? data.net_amount__c : 0).style(style);
+     ws2.cell(row , column++).number(data.sales_tax ? data.sales_tax : 0).style(style);
+     let Total_Fees = data.net_amount__c  + data.sales_tax;
+     ws2.cell(row , column++).number(Total_Fees ? Total_Fees : 0).style(style);
+     ws2.cell(row , column++).string((data.mbr_rct_no == 'Cheque' || data.mbr_rct_no == 'Credit Card' || data.mbr_rct_no == 'CHEQUE' || data.mbr_rct_no == 'CREDIT CARD') ? data.mbr_rct_no :`` ).style(style);//Doubt
+     let payment_method = ``;
+     if(data.payment_method == 'Cheque' || data.payment_method == 'CHEQUE')
+     payment_method = `Cheque`;
+     else if(data.payment_method == 'Online' || data.payment_method == 'ONLINE' )
+     payment_method = `Net Banking`;
+ 
+     ws2.cell(row , column++).string(payment_method).style(style);
+     let payment_type  = ``;
+     if(data.payment_type == 'Cheque' || data.payment_type == 'CHEQUE' || data.payment_type == 'Online' || data.payment_type == 'Online')
+     payment_type = `Payment`;
+     else if(data.payment_type == 'Credit Card' || data.payment_type == 'CREDIT CARD')
+     payment_type = data.payment_type;//Doubt
+     ws2.cell(row , column++).string(payment_type).style(style);
+     ws2.cell(row , column++).string(`` + (data.cheque_number ? data.cheque_number : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.bank_name ? data.bank_name : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.cheque_date ? convertDateFormatForExcel(data.cheque_date) : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.bank_cheque_deposit_number ? data.bank_cheque_deposit_number : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.bank_deposit_date ? convertDateFormatForExcel(data.bank_deposit_date) : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.cc_details ? data.cc_details : ``)).style(style);
+     let consultant_name = data.salutation ? data.salutation : `` + ` `;
+     consultant_name += data.firstname ? data.firstname : `` + ` `;
+     consultant_name += data.lastname ? data.lastname : ``;
+     ws2.cell(row , column++).string(`` + (consultant_name ? consultant_name : ``)).style(style);
+     ws2.cell(row , column++).string(`Taj`).style(style);
+     ws2.cell(row , column++).string(`` + (data.add_on_plan_code ? data.add_on_plan_code : ``)).style(style);
+     let enrollment_type = ``;
+     if(data.enrollment_type == `New Membership`)
+     enrollment_type = `New`;
+     else if(data.enrollment_type == `Renewal` || data.enrollment_type == `Renew`)
+     enrollment_type = `Renewal`;
+     ws2.cell(row , column++).string(enrollment_type).style(style);
+     ws2.cell(row , column++).string(`` + (data.new_renewal_date ? convertDateFormatForExcel(data.new_renewal_date): ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.next_renewal_expiry_date ? convertDateFormatForExcel(data.next_renewal_expiry_date): ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.first_enrolledat == 'New Membership' ? `Taj TeleSales Centre` : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.first_enroll_source == 'New Membership' ? `Taj TeleSales Centre` : ``)).style(style);
+     ws2.cell(row , column++).string(`Taj TeleSales Centre`).style(style);
+     let lastUpdateSource = ``;
+     if(data.officecity == 'Delhi')
+     lastUpdateSource = `Telesales - Delhi`;
+     else if(data.officecity == 'Mumbai')
+     lastUpdateSource = `Telesales - Mumbai`;
+     ws2.cell(row , column++).string(lastUpdateSource).style(style);
+     ws2.cell(row , column++).string(`` +(data.membershipno ? data.membershipno : ``)).style(style);
+     ws2.cell(row , column++).string(`` +(data.tier ? 'PREFERRED' : `PREFERRED`)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.statusdesc ? data.statusdesc : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.dt_of_birth ? data.dt_of_birth : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.gender ? data.gender : ``)).style(style);
+     ws2.cell(row , column++).string(`IN`).style(style);
+     ws2.cell(row , column++).string(`` + (data.title ? data.title : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.first_name ? data.first_name : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.last_name ? data.last_name : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officeadd1 ? data.officeadd1 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officeadd2 ? data.officeadd2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officeadd3 ? data.officeadd3 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officecountry ? data.officecountry : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officestate ? data.officestate : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officecity ? data.officecity : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officepin ? data.officepin : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officetel ? data.officetel : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officetel2 ? data.officetel2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officemobile ? data.officemobile : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.officefax ? data.officefax : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.office_email ? data.office_email : ``)).style(style);
+     ws2.cell(row , column++).string(`"B"`).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeadd1 ? data.homeadd1 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeadd2 ? data.homeadd2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeadd3 ? data.homeadd3 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homecountry ? data.homecountry : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homestate ? data.homestate : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homecity ? data.homecity : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homepin ? data.homepin : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.hometel ? data.hometel : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.hometel2 ? data.hometel2 : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.mobile ? data.mobile : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homefax ? data.homefax : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.homeemail ? data.homeemail : ``)).style(style);
+     ws2.cell(row , column++).string(`"R"`).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.Preferred_Postal_Communication ? data.Preferred_Postal_Communication : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.Preferred_Email_Communication ? data.Preferred_Email_Communication : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.Preferred_Mobile_Communication ? data.Preferred_Mobile_Communication : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.designation ? data.designation : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.company ? data.company : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.job_description ? data.job_description : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.profession ? data.profession : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.til_form_no ? data.til_form_no : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.profession ? data.profession : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.created_at_source == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.created_at_channel == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.createdby == 'New Membership' ? 'Taj TeleSales Centre' : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.createddt ? convertDateFormatForExcel(data.createddt): ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.modified_by ? data.modified_by: ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.modifieddt ? convertDateFormatForExcel(data.modifieddt): ``)).style(style);
+     ws2.cell(row , column++).string(`"Spouse"`).style(style); 
+     ws2.cell(row , column++).string(`` + (data.marital ? data.marital : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spoussex ? data.spoussex : ``)).style(style); 
+     let spouseFullName =(data.spous_sal ? data.spous_sal : ``) + ` `+ (data.spous_firstname ? data.spous_firstname : ``) + ` `+ (data.spous_lastname ? data.spous_lastname : ``);
+     ws2.cell(row , column++).string(`` + (spouseFullName)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spous_sal ? data.spous_sal : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spous_firstname ? data.spous_firstname : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spous_lastname ? data.spous_lastname : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.spousdob ? data.spousdob : ``)).style(style); 
+     ws2.cell(row , column++).string(`` + (data.anniversary ? data.anniversary : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.orion_cheque_bank ? data.orion_cheque_bank : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + ((data.payment_mode__c == 'CHEQUE' || data.payment_mode__c == 'Cheque') ? 'Other Local' : ``)).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(``).style(style);
+     ws2.cell(row , column++).string(`` + (data.membership_enrollment_date__c ? convertDateFormatForExcel(data.membership_enrollment_date__c): ``)).style(style);
+     ws2.cell(row , column++).string(`"Y"`).style(style);
+     ws2.cell(row , column++).string(`` + (data.state_code ? data.state_code : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.city_code ? data.city_code : ``)).style(style);
+     ws2.cell(row , column++).string(`` + (data.enrolled_in_taj_loyalty_program__c ? data.enrolled_in_taj_loyalty_program__c : `false`)).style(style);
+     ws2.cell(row , column++).string(`` + (data.sms_communication_preferences__c ? data.sms_communication_preferences__c : `false`)).style(style);
+     ws2.cell(row , column++).string(`` + (data.terms_and_condition_flag__c ? data.terms_and_condition_flag__c : `false`)).style(style);
+    row++;
+   }
+ 
+  
 
   let fileName = `./reports/ExportString/DSRPreferred_${Date.now()}.xlsx`
   const buffer = await wb.writeToBuffer();
@@ -122,6 +662,28 @@ let DSRPreferred=async(data)=>{
       reject(`${e}`)
     }
   })
+}
+
+/**
+ * 
+ * Date formate
+ */
+
+let monthArr = ['Jan', 'Feb' , 'Mar' , 'Apr' , 'May' , 'Jun' , 'Jul' , 'Aug' , 'Sep' , 'Oct' , 'Nov' , 'Dec'];
+ let convertDateFormatForExcel = (date1) => {
+   let dateTime = ``;
+  if (date1) {
+      let today1 = new Date(date1);
+      let hours1 = date1.getHours();
+      let minutes = date1.getMinutes();
+      let ampm = hours1 >= 12 ? 'pm' : 'am';
+      hours1 = hours1 % 12;
+      hours1 = hours1 ? hours1 : 12; // the hour '0' should be '12'
+      minutes = minutes < 10 ? '0' + minutes : minutes;
+      let strTime = hours1 + ':' + minutes + ' ' + ampm;
+      dateTime = `${String(today1.getDate()).padStart(2, '0')}-${monthArr[today1.getMonth() +1]}-${today1.getFullYear()}`;
+  }
+  return dateTime;
 }
 
 /**
@@ -154,7 +716,7 @@ let OrionString=async(data)=>{
       for(let d of data){
         // console.log(data)
         let column = 1;
-        ws2.cell(row , column++).number((d.membership_number__c ? d.membership_number__c : 0 )).style(style);
+        ws2.cell(row , column++).string(`` +(d.membership_number__c ? d.membership_number__c : `` )).style(style);
         ws2.cell(row , column++).string(`` + (d.name ? d.name : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.add1 ? d.add1 : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.add2 ? d.add2 : ``)).style(style);
@@ -169,12 +731,12 @@ let OrionString=async(data)=>{
         ws2.cell(row , column++).string(`` + (d.firstname ? d.firstname : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.lastname ? d.lastname : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.recommended_by ? d.recommended_by : ``)).style(style);
-        ws2.cell(row , column++).string(`` + (d.membership_enrollment_date__c ? d.membership_enrollment_date__c : ``)).style(style);
-        ws2.cell(row , column++).string(`` + (d.expiry_date__c ? d.expiry_date__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.membership_enrollment_date__c ? convertDateFormatForExcel(d.membership_enrollment_date__c) : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.expiry_date__c ? convertDateFormatForExcel(d.expiry_date__c) : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.state_code ? d.state_code : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.city_code ? d.city_code : ``)).style(style);
-        ws2.cell(row , column++).string(`` + (d.membership_enrollment_date__c ? d.membership_enrollment_date__c : ``)).style(style);
-        ws2.cell(row , column++).string(`` + (d.net_amount__c ? d.net_amount__c : ``)).style(style);
+        ws2.cell(row , column++).string(`` + (d.membership_enrollment_date__c ? convertDateFormatForExcel(d.membership_enrollment_date__c) : ``)).style(style);
+        ws2.cell(row , column++).number( (d.net_amount__c ? d.net_amount__c : 0)).style(style);
         ws2.cell(row , column++).string(`` + (d.payment_mode__c ? d.payment_mode__c : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.payment_mode__c ? d.payment_mode__c : ``)).style(style);
         ws2.cell(row , column++).string(`` + (d.cheque_number__c ? d.cheque_number__c : ``)).style(style);

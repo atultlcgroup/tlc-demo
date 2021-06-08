@@ -70,6 +70,26 @@ let getEPRSfid = async()=>{
 let getDSRData = async(programSFID)=>{
     try {
         let qry = `select
+        membership__c.membership_number__c,account.name,account.address_line_2__c,City__c.name,
+        account.billingpostalcode,account.Email_for_notification__c,account.salutation,account.firstname,
+        account.lastname,membership__c.membership_enrollment_date__c,membership__c.expiry_date__c,
+              payment__c.net_amount__c,payment__c.payment_mode__c,
+              consultant__c.name consultant_name,account.Birth_date__c Dt_Of_Birth,
+        Payment__c.Payment_For__c Type_Of_Enrollement, Membership__c.Membership_Enrollment_Date__c Dsr_Date,
+        Payment__c.GST_Amount__c Sales_Tax,Payment__c.Net_Amount__c Total_Fees,
+        Payment__c.Payment_Mode__c Mbr_Rct_No,Payment__c.Payment_Mode__c Payment_Method,Payment__c.Payment_Mode__c Payment_Type,
+        Payment__c.Cheque_Number__c Cheque_Number,Payment__c.Bank_Name__c Bank_Name,Payment__c.Bank_Deposit_Date__c Cheque_Date,
+        Payment__c.Bank_Deposit_Number__c Bank_Cheque_Deposit_Number,Payment__c.Bank_Deposit_Date__c Bank_Deposit_Date,
+        Payment__c.Credit_Number__c Cc_Details,membershiptype__c.Customer_Set_Program_Level__c Add_On_Plan_Code,
+        Payment__c.Payment_For__c Enrollment_Type,Membership__c.Membership_Enrollment_Date__c New_Renewal_Date,
+        membership__c.expiry_date__c Next_Renewal_Expiry_Date,Payment__c.Payment_For__c First_Enrolledat,
+        Payment__c.Payment_For__c First_Enroll_Source,membership__c.membership_number__c Membershipno,
+        membershiptype__c.Customer_Set_Program_Level__c Tier,Payment__c.GST_details__c Statusdesc,
+        account.PersonBirthDate Dt_Of_Birth,account.Gender_c__c Gender,account.Salutation Title,
+        account.FirstName First_Name,account.LastName Last_Name,account.Company_c__c Company,account.Designation__c Job_Description,
+        Payment__c.Payment_For__c Created_At_Source,Payment__c.Payment_For__c Created_At_Channel,Payment__c.Payment_For__c Createdby,
+        Membership__c.Membership_Enrollment_Date__c Createddt,Membership__c.Membership_Enrollment_Date__c Modifieddt,
+        account.anniversary__c Anniversary,Membership__c.Membership_Enrollment_Date__c orion_transaction_date,
         case
         when Member_Address_information__c.address_type__c='Loyalty - Business'
         or Member_Address_information__c.address_type__c='Business'
@@ -121,7 +141,42 @@ let getDSRData = async(programSFID)=>{
         Case
         when Account.PersonDoNotCall=true then False
         when Account.PersonDoNotCall=false then true
-        END as Call_Communication_Preference__c,Account.Terms_and_condition_Flag__c
+        END as Call_Communication_Preference__c,Account.Terms_and_condition_Flag__c,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.Address_Line_1__c
+END as Homeadd1,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.Address_Line_2__c
+END as Homeadd2,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.Address_Line_3__c
+END as Homeadd3,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.Country__c
+END as HomeCountry,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.State__c
+END as Homestate,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.City__c
+END as HomeCity,
+case
+when Member_Address_information__c.address_type__c='Personal'
+then
+Member_Address_information__c.Pin_code__c
+END as Homepin
         from tlcsalesforce.Payment__c
         inner join tlcsalesforce.membership__c on membership__c.sfid=payment__c.membership__c
         inner join tlcsalesforce.Account on membership__c.member__c=account.sfid
@@ -132,17 +187,18 @@ let getDSRData = async(programSFID)=>{
         Inner Join tlcsalesforce.program__c On membershiptype__c.program__c = program__c.sfid
         Left Join tlcsalesforce.Taj_Bank_Detail__c on payment__c.Taj_Bank_Detail__c=Taj_Bank_Detail__c.sfid
         Left join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
-        where (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 day'
-        
-              or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 day'))
-               and
-        Membership__c is not Null and Membership_Offer__c is null
+        Left join TLcsalesforce.consultant__c on Payment__c.consultant__c=consultant__c.sfid 
+         where (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 days' 
+        or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 days'))
+         and
+       Membership__c is not Null and Membership_Offer__c is null
         and
-        --(Property__c.sfid='')
-        --and
-        program__c.sfid  = '${programSFID}'
-        AND membershiptype__c.sfid != program__c.default_membership_type__c
-        --AND(Member_Address_information__c.address_type__c='Loyalty - Business' or Member_Address_information__c.address_type__c='Business' )`;
+        (
+            --(Property__c.sfid='')
+        --Or
+        program__c.sfid  = '${programSFID}')
+       AND membershiptype__c.sfid != program__c.default_membership_type__c
+        `;
         let data = await pool.query(qry);
         return data.rows.length ? data.rows  : [];
         } catch (error) {
@@ -272,17 +328,18 @@ let getOrionStringData =async(program_id)=>
         inner join tlcsalesforce.membershiptype__c on membership__c.customer_set__c=membershiptype__c.sfid
         Inner Join tlcsalesforce.program__c On membershiptype__c.program__c = program__c.sfid
         Left Join tlcsalesforce.Taj_Bank_Detail__c on payment__c.Taj_Bank_Detail__c=Taj_Bank_Detail__c.sfid
-        Left join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid limit 19
-        --where (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 days'
+        Left join tlcsalesforce.property__c on membershiptype__c.property__c=property__c.sfid
+        where (Membership__c.Membership_Enrollment_Date__c = current_date - interval '1 days'
         
-              --or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 days'))
-               --and
-        --Membership__c is not Null and Membership_Offer__c is null
-        --and
-        --((Property__c.sfid='')
-        --Or
-        --program__c.sfid  = '${program_id}')
-        --AND membershiptype__c.sfid != program__c.default_membership_type__c
+              or (Membership__c.Membership_Renewal_Date__c = current_date - interval '1 days'))
+               and
+        Membership__c is not Null and Membership_Offer__c is null
+        and
+        (
+            --(Property__c.sfid='')
+        Or
+        program__c.sfid  = '${program_id}')
+        AND membershiptype__c.sfid != program__c.default_membership_type__c
         
         `;
         // console.log(qry);
@@ -321,19 +378,19 @@ let exportString = async()=>{
          /**
          * Generate Excels
          */
-        //  let DSRChequeExcel = await generateExcels.DSRCheque(DSRdata);
-        //  let DSRPriviledgeExcel = await generateExcels.DSRPrivilege(DSRdata);
-        //  let DSRPreferredExcel = await generateExcels.DSRPreferred(DSRdata);
+         let DSRChequeExcel = await generateExcels.DSRCheque(DSRdata);
+         let DSRPriviledgeExcel = await generateExcels.DSRPrivilege(DSRdata);
+         let DSRPreferredExcel = await generateExcels.DSRPreferred(DSRdata);
          let OrionStringExcel = await generateExcels.OrionString(OrionStringData);
          
-        //  let filesArr = [{fileName: `DSR Cheque` , filePath : `${DSRChequeExcel}`},{fileName: `DSR Privileged` , filePath : `${DSRPriviledgeExcel}`},{fileName: `DSR Preferred` , filePath : `${DSRPreferredExcel}`},{fileName: `Orion String` , filePath : `${OrionStringExcel}`}];
+         let filesArr = [{fileName: `DSR Cheque` , filePath : `${DSRChequeExcel}`},{fileName: `DSR Privileged` , filePath : `${DSRPriviledgeExcel}`},{fileName: `DSR Preferred` , filePath : `${DSRPreferredExcel}`},{fileName: `Orion String` , filePath : `${OrionStringExcel}`}];
     //    console.log(filesArr)
          //  console.log(OrionStringcel , DSRChequeExcel , DSRPriviledgeExcel , DSRPreferredExcel )
 
         /**
          * SendMail 
          */        
-        //  let sendMailData = await sendMail.sendExportSrtingReport(filesArr, `atul.srivastava@tlcgroup.com` , dynamicValues , paymentEmailRuleObject.programNameArr[i] , logId);
+         let sendMailData = await sendMail.sendExportSrtingReport(filesArr, `atul.srivastava@tlcgroup.com` , dynamicValues , paymentEmailRuleObject.programNameArr[i] , logId);
          }
         }
     } catch (error) {
